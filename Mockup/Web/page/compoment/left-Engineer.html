@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html style="height: 100%;">
+	<head>
+		<base target="middleiframe" />
+		<meta charset="UTF-8">
+		<title></title>
+		<link rel="stylesheet" href="../../css/bootstrap.min.css" />
+		<link rel="stylesheet" href="../../style.css" />
+		<link rel="stylesheet" href="../../css/iconfont.css" />
+		<script type="text/javascript" src="../../js/jquery-1.11.0.js"></script>
+	</head>
+	<body>
+		<div class="bodyDiv">
+			<div class="leftBody">
+				<div class="topDiv leftDiv">	
+					<div class="list-group list-group-flush leftList" >
+							<a href="../homePage-Engineer.html" class="listItemOne list-group-item "><span class="iconfont icon-shouye"></span> 首页 </a>
+							<a href="../Engineer_Device.html" class="listItem list-group-item list-group-item-action "><span class="iconfont icon-zichanguanli"></span> 资产管理<span class="badge">></span></a>
+							<ul class="list-group list-group-flush menuList">
+								<a class="listItemOne list-group-item list-group-item-action " href="../Engineer_Device.html"><span class="iconfont icon-shebeiguanli"></span> 设备</a>
+								<a class="listItemOne list-group-item list-group-item-action " href="../Engineer_contractManagementList.html"><span class="iconfont icon-hetong"></span> 合同</a>
+								<a class="listItemOne list-group-item list-group-item-action" href="../Enginner_supplier.html"><span class="iconfont icon-supplier"></span> 供应商</a>
+							</ul>
+							<a href="../DMApproveRepairApplicationList.html" class="listItem list-group-item list-group-item-action "><span class="iconfont icon--yunweifuwujilu"></span> 运维管理<span class="badge">></span></a>
+								<ul class="list-group list-group-flush menuList">
+									<a class="listItemOne list-group-item list-group-item-action" href="../DMApproveRepairApplicationList.html"><span class="iconfont icon-baoxiu"></span> 客户请求</a>
+									<a class="listItemOne list-group-item list-group-item-action" href="../DeviceUserServerRequest.html"><span class="iconfont icon-gongdanliebiao"></span> 派工单</a>
+								</ul>
+							<a href="../ReportManager.html" class="listItem list-group-item list-group-item-action "><span class="iconfont icon-report"></span> 报表管理<span class="badge">></span></a>
+							<ul class="list-group list-group-flush menuList">
+								<a class="listItemOne list-group-item list-group-item-action" href="../ReportManager.html"><span class="iconfont icon-report"></span> 报表</a>
+							</ul>
+							<a href="../Engineer_user.html" class="listItem list-group-item list-group-item-action"><span class="iconfont icon-yonghuguanli"></span> 用户管理<span class="badge">></span></a>
+							<ul class="list-group list-group-flush menuList">
+								<a class="listItemOne list-group-item list-group-item-action" href="../Engineer_user.html"><span class="iconfont icon-yonghu"></span>用户</a>
+							</ul>
+							<a class="list-group-item  "></a>
+							<a class="list-group-item  "></a>
+					</div>
+				</div>
+			</div>
+		</div>
+	</body>
+	<script>
+		$(function() {
+			$(".listItemOne").first().css("color", "#17A2B8");
+			$(".listItem").click(function() {
+				var temp = $(this);
+				$(".listItem,.listItemOne").css("color", "#495057");
+				$(".listItem,.listItemOne").hover(
+					function() {
+						$(this).css("color", "#17A2B8");
+					},
+					function() {
+						$(this).css("color", "#495057");
+					});
+				temp.css("color", "#17A2B8");
+				temp.hover(
+					function() {
+						$(this).css("color", "#17A2B8");
+					},
+					function() {
+						$(this).css("color", "#17A2B8");
+					});
+				temp.next().children().first().css("color", "#17A2B8");
+				temp.next().children().first().hover(
+					function() {
+						$(this).css("color", "#17A2B8");
+					},
+					function() {
+						$(this).css("color", "#17A2B8");
+					});
+				temp.next().slideToggle("normal", function() {
+					temp.children(".badge").html((temp.children(".badge").html() == "∨")?">":"∨");
+				});
+			})
+			$(".listItemOne").click(function() {
+				var tempOne = $(this);
+				$(".listItem,.listItemOne").css("color", "#495057");
+				$(".listItem,.listItemOne").hover(
+					function() {
+						$(this).css("color", "#17A2B8");
+					},
+					function() {
+						$(this).css("color", "#495057");
+					});
+				tempOne.css("color", "#17A2B8");
+				tempOne.hover(
+					function() {
+						$(this).css("color", "#17A2B8");
+					},
+					function() {
+						$(this).css("color", "#17A2B8");
+					});
+				tempOne.parent("ul").prev().css("color", "#17A2B8");
+				tempOne.parent("ul").prev().hover(
+					function() {
+						$(this).css("color", "#17A2B8");
+					},
+					function() {
+						$(this).css("color", "#17A2B8");
+					});
+			})
+		})
+	</script>
+</html>

@@ -1,0 +1,191 @@
+﻿using BusinessObjects.Util;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+
+namespace BusinessObjects.Domain
+{
+    public class FaultRateInfo
+    {
+        public ObjectType ObjectTypeID { get; set; }
+        public int ObjectID { get; set; }
+        public int Year { get; set; }
+        public DateTimeMonth Month { get; set; }
+        public double Rate { get; set; }
+        public FaultRateInfo() { 
+
+        }
+        public FaultRateInfo(DataRow dr):this()
+        {
+            this.ObjectTypeID = SQLUtil.ConvertEnum<ObjectType>(dr["ObjectTypeID"]);
+            this.ObjectID = SQLUtil.ConvertInt(dr["ObjectID"]); 
+            this.Year = SQLUtil.ConvertInt(dr["Year"]);
+            this.Month = SQLUtil.ConvertEnum<DateTimeMonth>(dr["Month"]);
+            this.Rate = SQLUtil.ConvertDouble(dr["Rate"]);
+        }
+
+        public static List<FaultRateInfo> GetInitList(int objectID, ObjectType type)
+        {
+            List<FaultRateInfo> infos = new List<FaultRateInfo>(); 
+            foreach(FaultRateWholeSection year in Enum.GetValues(typeof(FaultRateWholeSection)))
+            { 
+                foreach(DateTimeMonth month in Enum.GetValues(typeof(DateTimeMonth)))
+                {
+                    FaultRateInfo info = new FaultRateInfo();
+                    info.ObjectID = objectID;
+                    info.ObjectTypeID = type;
+                    info.Year = (int)year;
+                    info.Month = month;
+                    info.Rate = 0d;
+                    infos.Add(info); 
+                }
+            }
+            return infos;
+        }
+
+        public static List<AuditDetailInfo> ConvertAuditDetail( List<FaultRateInfo> oldDatas, List<FaultRateInfo> newDatas)
+        {
+            List<AuditDetailInfo> infos = new List<AuditDetailInfo> (); 
+            int len = oldDatas.Count;
+            for (int i = 0;i< len; i++)
+            {
+                FaultRateInfo oldInfo = oldDatas[i], newInfo = newDatas[i];
+                if (oldInfo.Rate != newInfo.Rate)
+                    infos.Add(new AuditDetailInfo() { FieldName = "FaultRateRate-" + oldInfo.Year + "-" + (int)oldInfo.Month, OldValue = oldInfo.Rate.ToString(), NewValue = newInfo.Rate.ToString() });
+            }
+            return infos;
+        } 
+        public static DataTable ConvertDataTable(int auditID, List<FaultRateInfo> oldDatas, List<FaultRateInfo> newDatas)
+        {
+            DataTable dt = new DataTable();
+            dt.Columns.Add("AuditID");
+            dt.Columns.Add("FieldName");
+            dt.Columns.Add("OldValue");
+            dt.Columns.Add("NewValue");
+            int len = oldDatas.Count;
+            for (int i = 0; i < len; i++)
+            {
+                FaultRateInfo oldInfo = oldDatas[i], newInfo = newDatas[i];
+                if (oldInfo.Rate != newInfo.Rate)
+                    //infos.Add(new AuditDetailInfo() { AuditID = auditID, FieldName = "FaultRateRate-" + oldInfo.Year + "-" + oldInfo.Month, OldValue = oldInfo.Rate.ToString(), NewValue = newInfo.Rate.ToString() });
+                    dt.Rows.Add(auditID, "FaultRateRate-"+ oldInfo.Year+"-"+oldInfo.Month, oldInfo.Rate, newInfo.Rate);
+            }
+            return dt;
+        }
+
+        public static DataTable ConvertFaultRateDataTable(List<FaultRateInfo> infos)
+        {
+            DataTable dt = new DataTable();
+            dt.Columns.Add("ObjectTypeID", typeof(System.Int32));
+            dt.Columns.Add("ObjectID", typeof(System.Int32));
+            dt.Columns.Add("Year", typeof(System.Int32));
+            dt.Columns.Add("Month", typeof(System.Int32));
+            dt.Columns.Add("Rate", typeof(System.Double));
+
+            infos.ForEach(faultRate => {
+                DataRow dr = dt.NewRow();
+                dr["ObjectTypeID"] = faultRate.ObjectTypeID;
+                dr["ObjectID"] = faultRate.ObjectID;
+                dr["Year"] = faultRate.Year;
+                dr["Month"] = faultRate.Month;
+                dr["Rate"] = faultRate.Rate;
+
+                dt.Rows.Add(dr);
+            });
+            return dt;
+        }
+
+        public enum ObjectType
+        {
+            [Description("维保额外")]
+            Repair = 1,
+            [Description("零件")]
+            Component,
+            [Description("耗材")]
+            Consumable
+        }
+
+
+        public enum DateTimeMonth
+        {
+            [Description("1月")]
+            Jan = 1,   // January  , //
+            [Description("2月")]
+            Feb,   // February    , //
+            [Description("3月")]
+            Mar,   // March       , //
+            [Description("4月")]
+            Apr,   // April       , //
+            [Description("5月")]
+            May,   // May         , //
+            [Description("6月")]
+            Jun,   // June        , //
+            [Description("7月")]
+            Jul,   // July        , //
+            [Description("8月")]
+            Aug,   // August      , //
+            [Description("9月")]
+            Sep,   // September   , //
+            [Description("10月")]
+            Oct,   // October     , //
+            [Description("11月")]
+            Nov,   // November    , //
+            [Description("12月")]
+            Dec    // December      //
+        }
+        public enum FaultRateShortSection
+        {
+            [Description("1年")]
+            One = 1,
+            [Description("2年")]
+            Two,
+            [Description("3年")]
+            Three,
+            [Description("4年")]
+            Four,
+            [Description("5-9年")]
+            FiveToNine,
+            [Description("10年及以上")]
+            TenAndAbove = 10
+        }
+
+        public enum FaultRateSubSection
+        {
+            [Description("5年")]
+            Five = 5,
+            [Description("6年")]
+            Six,
+            [Description("7年")]
+            Seven,
+            [Description("8年")]
+            Eight,
+            [Description("9年")]
+            Nine
+        }
+
+        public enum FaultRateWholeSection
+        {
+            [Description("1年")]
+            One = 1,
+            [Description("2年")]
+            Two,
+            [Description("3年")]
+            Three,
+            [Description("4年")]
+            Four,
+            [Description("5年")]
+            Five,
+            [Description("6年")]
+            Six,
+            [Description("7年")]
+            Seven,
+            [Description("8年")]
+            Eight,
+            [Description("9年")]
+            Nine,
+            [Description("10年")]
+            TenAndAbove
+        }
+    }
+}

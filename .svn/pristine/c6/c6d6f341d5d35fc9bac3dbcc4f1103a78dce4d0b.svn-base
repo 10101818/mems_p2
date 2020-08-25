@@ -1,0 +1,633 @@
+﻿using BusinessObjects.Aspect;
+using BusinessObjects.DataAccess;
+using BusinessObjects.Domain;
+using BusinessObjects.Util;
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace BusinessObjects.Manager
+{
+    /// <summary>
+    /// ValuationManager
+    /// </summary>
+    [LoggingAspect(AspectPriority = 1)]
+    public class ValuationManager
+    {
+        private ValuationDao valuationDao = new ValuationDao();
+        private FujiClassDao FujiClassDao = new FujiClassDao();
+        private FaultRateDao faultRateDao = new FaultRateDao();
+
+        /// <summary>
+        /// 修改估价参数
+        /// </summary>
+        /// <param name="info">估价参数信息</param>
+        [TransactionAspect]
+        public void UpdateParameter(ValParameterInfo info)
+        {
+            this.valuationDao.UpdateParameter(info);
+        }
+
+        #region ValControl
+        /// <summary>
+        /// 保存估价前提条件信息
+        /// </summary>
+        /// <param name="info">估价前提条件</param>
+        [TransactionAspect]
+        public void SaveValControl(ValControlInfo info)
+        {
+            this.valuationDao.DeleteControl(); 
+            this.valuationDao.AddControl(info);
+        }
+
+        #endregion
+
+        #region ValEquipment
+        /// <summary>
+        /// 保存设备
+        /// </summary>
+        /// <param name="updateEquipments">更改的设备信息</param>
+        /// <param name="importEquipments">导入的设备信息</param>
+        [TransactionAspect]
+        public void SaveValEquipments(List<ValEquipmentInfo> updateEquipments, List<ValEquipmentInfo> importEquipments = null)
+        {
+            if (updateEquipments != null && updateEquipments.Count > 0)
+            {                
+                DataTable dt = ValEquipmentInfo.ConvertValEquipmentTable(updateEquipments);
+                this.valuationDao.UpdateEquipments(dt);
+            }
+
+            if (importEquipments != null && importEquipments.Count > 0)
+            {
+                this.valuationDao.DeleteEquipments(true);
+                this.valuationDao.DeleteConsumables(true);
+                this.valuationDao.DeleteComponents(true);
+                this.valuationDao.DeleteSpares(true);
+
+                DataTable dt = ValEquipmentInfo.ConvertValEquipmentTable(importEquipments);
+                this.valuationDao.ImportEquipments(dt);
+
+                this.valuationDao.InitConsumables();
+                this.valuationDao.InitComponents();
+                this.valuationDao.InitSpares();
+            }            
+        }
+
+        /// <summary>
+        /// 格式化导入的设备信息
+        /// </summary>
+        /// <param name="fileBytes">设备信息</param>
+        /// <param name="message">导入状态信息</param>
+        /// <param name="importEquipments">新增设备</param>
+        /// <param name="updateEquipments">修改设备</param>
+        /// <returns>导入状态</returns>
+        public int ParseImportFile(byte[] fileBytes, out string message, out List<ValEquipmentInfo> importEquipments, out List<ValEquipmentInfo> updateEquipments)
+        {
+            List<int> inSystemEquipmentIDs = this.valuationDao.GetInSystemEquipmentID();
+            List<FujiClass2Info> existFujiClass2List = this.FujiClassDao.GetFujiClass2();
+
+            message = "";
+            importEquipments = new List<ValEquipmentInfo>();
+            updateEquipments = new List<ValEquipmentInfo>();
+            DataTable dt = null;
+            if(Util.ImportUtil.ReadExcelFile(fileBytes, out dt) == false)
+            {
+                message = "读取Excel文件失败";
+                return 1;
+            }
+            if(dt.Rows.Count == 0)
+            {
+                message = "Excel文件为空";
+                return 1;
+            }
+            if(dt.Columns.Count < 14)
+            {
+                message = "Excel文件小于14列";
+                return 1;
+            }
+
+            string OID = null;
+            dt.RemoveEmptyRows();
+            foreach(DataRow drRow in dt.Rows)
+            {
+                ValEquipmentInfo info = new ValEquipmentInfo();
+                info.InSystem = SQLUtil.TrimNull(drRow[0]) == "Y" ? true : false;
+                OID = SQLUtil.TrimNull(drRow[1]);
+                if (info.InSystem) info.Equipment.ID = BaseDao.ProcessOID(OID);
+                else info.Equipment.ID = importEquipments.Count + 1;
+                info.Equipment.AssetCode = SQLUtil.TrimNull(drRow[2]);
+                info.Equipment.Name = SQLUtil.TrimNull(drRow[3]);
+                info.Equipment.SerialCode = SQLUtil.TrimNull(drRow[4]);
+                info.Equipment.Manufacturer.Name = SQLUtil.TrimNull(drRow[5]);
+                info.Equipment.Department.Name = SQLUtil.TrimNull(drRow[6]);
+                info.Equipment.PurchaseAmount = SQLUtil.ConvertDouble(drRow[7]);
+                info.Equipment.FujiClass2.Name = SQLUtil.TrimNull(drRow[10]);
+                info.Equipment.FujiClass2.ID = (from FujiClass2Info fujiClass2 in existFujiClass2List where fujiClass2.Name == info.Equipment.FujiClass2.Name select fujiClass2.ID).FirstOrDefault();
+                info.CurrentScope.Name = SQLUtil.TrimNull(drRow[11]);
+                info.CurrentScope.ID = ValEquipmentInfo.ScopeTypes.GetScopeID(info.CurrentScope.Name);
+                info.EndDate = SQLUtil.ConvertDateTime(drRow[12]);
+                info.NextScope.Name = SQLUtil.TrimNull(drRow[13]);
+                info.NextScope.ID = ValEquipmentInfo.ScopeTypes.GetScopeID(info.NextScope.Name);
+
+                if (info.InSystem == false)
+                {
+                    if (info.Equipment.FujiClass2.ID == 0)
+                    {
+                        message = string.Format("设备富士II类:'{0}'不存在", info.Equipment.FujiClass2.Name);
+                        return 1;
+                    }
+                    if (info.Equipment.AssetCode.Length == 0 || info.Equipment.AssetCode.Length > 30)
+                    {
+                        message = string.Format("系统编号为{0}的设备资产编号无效", OID);
+                        return 1;
+                    }
+                    if (info.Equipment.Name.Length == 0 || info.Equipment.Name.Length > 30)
+                    {
+                        message = string.Format("系统编号为{0}的设备名称无效", OID);
+                        return 1;
+                    }
+                    if (info.Equipment.SerialCode.Length == 0 || info.Equipment.SerialCode.Length > 30)
+                    {
+                        message = string.Format("系统编号为{0}的设备序列号无效", OID);
+                        return 1;
+                    }
+                    if (info.Equipment.Manufacturer.Name.Length == 0 || info.Equipment.Manufacturer.Name.Length > 50)
+                    {
+                        message = string.Format("系统编号为{0}的设备厂商无效", OID);
+                        return 1;
+                    }                  
+                    if (info.Equipment.Department.Name.Length == 0 || info.Equipment.Department.Name.Length > 20)
+                    {
+                        message = string.Format("系统编号为{0}的设备科室无效", OID);
+                        return 1;
+                    }
+                }
+
+                if (info.CurrentScope.ID == 0)
+                {
+                    message = string.Format("目前维保种类:'{0}'不存在", info.CurrentScope.Name);
+                    return 1;
+                }
+                if(info.CurrentScope.ID != ValEquipmentInfo.ScopeTypes.NoneCoverage && info.EndDate == DateTime.MinValue)
+                {
+                    message = string.Format("系统编号为{0}的设备维保到期日不能为空", OID);
+                    return 1;
+                }
+                if(info.NextScope.ID == 0)
+                {
+                    message = string.Format("下期维保种类:'{0}'不存在", info.NextScope.Name);
+                    return 1;
+                }
+
+                if (info.InSystem)
+                {
+                    if (inSystemEquipmentIDs.Contains(info.Equipment.ID))
+                    {
+                        updateEquipments.Add(info);
+                    }
+                    else
+                    {
+                        message = string.Format("系统中不存在系统编号为{0}的设备", OID);
+                        return 1;
+                    }
+                }
+                else
+                {
+                    importEquipments.Add(info);
+                }
+            }
+            if (updateEquipments.Count == 0 && importEquipments.Count == 0)
+            {
+                message = "Excel文件为空";
+                return 1;
+            }
+
+            return 0;
+        }
+
+        /// <summary>
+        /// 更新设备工时
+        /// </summary>
+        [TransactionAspect]
+        public void UpdateEquipmentHours()
+        {
+            this.valuationDao.UpdateEquipmentHours();
+        }
+
+        #endregion
+
+        #region ValSpare
+        /// <summary>
+        /// 保存备用机信息
+        /// </summary>
+        /// <param name="infos">备用机信息</param>
+        [TransactionAspect]
+        public void SaveValSpares(List<ValSpareInfo> infos)
+        {
+            DataTable dt = ValSpareInfo.ConvertValSpareTable(infos);
+            this.valuationDao.UpdateSpares(dt);
+        }
+        #endregion
+
+        #region ValComponent
+        /// <summary>
+        /// 保存零件信息
+        /// </summary>
+        /// <param name="infos">零件信息</param>
+        [TransactionAspect]
+        public void SaveValComponents(List<ValComponentInfo> infos)
+        {
+            DataTable dt = ValComponentInfo.ConvertValComponentTable(infos);
+            this.valuationDao.UpdateComponents(dt);
+        }
+        #endregion
+
+        #region ValConsumable
+        /// <summary>
+        /// 保存耗材信息
+        /// </summary>
+        /// <param name="infos">耗材信息</param>
+        [TransactionAspect]
+        public void SaveValConsumables(List<ValConsumableInfo> infos)
+        {
+            DataTable dt = ValConsumableInfo.ConvertValConsumableTable(infos);
+            this.valuationDao.UpdateConsumables(dt);
+        }
+        #endregion
+
+        #region 成本明细
+        /// <summary>
+        /// 估价执行
+        /// </summary>
+        public void RunVal()
+        {
+            this.valuationDao.DeleteValEqptOutput();
+            this.valuationDao.DeleteValConsumableOutput();
+            this.valuationDao.DeleteValComponentOutput();
+
+            ValControlInfo control = this.valuationDao.GetControl();
+
+            DataTable dtContractAmount = CalculateContractAmountForcast(control.ContractStartDate, control.Years);
+            DataTable dtRepair3partyCost = CalculateRepair3partyCostForcast(control.ContractStartDate, control.Years);
+            dtContractAmount.Merge(dtRepair3partyCost);
+            this.valuationDao.InsertValEquipmentOutput(dtContractAmount);
+
+            CalculateComponentsAmountForcast(control.ContractStartDate, control.Years);
+
+            //耗材
+            CalculateConsumableAmountForcast(control.ContractStartDate, control.Years);
+        }
+        //维保费
+        private DataTable CalculateContractAmountForcast(DateTime startDate, int years)
+        {
+            List<ValEquipmentInfo> valEquipmentInfos = this.valuationDao.QueryEquipmentList(-1, -1, "", "", "", 0, 0, "", "", "ve.EquipmentID", true);
+            List<FujiClass2Info> fujiClass2Infos = this.FujiClassDao.GetFujiClass2();
+
+            DataTable dt = new DataTable();
+            dt.Columns.Add("Insystem", typeof(System.Boolean));
+            dt.Columns.Add("EquipmentID", typeof(System.Int32));
+            dt.Columns.Add("Year", typeof(System.Int32));
+            dt.Columns.Add("Month", typeof(System.Int32));
+            dt.Columns.Add("ContractAmount", typeof(System.Double));
+            dt.PrimaryKey = new DataColumn[] { dt.Columns[0], dt.Columns[1], dt.Columns[2], dt.Columns[3] };
+
+            double amount, baseAmount;
+            DateTime curDate;
+            foreach(ValEquipmentInfo valEquip in valEquipmentInfos)
+            {
+                baseAmount = 0;
+
+                FujiClass2Info fujiClass2 = (from FujiClass2Info temp in fujiClass2Infos where temp.ID == valEquip.Equipment.FujiClass2.ID select temp).FirstOrDefault();
+                //if (fujiClass2.IncludeContract)
+                {
+                    if (valEquip.NextScope.ID == ValEquipmentInfo.ScopeTypes.FullCoverage)
+                        baseAmount = Math.Round(valEquip.Equipment.PurchaseAmount * fujiClass2.FullCoveragePtg / 100.0 / 12.0, 2);
+                    if (valEquip.NextScope.ID == ValEquipmentInfo.ScopeTypes.TechCoverage)
+                        baseAmount = Math.Round(valEquip.Equipment.PurchaseAmount * fujiClass2.TechCoveragePtg / 100.0 / 12.0, 2);
+                }
+
+                for (int i = 0; i < years * 12; i++)
+                {
+                    curDate = startDate.AddMonths(i);
+                    if (curDate <= valEquip.EndDate && valEquip.CurrentScope.ID != ValEquipmentInfo.ScopeTypes.NoneCoverage)
+                        amount = 0;
+                    else
+                        amount = baseAmount;
+
+                    dt.Rows.Add(valEquip.InSystem, valEquip.Equipment.ID, curDate.Year, curDate.Month, amount);
+                }      
+            }
+
+            return dt;
+        }
+        //外来服务费
+        private DataTable CalculateRepair3partyCostForcast(DateTime startDate, int years)
+        {
+            List<ValEquipmentInfo> valEquipmentInfos = this.valuationDao.QueryEquipmentList(-1, -1, "", "", "", 0, 0, "", "", "ve.EquipmentID", true);
+            List<FujiClass2Info> fujiClass2Infos = this.FujiClassDao.GetFujiClass2();
+            Dictionary<int, List<FaultRateInfo>> dicFaultRates = this.faultRateDao.GetFaultRateByObject(SQLUtil.GetIDListFromObjectList(fujiClass2Infos), FaultRateInfo.ObjectType.Repair);
+
+            List<ValComponentInfo> valComponentInfos = this.valuationDao.QueryComponentList(0, 0, "", "", true);
+
+            DataTable dt = new DataTable();
+            dt.Columns.Add("Insystem", typeof(System.Boolean));
+            dt.Columns.Add("EquipmentID", typeof(System.Int32));
+            dt.Columns.Add("Year", typeof(System.Int32));
+            dt.Columns.Add("Month", typeof(System.Int32));
+            dt.Columns.Add("Repair3partyCost", typeof(System.Double));
+            dt.PrimaryKey = new DataColumn[] { dt.Columns[0], dt.Columns[1], dt.Columns[2], dt.Columns[3] };
+
+            double amount, baseAmount, usageRate;
+            DateTime curDate;
+            int monthPassed;
+            foreach (ValEquipmentInfo valEquip in valEquipmentInfos)
+            {
+                baseAmount = 0;
+                usageRate = 0;
+
+                FujiClass2Info fujiClass2 = (from FujiClass2Info temp in fujiClass2Infos where temp.ID == valEquip.Equipment.FujiClass2.ID select temp).FirstOrDefault();
+                if (fujiClass2.IncludeRepair)
+                {
+                    if (fujiClass2.EquipmentType.ID != FujiClass2Info.LKPEquipmentType.General && 
+                        (valEquip.CurrentScope.ID == ValEquipmentInfo.ScopeTypes.NoneCoverage || valEquip.NextScope.ID == ValEquipmentInfo.ScopeTypes.NoneCoverage))
+                        baseAmount = fujiClass2.Repair3partyCost * fujiClass2.Repair3partyRatio / 100.0;
+
+                    ValComponentInfo valComponentInfo = (from ValComponentInfo temp in valComponentInfos where temp.InSystem == valEquip.InSystem && temp.Equipment.ID == valEquip.Equipment.ID select temp).FirstOrDefault();
+                    usageRate = Math.Round(fujiClass2.Usage == 0 ? 0 : valComponentInfo.Usage * 1.0 / fujiClass2.Usage, 2);
+                }
+
+                monthPassed = GetEquipUsageMonths(startDate, valEquip);
+                    
+                List<FaultRateInfo> faultRates = dicFaultRates[valEquip.Equipment.FujiClass2.ID];
+                for (int i = 0; i < years * 12; i++)
+                {
+                    curDate = startDate.AddMonths(i);
+
+                    if (baseAmount == 0 ||
+                        (curDate <= valEquip.EndDate && valEquip.CurrentScope.ID != ValEquipmentInfo.ScopeTypes.NoneCoverage) ||
+                        (valEquip.NextScope.ID != ValEquipmentInfo.ScopeTypes.NoneCoverage))
+                    {
+                        amount = 0;
+                    } 
+                    else
+                    {
+                        amount = CalculateAmountByFaultRate(faultRates, baseAmount, monthPassed, usageRate, i);
+                    }
+
+                    dt.Rows.Add(valEquip.InSystem, valEquip.Equipment.ID, curDate.Year, curDate.Month, amount);
+                }
+            }
+            return dt;
+        }
+        //零件
+        private void CalculateComponentsAmountForcast(DateTime startDate, int years)
+        {
+            List<ValEquipmentInfo> valEquipmentInfos = this.valuationDao.QueryEquipmentList(-1, -1, "", "", "", 0, 0, "", "", "ve.EquipmentID", true);
+            List<FujiClass2Info> fujiClass2Infos = this.FujiClassDao.GetFujiClass2();
+            Dictionary<int, List<FaultRateInfo>> dicFaultRatesEquip = this.faultRateDao.GetFaultRateByObject(SQLUtil.GetIDListFromObjectList(fujiClass2Infos), FaultRateInfo.ObjectType.Repair);
+
+            List<ValComponentInfo> valComponentInfos = this.valuationDao.QueryComponentList(-1, 0, "", "", false);
+            Dictionary<int, List<FaultRateInfo>> dicFaultRatesComp = this.faultRateDao.GetFaultRateByObject(SQLUtil.GetIDListFromObjectList(valComponentInfos, "ComponentID"), FaultRateInfo.ObjectType.Component);
+
+            DataTable dt = new DataTable();
+            dt.Columns.Add("Insystem", typeof(System.Boolean));
+            dt.Columns.Add("EquipmentID", typeof(System.Int32));
+            dt.Columns.Add("ComponentID", typeof(System.Int32));
+            dt.Columns.Add("Year", typeof(System.Int32));
+            dt.Columns.Add("Month", typeof(System.Int32));
+            dt.Columns.Add("Amount", typeof(System.Double));
+
+            foreach (ValComponentInfo valComponentInfo in valComponentInfos)
+            {
+                ValEquipmentInfo valEquip = (from ValEquipmentInfo temp in valEquipmentInfos where temp.InSystem == valComponentInfo.InSystem && temp.Equipment.ID == valComponentInfo.Equipment.ID select temp).FirstOrDefault();
+                FujiClass2Info fujiClass2 = (from FujiClass2Info temp in fujiClass2Infos where temp.ID == valEquip.Equipment.FujiClass2.ID select temp).FirstOrDefault();
+
+                if(valComponentInfo.Component.ID == 0)
+                {
+                    if (fujiClass2.EquipmentType.ID == FujiClass2Info.LKPEquipmentType.General)
+                    {
+                        CalculateComponentAmountForcast1(startDate, years, dt, valEquip, fujiClass2, valComponentInfo);
+                    }
+                    else
+                    {
+                        CalculateComponentAmountForcast2(startDate, years, dt, valEquip, fujiClass2, valComponentInfo, dicFaultRatesEquip[valEquip.Equipment.FujiClass2.ID]);
+                    }
+                }
+                else if (valComponentInfo.Component.Type.ID == ComponentInfo.ComponentTypes.CT)
+                {
+                    CalculateComponentAmountForcast4(startDate, years, dt, valEquip, fujiClass2, valComponentInfo);
+                }
+                else
+                {
+                    CalculateComponentAmountForcast3(startDate, years, dt, valEquip, fujiClass2, valComponentInfo, dicFaultRatesComp[valComponentInfo.Component.ID]);
+                }
+            }
+
+            this.valuationDao.InsertValComponentOutput(dt);
+        }
+
+        //CT球管
+        private static void CalculateComponentAmountForcast4(DateTime startDate, int years, DataTable dt, ValEquipmentInfo valEquip, FujiClass2Info fujiClass2, ValComponentInfo valComponentInfo)
+        {
+            double amount;            
+            double currentSeconds = valComponentInfo.Seconds;
+            for (int i = 0; i < years * 12; i++)
+            {
+                DateTime curDate = startDate.AddMonths(i);
+
+                amount = 0;
+                currentSeconds += Math.Round(valComponentInfo.Usage * valComponentInfo.Component.SecondsPer, 2);
+                if (currentSeconds > valComponentInfo.Component.TotalSeconds)
+                {
+                    currentSeconds = Math.Round(currentSeconds - valComponentInfo.Component.TotalSeconds, 2);
+                    
+                    if (!valComponentInfo.IncludeContract ||
+                        (curDate <= valEquip.EndDate && valEquip.CurrentScope.ID == ValEquipmentInfo.ScopeTypes.NoneCoverage) ||
+                        (curDate > valEquip.EndDate && valEquip.NextScope.ID == ValEquipmentInfo.ScopeTypes.NoneCoverage))
+                    {
+                        amount = valComponentInfo.Component.StdPrice;
+                    }
+                }
+
+                dt.Rows.Add(valComponentInfo.InSystem, valComponentInfo.Equipment.ID, valComponentInfo.Component.ID, curDate.Year, curDate.Month, amount);
+            }
+        }
+
+        //其他零件
+        private void CalculateComponentAmountForcast3(DateTime startDate, int years, DataTable dt, ValEquipmentInfo valEquip, FujiClass2Info fujiClass2, ValComponentInfo valComponentInfo, List<FaultRateInfo> faultRates)
+        {
+            //TODO 因为作业报告零配件尚未开发，目前使用默认值 baseAmount and monthPassed
+            double amount;
+            double baseAmount = valComponentInfo.Component.StdPrice;
+            int monthPassed = 0;
+            double usageRate = Math.Round(valComponentInfo.Component.Usage == 0 ? 0 : valComponentInfo.Usage * valComponentInfo.Qty * 1.0 / valComponentInfo.Component.Usage, 2);
+
+            for (int i = 0; i < years * 12; i++)
+            {
+                DateTime curDate = startDate.AddMonths(i);
+
+                if (!fujiClass2.IncludeRepair || 
+                    (curDate <= valEquip.EndDate && valEquip.CurrentScope.ID != ValEquipmentInfo.ScopeTypes.NoneCoverage && valComponentInfo.IncludeContract) ||
+                    (curDate > valEquip.EndDate && valEquip.NextScope.ID != ValEquipmentInfo.ScopeTypes.NoneCoverage && valComponentInfo.IncludeContract))
+                {
+                    amount = 0;
+                }
+                else
+                {
+                    amount = CalculateAmountByFaultRate(faultRates, baseAmount, monthPassed, usageRate, i);
+                }
+
+                dt.Rows.Add(valComponentInfo.InSystem, valComponentInfo.Equipment.ID, valComponentInfo.Component.ID, curDate.Year, curDate.Month, amount);
+            }
+        }
+
+        //重点， 次重点设备 整机的计算
+        private void CalculateComponentAmountForcast2(DateTime startDate, int years, DataTable dt, ValEquipmentInfo valEquip, FujiClass2Info fujiClass2, ValComponentInfo valComponentInfo, List<FaultRateInfo> faultRates)
+        {
+            double amount;
+            double baseAmount = fujiClass2.RepairComponentCost;
+            double usageRate = Math.Round(fujiClass2.Usage == 0 ? 0 : valComponentInfo.Usage * 1.0 / fujiClass2.Usage, 2);
+            int monthPassed = GetEquipUsageMonths(startDate, valEquip);
+
+            for (int i = 0; i < years * 12; i++)
+            {
+                DateTime curDate = startDate.AddMonths(i);
+
+                if (!fujiClass2.IncludeRepair ||
+                    (curDate <= valEquip.EndDate && valEquip.CurrentScope.ID == ValEquipmentInfo.ScopeTypes.FullCoverage) ||
+                    (curDate > valEquip.EndDate && valEquip.NextScope.ID == ValEquipmentInfo.ScopeTypes.FullCoverage))
+                {
+                    amount = 0;
+                }
+                else
+                {
+                    amount = CalculateAmountByFaultRate(faultRates, baseAmount, monthPassed, usageRate, i);
+                }
+
+                dt.Rows.Add(valComponentInfo.InSystem, valComponentInfo.Equipment.ID, valComponentInfo.Component.ID, curDate.Year, curDate.Month, amount);
+            }
+        }
+
+        //一般设备 整机的计算
+        private static void CalculateComponentAmountForcast1(DateTime startDate, int years, DataTable dt, ValEquipmentInfo valEquip, FujiClass2Info fujiClass2, ValComponentInfo valComponentInfo)
+        {
+            double amount;
+            double baseAmount = Math.Round(valEquip.Equipment.PurchaseAmount * fujiClass2.RepairCostRatio / 100.0, 2);
+
+            for (int i = 0; i < years * 12; i++)
+            {
+                DateTime curDate = startDate.AddMonths(i);
+
+                if (!fujiClass2.IncludeRepair ||
+                    (curDate <= valEquip.EndDate && valEquip.CurrentScope.ID != ValEquipmentInfo.ScopeTypes.NoneCoverage) ||
+                    (curDate > valEquip.EndDate && valEquip.NextScope.ID != ValEquipmentInfo.ScopeTypes.NoneCoverage))
+                {
+                    amount = 0;
+                }
+                else
+                {
+                    amount = baseAmount;
+                }
+
+                dt.Rows.Add(valComponentInfo.InSystem, valComponentInfo.Equipment.ID, valComponentInfo.Component.ID, curDate.Year, curDate.Month, amount);
+            }
+        }
+        //耗材
+        private void CalculateConsumableAmountForcast(DateTime startDate, int years)
+        {
+            List<ValEquipmentInfo> valEquipmentInfos = this.valuationDao.QueryEquipmentList(-1, -1, "", "", "", 0, 0, "", "", "ve.EquipmentID", true);
+            List<ValConsumableInfo> valConsumableInfos = this.valuationDao.QueryConsumableList(0, null, null); 
+
+            DataTable dt = new DataTable();
+            dt.Columns.Add("Insystem", typeof(System.Boolean));
+            dt.Columns.Add("EquipmentID", typeof(System.Int32));
+            dt.Columns.Add("ConsumableID", typeof(System.Int32));
+            dt.Columns.Add("Year", typeof(System.Int32));
+            dt.Columns.Add("Month", typeof(System.Int32));
+            dt.Columns.Add("Amount", typeof(System.Double));
+
+            double amount, baseAmount;
+            DateTime curDate;
+            foreach (ValConsumableInfo valConsumableInfo in valConsumableInfos)
+            {
+                baseAmount = Math.Round(valConsumableInfo.Consumable.CostPer * valConsumableInfo.Consumable.ReplaceTimes / 12.0, 2);
+
+                foreach (ValEquipmentInfo valEquip in (from ValEquipmentInfo temp in valEquipmentInfos where temp.Equipment.FujiClass2.ID == valConsumableInfo.Consumable.FujiClass2.ID select temp))
+                {
+                    for (int i = 0; i < years * 12; i++)
+                    {
+                        curDate = startDate.AddMonths(i);
+
+                        if (valConsumableInfo.IncludeContract &&
+                            ((curDate <= valEquip.EndDate && valEquip.CurrentScope.ID != ValEquipmentInfo.ScopeTypes.NoneCoverage) ||
+                                (curDate > valEquip.EndDate && valEquip.NextScope.ID != ValEquipmentInfo.ScopeTypes.NoneCoverage)))
+                        {
+                            amount = 0;
+                        }
+                        else
+                        {
+                            amount = baseAmount;
+                        }
+
+                        dt.Rows.Add(valEquip.InSystem, valEquip.Equipment.ID, valConsumableInfo.Consumable.ID, curDate.Year, curDate.Month, amount);
+                    }
+                }
+            }
+
+            this.valuationDao.InsertValConsumableOutput(dt);
+        }
+        //用故障率计算金额
+        private double CalculateAmountByFaultRate(List<FaultRateInfo> faultRates, double baseAmount, int monthPassed, double usageRate, int months)
+        {
+            int faultRateIndex = (int)Math.Round(usageRate * (monthPassed + months), 0);
+
+            if (faultRateIndex >= faultRates.Count) faultRateIndex = faultRates.Count - 1;
+
+            return Math.Round(baseAmount * faultRates[faultRateIndex].Rate / 100.0, 2);
+        }
+
+        //设备已使用月数
+        private int GetEquipUsageMonths(DateTime startDate, ValEquipmentInfo valEquip)
+        {
+            DateTime equipUsageDate = (valEquip.Equipment.UseageDate == DateTime.MinValue ? startDate : valEquip.Equipment.UseageDate);
+
+            return (startDate.Year * 12 + startDate.Month) - (equipUsageDate.Year * 12 + equipUsageDate.Month);
+        }
+
+        #endregion
+
+        #region 备用机计算工具
+        public void GetSpareCount(DateTime startDate, DateTime endDate, double safeRate, List<ValSpareInfo> fuji2List)
+        {
+            DataTable dt = new DataTable();
+            dt.Columns.Add("FujiClass2Name");
+            dt.Columns.Add("RepairDays");
+            dt.Columns.Add("SpareCount");
+
+            TimeSpan ts1 = new TimeSpan(startDate.Ticks);
+            TimeSpan ts2 = new TimeSpan(endDate.Ticks);
+            TimeSpan ts = ts1.Subtract(ts2).Duration();
+            int nDays = ts.Days + 1;
+
+            foreach(ValSpareInfo fuji2 in fuji2List)
+            {
+                DataTable repairs = this.valuationDao.GetFujiClass2RepairHours(startDate, endDate, fuji2.FujiClass2.ID)
+                int repairCounts = repairs.Rows.Count;
+                double avgRepairCount = repairCounts * 1.0 / nDays;
+
+                for (int i = 0; i < nDays - 1; i++)
+                {
+                    DateTime creDate = startDate.AddDays(i);
+                    DataTable curRepairHours = this.valuationDao.GetFujiClass2RepairHours(creDate, creDate.AddDays(1), fuji2.FujiClass2.ID);
+
+                }
+            }
+
+
+        }
+        #endregion
+    }
+}

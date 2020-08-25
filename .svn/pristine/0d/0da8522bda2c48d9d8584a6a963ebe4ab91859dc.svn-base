@@ -1,0 +1,1159 @@
+﻿using BusinessObjects.Aspect;
+using BusinessObjects.Domain;
+using BusinessObjects.Util;
+using PostSharp.Extensibility;
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Data.SqlClient;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace BusinessObjects.DataAccess
+{
+    /// <summary>
+    /// 估价Dao
+    /// </summary>
+    [LoggingAspect(AspectPriority = 1)]
+    [ConnectionAspect(AspectPriority = 2, AttributeTargetTypeAttributes = MulticastAttributes.Public)]
+    public class ValuationDao : BaseDao
+    {
+        #region parameter
+        /// <summary>
+        /// 获取估价参数信息
+        /// </summary>
+        /// <returns>估价参数信息</returns>
+        public ValParameterInfo GetParameter()
+        {
+            sqlStr = "SELECT * from tblValParameter";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                DataRow dr = GetDataRow(command);
+
+                return new ValParameterInfo(dr);
+            }
+        } 
+        /// <summary>
+        /// 修改估价参数
+        /// </summary>
+        /// <param name="info">估价参数</param>
+        public void UpdateParameter(ValParameterInfo info)
+        {
+            sqlStr = "UPDATE tblValParameter SET HospitalLevel = @HospitalLevel,HospitalFactor = @HospitalFactor, SystemCost = @SystemCost, " +
+                    " MonthlyHours = @MonthlyHours, UnitCost = @UnitCost, SmallConsumableCost = @SmallConsumableCost";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.Parameters.Add("@HospitalLevel", SqlDbType.Int).Value = SQLUtil.ConvertInt(info.HospitalLevel.ID);
+                command.Parameters.Add("@HospitalFactor", SqlDbType.Float).Value = SQLUtil.ConvertDouble(info.HospitalFactor);
+                command.Parameters.Add("@SystemCost", SqlDbType.Float).Value = SQLUtil.ConvertDouble(info.SystemCost);
+                command.Parameters.Add("@MonthlyHours", SqlDbType.Float).Value = SQLUtil.ConvertDouble(info.MonthlyHours);
+                command.Parameters.Add("@UnitCost", SqlDbType.Float).Value = SQLUtil.ConvertDouble(info.UnitCost);
+                command.Parameters.Add("@SmallConsumableCost", SqlDbType.Float).Value = SQLUtil.ConvertDouble(info.SmallConsumableCost);
+
+                command.ExecuteNonQuery();
+            }
+        }
+        #endregion
+
+        #region ValControl
+        /// <summary>
+        /// 获取估价前提条件
+        /// </summary>
+        /// <returns>估价前提条件信息</returns>
+        public ValControlInfo GetControl()
+        {
+            sqlStr = "SELECT * FROM tblValControl "; 
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                DataRow dr = GetDataRow(command);
+                if (dr == null) return null;
+                else return new ValControlInfo(dr);
+            }
+        }
+        /// <summary>
+        /// 预测所需总工时数
+        /// </summary>
+        /// <returns>预测所需总工时数</returns>
+        public double GetTotalHours()
+        {
+            sqlStr = "SELECT SUM(PatrolHours + MaintenanceHours + RepairHours) " +
+                    " FROM tblValEquipment";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                return GetDouble(command);
+            }
+        }
+        /// <summary>
+        /// 保存估价前提条件信息
+        /// </summary>
+        /// <param name="info">估价前提条件信息</param>
+        public void AddControl(ValControlInfo info)
+        {
+            sqlStr = "INSERT INTO tblValControl(CtlFlag,UserID,UpdateDate,IsExecuted,EndDate,ContractStartDate,Years,HospitalLevel,HospitalFactor,ImportCost,ProfitMargins, " +
+                    " RiskRatio,VarAmount,ComputeEngineer,ForecastEngineer,AutualEngineer) " +
+                    " VALUES('CTL',@UserID,GetDate(),@IsExecuted, @EndDate,@ContractStartDate,@Years,@HospitalLevel,@HospitalFactor,@ImportCost,@ProfitMargins, " +
+                    " @RiskRatio,@VarAmount,@ComputeEngineer,@ForecastEngineer,@AutualEngineer)";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.Parameters.Add("@UserID", SqlDbType.Int).Value = info.User.ID;
+                command.Parameters.Add("@IsExecuted", SqlDbType.Bit).Value = info.IsExecuted;
+
+                command.Parameters.Add("@EndDate", SqlDbType.DateTime).Value = info.EndDate;
+                command.Parameters.Add("@ContractStartDate", SqlDbType.DateTime).Value = info.ContractStartDate;
+                command.Parameters.Add("@Years", SqlDbType.Int).Value = info.Years;
+                command.Parameters.Add("@HospitalLevel", SqlDbType.Int).Value = info.HospitalLevel.ID;
+                command.Parameters.Add("@HospitalFactor", SqlDbType.Decimal).Value = info.HospitalFactor;
+                command.Parameters.Add("@ImportCost", SqlDbType.Decimal).Value = info.ImportCost;
+                command.Parameters.Add("@ProfitMargins", SqlDbType.Decimal).Value = info.ProfitMargins;
+                command.Parameters.Add("@RiskRatio", SqlDbType.Decimal).Value = info.RiskRatio;
+                command.Parameters.Add("@VarAmount", SqlDbType.Decimal).Value = info.VarAmount;
+                command.Parameters.Add("@ComputeEngineer", SqlDbType.Int).Value = info.ComputeEngineer;
+                command.Parameters.Add("@ForecastEngineer", SqlDbType.Int).Value = info.ForecastEngineer;
+                command.Parameters.Add("@AutualEngineer", SqlDbType.Int).Value = info.AutualEngineer;
+
+                command.ExecuteScalar();
+            }
+        }
+        /// <summary>
+        /// 删除估价前提条件信息
+        /// </summary>
+        public void DeleteControl()
+        {
+            sqlStr = "DELETE tblValControl";
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.ExecuteNonQuery();
+            }
+        }
+
+        #endregion
+
+        #region tblValEquipment
+        /// <summary>
+        /// 初始化估价设备清单
+        /// </summary>
+        public void InitEquipments()
+        {
+            sqlStr = "INSERT INTO tblValEquipment (InSystem,EquipmentID, AssetCode,Name,SerialCode,Manufacturer,FujiClass2ID,Department,PurchaseAmount,CurrentScopeID,EndDate,NextScopeID)" +
+                    " SELECT 1 AS InSystem,e.ID EquipmentID,e.AssetCode,e.Name,e.SerialCode,s.Name Manufacturer,ISNULL(e.FujiClass2ID,0) AS FujiClass2ID,d.Description Department,e.PurchaseAmount, " +
+                    " ISNULL(c.ScopeID,3) CurrentScopeID,c.EndDate, " + ValEquipmentInfo.ScopeTypes.NoneCoverage +
+                    " FROM tblEquipment e " +
+                    " LEFT JOIN v_ActiveContract ac ON e.ID = ac.EquipmentID " +
+                    " INNER JOIN tblFujiClass2 f2 ON e.FujiClass2ID = f2.ID " +
+                    " LEFT JOIN tblContract c ON c.ID = ac.ContractID " +
+                    " LEFT JOIN lkpDepartment d ON d.ID = e.DepartmentID " +
+                    " LEFT JOIN tblSupplier s ON e.ManufacturerID = s.ID " +
+                    " WHERE e.EquipmentStatusID <> " + EquipmentInfo.EquipmentStatuses.Scrap;
+
+            using(SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.ExecuteNonQuery();
+            }
+        }
+        /// <summary>
+        /// 获取估价设备清单数量
+        /// </summary>
+        /// <param name="equipmentType">设备类型</param>
+        /// <param name="amountType">金额类型</param>
+        /// <param name="equipmentName">设备名称</param>
+        /// <param name="serialCode">设备序列号</param>
+        /// <param name="departmentName">科室</param>
+        /// <param name="class1ID">富士I类</param>
+        /// <param name="class2ID">富士II类</param>
+        /// <param name="filterField">搜索字段</param>
+        /// <param name="filterText">搜索内容</param>
+        /// <returns>设备数量</returns>
+        public int GetEquipmentCount(int equipmentType, int amountType, string equipmentName, string serialCode, string departmentName, int class1ID, int class2ID, string filterField, string filterText)
+        {
+            sqlStr = "SELECT COUNT(ve.EquipmentID) FROM tblValEquipment ve " +
+                    " INNER JOIN tblFujiClass2 f2 ON ve.FujiClass2ID = f2.ID " +
+                    " WHERE 1=1 ";
+            if (equipmentType != -1)
+                sqlStr += " AND f2.EquipmentType = " + equipmentType;
+            if (amountType != -1)
+                sqlStr += UIFilterEquipmentAmount.GetAmountSql(amountType);
+            if (!string.IsNullOrEmpty(equipmentName))
+                sqlStr += " AND UPPER(ve.Name) Like @EquipmentName ";
+            if (!string.IsNullOrEmpty(serialCode))
+                sqlStr += " AND UPPER(ve.SerialCode) Like @SerialCode ";
+            if (!string.IsNullOrEmpty(departmentName))
+                sqlStr += " AND UPPER(ve.Department) Like @Department ";
+            if (class1ID != 0)
+                sqlStr += " AND f2.FujiClass1ID = " + class1ID;
+            if (class2ID != 0)
+                sqlStr += "AND f2.ID = " + class2ID;
+
+            if (!string.IsNullOrEmpty(filterText))
+                sqlStr += GetFieldFilterClause(filterField);
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                if (!String.IsNullOrEmpty(filterText))
+                    AddFieldFilterParam(command, filterField, filterText);
+
+                if (!string.IsNullOrEmpty(equipmentName))
+                    command.Parameters.Add("@EquipmentName", SqlDbType.NVarChar).Value = "%" + equipmentName.ToUpper() + "%";
+                if (!string.IsNullOrEmpty(serialCode))
+                    command.Parameters.Add("@SerialCode", SqlDbType.NVarChar).Value = "%" + serialCode.ToUpper() + "%";
+                if (!string.IsNullOrEmpty(departmentName))
+                    command.Parameters.Add("@Department", SqlDbType.NVarChar).Value = "%" + departmentName.ToUpper() + "%";
+
+                return GetCount(command);
+            }
+        }
+        /// <summary>
+        /// 获取估价设备清单信息
+        /// </summary>
+        /// <param name="equipmentType">设备类型</param>
+        /// <param name="amountType">金额类型</param>
+        /// <param name="equipmentName">设备名称</param>
+        /// <param name="serialCode">设备序列号</param>
+        /// <param name="departmentName">科室</param>
+        /// <param name="class1ID">富士I类</param>
+        /// <param name="class2ID">富士II类</param>
+        /// <param name="filterField">搜索字段</param>
+        /// <param name="filterText">搜索内容</param>
+        /// <param name="sortField">排序字段</param>
+        /// <param name="sortDirection">排序方式</param>
+        /// <param name="curRowNum">当页第一条数据下标</param>
+        /// <param name="pageSize">数据条数</param>
+        /// <returns>设备清单信息 </returns>
+        public List<ValEquipmentInfo> QueryEquipmentList(int equipmentType, int amountType, string equipmentName, string serialCode, string departmentName, int class1ID, int class2ID, string filterField, string filterText, string sortField, bool sortDirection, int curRowNum = 0, int pageSize = 0)
+        {
+            sqlStr = "SELECT ve.*,f2.Name as FujiClass2Name, f2.EquipmentType EquipmentTypeID, f1.ID FujiClass1ID,f1.Name as FujiClass1Name,e.UseageDate " + 
+                        " FROM tblValEquipment ve " +
+                        " INNER JOIN tblEquipment e ON e.ID = ve.EquipmentID AND ve.InSystem = 1 " +
+                        " INNER JOIN tblFujiClass2 f2 ON ve.FujiClass2ID = f2.ID " +
+                        " INNER JOIN tblFujiClass1 f1 ON f1.ID = f2.FujiClass1ID " +
+                        " WHERE 1=1 ";
+                if (equipmentType != -1)
+                    sqlStr += " AND f2.EquipmentType = " + equipmentType;
+                if (amountType != -1)
+                    sqlStr += UIFilterEquipmentAmount.GetAmountSql(amountType);
+                if (!string.IsNullOrEmpty(equipmentName))
+                    sqlStr += " AND UPPER(ve.Name) Like @EquipmentName ";
+                if (!string.IsNullOrEmpty(serialCode))
+                    sqlStr += " AND UPPER(ve.SerialCode) Like @SerialCode ";
+                if (!string.IsNullOrEmpty(departmentName))
+                    sqlStr += " AND UPPER(ve.Department) Like @Department ";
+                if (class1ID != 0)
+                    sqlStr += " AND f2.FujiClass1ID = " + class1ID;
+                if (class2ID != 0)
+                    sqlStr += "AND f2.ID = " + class2ID;
+
+                if (!string.IsNullOrEmpty(filterText))
+                    sqlStr += GetFieldFilterClause(filterField);
+
+                sqlStr += GenerateSortClause(sortDirection, sortField, "ve.EquipmentID");
+                sqlStr = AppendLimitClause(sqlStr, curRowNum, pageSize);
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                if (!String.IsNullOrEmpty(filterText))
+                    AddFieldFilterParam(command, filterField, filterText);
+
+                if (!string.IsNullOrEmpty(equipmentName))
+                    command.Parameters.Add("@EquipmentName", SqlDbType.NVarChar).Value = "%" + equipmentName.ToUpper() + "%";
+                if (!string.IsNullOrEmpty(serialCode))
+                    command.Parameters.Add("@SerialCode", SqlDbType.NVarChar).Value = "%" + serialCode.ToUpper() + "%";
+                if (!string.IsNullOrEmpty(departmentName))
+                    command.Parameters.Add("@Department", SqlDbType.NVarChar).Value = "%" + departmentName.ToUpper() + "%";
+
+                return GetList<ValEquipmentInfo>(command); 
+            }
+        }
+        /// <summary>
+        /// 获取设备清单中在系统的设备id
+        /// </summary>
+        /// <returns>设备清单中在系统的设备id</returns>
+        public List<int> GetInSystemEquipmentID()
+        {
+            sqlStr = "SELECT EquipmentID FROM tblValEquipment " +
+                    " WHERE InSystem = 1";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                return GetList(command);
+            }
+        }
+
+        /// <summary>
+        /// 批量保存设备信息
+        /// </summary>
+        /// <param name="dt">设备信息列表</param>
+        public void UpdateEquipments(DataTable dt)
+        {
+            sqlStr = "UPDATE tblValEquipment SET CurrentScopeID = @CurrentScopeID, EndDate = @EndDate, NextScopeID = @NextScopeID " +
+                     " WHERE EquipmentID = @EquipmentID AND InSystem = @InSystem";
+
+            SqlParameter parameter = null;
+            using (SqlCommand updateCommand = ConnectionUtil.GetCommand(sqlStr))
+            {
+                parameter = updateCommand.Parameters.Add("@EquipmentID", SqlDbType.Int);
+                parameter.SourceColumn = "EquipmentID";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = updateCommand.Parameters.Add("@CurrentScopeID", SqlDbType.Int);
+                parameter.SourceColumn = "CurrentScopeID";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = updateCommand.Parameters.Add("@NextScopeID", SqlDbType.Int);
+                parameter.SourceColumn = "NextScopeID";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = updateCommand.Parameters.Add("@EndDate", SqlDbType.DateTime);
+                parameter.SourceColumn = "EndDate";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = updateCommand.Parameters.Add("@InSystem", SqlDbType.Bit);
+                parameter.SourceColumn = "InSystem";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                using (SqlDataAdapter da = new SqlDataAdapter())
+                {
+                    da.InsertCommand = updateCommand;
+
+                    da.Update(dt);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 导入不在系统中的设备
+        /// </summary>
+        /// <param name="dt">设备信息</param>
+        public void ImportEquipments(DataTable dt)
+        {
+            sqlStr = "INSERT INTO tblValEquipment(InSystem,EquipmentID,AssetCode,Name,SerialCode,Manufacturer,FujiClass2ID,Department,PurchaseAmount,CurrentScopeID,EndDate,NextScopeID) " +
+                " VALUES(0,@EquipmentID,@AssetCode,@Name,@SerialCode,@Manufacturer,@FujiClass2ID,@Department,@PurchaseAmount,@CurrentScopeID,@EndDate,@NextScopeID) ";
+
+            SqlParameter parameter = null;
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                parameter = command.Parameters.Add("@EquipmentID", SqlDbType.Int);
+                parameter.SourceColumn = "EquipmentID";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@AssetCode", SqlDbType.NVarChar);
+                parameter.SourceColumn = "AssetCode";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@Name", SqlDbType.NVarChar);
+                parameter.SourceColumn = "Name";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@SerialCode", SqlDbType.NVarChar);
+                parameter.SourceColumn = "SerialCode";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@Manufacturer", SqlDbType.NVarChar);
+                parameter.SourceColumn = "Manufacturer";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@FujiClass2ID", SqlDbType.Int);
+                parameter.SourceColumn = "FujiClass2ID";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@Department", SqlDbType.NVarChar);
+                parameter.SourceColumn = "Department";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@PurchaseAmount", SqlDbType.Decimal);
+                parameter.SourceColumn = "PurchaseAmount";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@CurrentScopeID", SqlDbType.Int);
+                parameter.SourceColumn = "CurrentScopeID";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@NextScopeID", SqlDbType.Int);
+                parameter.SourceColumn = "NextScopeID";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@EndDate", SqlDbType.DateTime);
+                parameter.SourceColumn = "EndDate";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                using (SqlDataAdapter da = new SqlDataAdapter())
+                {
+                    da.InsertCommand = command;
+
+                    da.Update(dt);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 删除设备信息
+        /// </summary>
+        /// <param name="notInSystemOnly">是否仅删除不在系统中的设备</param>
+        public void DeleteEquipments(bool notInSystemOnly = false)
+        {
+            sqlStr = "DELETE tblValEquipment";
+            if (notInSystemOnly) sqlStr += " WHERE InSystem = 0";
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.ExecuteNonQuery();
+            }
+        }
+
+        /// <summary>
+        /// 修改设备工时
+        /// </summary>
+        public void UpdateEquipmentHours()
+        {
+            sqlStr = @"UPDATE e set e.MaintenanceHours = f.MaintenanceHours * f.MaintenanceTimes / 12.0,
+                        e.PatrolHours = f.PatrolHours * f.PatrolTimes / 12.0, e.RepairHours = f.RepairHours
+                        FROM tblValEquipment as e 
+                        INNER JOIN tblFujiClass2 as f on e.FujiClass2ID = f.ID";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.ExecuteNonQuery();
+            }
+        }
+
+        #endregion
+
+        #region tblValConsumable
+        /// <summary>
+        /// 初始化耗材
+        /// </summary>
+        public void InitConsumables()
+        {
+            sqlStr = "INSERT INTO tblValConsumable(ConsumableID,IncludeContract) " +
+                    " SELECT Distinct(c.ID),c.IncludeContract " +
+                    " FROM tblValEquipment ve " +
+                    " INNER JOIN tblConsumable c ON ve.FujiClass2ID = c.FujiClass2ID " +
+                    " WHERE c.ID NOT IN (SELECT ConsumableID FROM tblValConsumable) ";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.ExecuteNonQuery();
+            }
+        }
+
+        /// <summary>
+        /// 获取耗材列表数量
+        /// </summary>
+        /// <param name="class2ID">富士II类id</param>
+        /// <param name="filterField">搜索字段</param>
+        /// <param name="filterText">搜索内容</param>
+        /// <returns>耗材数量</returns>
+        public int GetConsumableCount(int class2ID, string filterField, string filterText)
+        {
+            sqlStr = "SELECT COUNT(c.ID) FROM tblValConsumable vc " +
+                    " INNER JOIN tblConsumable c ON vc.ConsumableID = c.ID " +
+                    " INNER JOIN tblFujiClass2 f2 ON c.FujiClass2ID = f2.ID " +
+                    " WHERE c.IsIncluded = 1 AND c.IsActive=1 ";
+
+            if (class2ID != 0)
+                sqlStr += " AND f2.ID = " + class2ID+" ";
+            if (!string.IsNullOrEmpty(filterText))
+                sqlStr += GetFieldFilterClause(filterField);
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                if (!String.IsNullOrEmpty(filterText))
+                    AddFieldFilterParam(command, filterField, filterText);
+
+                return GetCount(command);
+            }
+        }
+        /// <summary>
+        /// 获取耗材列表信息
+        /// </summary>
+        /// <param name="class2ID">富士II类id</param>
+        /// <param name="filterField">搜索字段</param>
+        /// <param name="filterText">搜索内容</param>
+        /// <param name="curRowNum">当页第一条数据的下标</param>
+        /// <param name="pageSize">数据条数</param>
+        /// <returns>耗材列表信息</returns>
+        public List<ValConsumableInfo> QueryConsumableList(int class2ID, string filterField, string filterText, int curRowNum = 0, int pageSize = 0)
+        {
+            sqlStr = "SELECT vc.*,c.Name ConsumableName,f2.ID FujiClass2ID,f2.Name FujiClass2Name,c.CostPer,c.ReplaceTimes " +
+                    " FROM tblValConsumable vc" +
+                    " INNER JOIN tblConsumable c ON vc.ConsumableID = c.ID " +
+                    " INNER JOIN tblFujiClass2 f2 ON c.FujiClass2ID = f2.ID " +
+                    " WHERE  c.IsIncluded = 1 AND c.IsActive=1  ";
+
+            if (class2ID != 0)
+                sqlStr += " AND f2.ID = " + class2ID+" ";
+            if (!string.IsNullOrEmpty(filterText))
+                sqlStr += GetFieldFilterClause(filterField);
+
+            sqlStr += " ORDER BY c.ID ";
+            sqlStr = AppendLimitClause(sqlStr, curRowNum, pageSize);
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                if (!String.IsNullOrEmpty(filterText))
+                    AddFieldFilterParam(command, filterField, filterText);
+
+                return GetList<ValConsumableInfo>(command);
+            }
+        }
+        /// <summary>
+        /// 修改耗材信息
+        /// </summary>
+        /// <param name="dt">修改的耗材列表</param>
+        public void UpdateConsumables(DataTable dt)
+        {
+            sqlStr = "UPDATE tblValConsumable SET IncludeContract = @IncludeContract " +
+                    " WHERE ConsumableID = @ConsumableID";
+
+            SqlParameter parameter = null;
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                parameter = command.Parameters.Add("@ConsumableID", SqlDbType.Int);
+                parameter.SourceColumn = "ConsumableID";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@IncludeContract", SqlDbType.Bit);
+                parameter.SourceColumn = "IncludeContract";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                using (SqlDataAdapter da = new SqlDataAdapter())
+                {
+                    da.InsertCommand = command;
+
+                    da.Update(dt);
+                }
+            }
+        }
+        /// <summary>
+        /// 删除耗材
+        /// </summary>
+        /// <param name="notInSystemOnly">是否只删除不在系统中的耗材</param>
+        public void DeleteConsumables(bool notInSystemOnly = false)
+        {
+            sqlStr = "DELETE tblValConsumable";
+            if (notInSystemOnly)
+                sqlStr += " WHERE ConsumableID NOT IN (SELECT DISTINCT(c.ID) FROM tblValEquipment ve " +
+                        " INNER JOIN tblConsumable c ON ve.FujiClass2ID = c.FujiClass2ID) ";
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.ExecuteNonQuery();
+            }
+        }
+
+        #endregion
+        
+        #region tblValComponent
+        /// <summary>
+        /// 初始化零件信息
+        /// </summary>
+        public void InitComponents()
+        {
+            sqlStr = "INSERT INTO tblValComponent(InSystem,EquipmentID,ComponentID,Qty,Usage,Seconds,IncludeContract) " +
+                    " (SELECT ve.InSystem,ve.EquipmentID,c.ID as ComponentID,1 as Qty,c.Usage * vp.HospitalFactor,e.CTUsedSeconds as Seconds,c.IncludeContract " +
+                    " FROM tblValEquipment ve " +
+                    " INNER JOIN tblEquipment e ON e.ID = ve.EquipmentID " +
+                    " INNER JOIN tblComponent c ON ve.FujiClass2ID = c.FujiClass2ID " +
+                    " INNER JOIN tblFujiClass2 f2 ON ve.FujiClass2ID = f2.ID " +
+                    " INNER JOIN tblValParameter vp ON 1=1 " +
+                    " WHERE 1=1 AND f2.IncludeRepair = 1 and c.IsActive = 1 " +
+                    " AND (ve.EquipmentID NOT IN (SELECT EquipmentID FROM tblValComponent) OR ve.InSystem = 0) " +
+                    " ) UNION ALL " +
+                    " (SELECT ve.InSystem,ve.EquipmentID,0,1,f2.Usage * vp.HospitalFactor,0,0 " +
+                    " FROM tblValEquipment ve " +
+                    " INNER JOIN tblFujiClass2 f2 ON ve.FujiClass2ID = f2.ID " +
+                    " INNER JOIN tblValParameter vp ON 1=1 " +
+                    " WHERE f2.IncludeRepair = 1 AND (ve.EquipmentID NOT IN (SELECT EquipmentID FROM tblValComponent) OR ve.InSystem = 0))";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.ExecuteNonQuery();
+            }
+        }
+        /// <summary>
+        /// 获取零件列表数据总数
+        /// </summary>
+        /// <param name="componentType">零件类型</param>
+        /// <param name="equipmentType">设备类别</param>
+        /// <param name="filterField">搜索字段</param>
+        /// <param name="filterText">搜索内容</param>
+        /// <returns>零件列表数据总数</returns>
+        public int GetComponentCount(int componentType, int equipmentType, string filterField, string filterText)
+        {
+            sqlStr = "SELECT COUNT(vc.ComponentID) " +
+                    " FROM tblValComponent vc " +
+                    " LEFT JOIN tblComponent c ON vc.ComponentID = c.ID " +
+                    " INNER JOIN tblValEquipment ve ON vc.EquipmentID = ve.EquipmentID " +
+                    " INNER JOIN tblFujiClass2 f2 ON ve.FujiClass2ID = f2.ID " +
+                    " WHERE f2.IncludeRepair = 1  AND ve.InSystem = vc.InSystem ";
+            if (componentType == ComponentInfo.ComponentTypes.CT)
+                sqlStr += " AND (c.IsActive = 1 AND c.IsIncluded =1 AND c.TypeID = " + componentType +") ";
+            else
+                sqlStr += " AND ((c.IsActive = 1 AND c.IsIncluded =1 AND c.TypeID <> " + ComponentInfo.ComponentTypes.CT +
+                          ") OR vc.ComponentID = 0) ";
+
+            if (equipmentType != 0)
+                sqlStr += " AND f2.EquipmentType = " + equipmentType;
+
+            if (!string.IsNullOrEmpty(filterText))
+            {
+                if ("c.Name".Equals(filterField) && ValComponentInfo.ComponentType.WholeMachine.Equals(filterText))
+                    sqlStr += " AND vc.ComponentID=0 ";
+                else
+                    sqlStr += GetFieldFilterClause(filterField);
+            }
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                if (!String.IsNullOrEmpty(filterText) && !("c.Name".Equals(filterField) && ValComponentInfo.ComponentType.WholeMachine.Equals(filterText)))
+                    AddFieldFilterParam(command, filterField, filterText);
+
+                return GetCount(command);
+            }
+        }
+        /// <summary>
+        /// 获取零件列表数据
+        /// </summary>
+        /// <param name="componentType">零件类型</param>
+        /// <param name="equipmentType">设备类别</param>
+        /// <param name="filterField">搜索字段</param>
+        /// <param name="filterText">搜索内容</param>
+        /// <param name="wholeMachineonly">是否只查询整机</param>
+        /// <param name="curRowNum">当页第一条数据的下标</param>
+        /// <param name="pageSize">数据条数</param>
+        /// <returns>零件列表数据</returns>
+        public List<ValComponentInfo> QueryComponentList(int componentType, int equipmentType, string filterField, string filterText, bool wholeMachineonly = false, int curRowNum = 0, int pageSize = 0)
+        {
+            sqlStr = "SELECT vc.*,ve.*, c.Name as ComponentName,f2.EquipmentType ,ISNULL(c.Usage,f2.Usage) as ComponentUsage,c.TypeID,c.StdPrice,c.SecondsPer,c.TotalSeconds " +
+                    " FROM tblValComponent vc " +
+                    " LEFT JOIN tblComponent c ON vc.ComponentID = c.ID " +
+                    " INNER JOIN tblValEquipment ve ON vc.EquipmentID = ve.EquipmentID " +
+                    " INNER JOIN tblFujiClass2 f2 ON ve.FujiClass2ID = f2.ID " +
+                    " WHERE ve.InSystem = vc.InSystem ";
+            if (componentType == ComponentInfo.ComponentTypes.CT)
+                sqlStr += " AND (c.IsActive = 1 AND c.IsIncluded =1 AND c.TypeID = " + componentType + ") ";
+            else if (componentType == 0)
+                sqlStr += " AND ((c.IsActive = 1 AND c.IsIncluded =1 AND c.TypeID <> " + ComponentInfo.ComponentTypes.CT +
+                          ") OR vc.ComponentID = 0) ";
+            else
+                sqlStr += " AND (c.IsActive = 1 AND c.IsIncluded =1) OR vc.ComponentID = 0";
+
+            if (equipmentType != 0)
+                sqlStr += " AND f2.EquipmentType = " + equipmentType +" ";
+
+            if (!string.IsNullOrEmpty(filterText))
+            {
+                if ("c.Name".Equals(filterField) && ValComponentInfo.ComponentType.WholeMachine.Equals(filterText))
+                    sqlStr += " AND vc.ComponentID=0 ";
+                else
+                    sqlStr += GetFieldFilterClause(filterField);
+            }
+            if (wholeMachineonly)
+                sqlStr += " AND vc.ComponentID = 0";
+
+            sqlStr += " ORDER BY vc.EquipmentID ASC ";
+            sqlStr = AppendLimitClause(sqlStr, curRowNum, pageSize);
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                if (!String.IsNullOrEmpty(filterText) && !("c.Name".Equals(filterField) && ValComponentInfo.ComponentType.WholeMachine.Equals(filterText)))
+                    AddFieldFilterParam(command, filterField, filterText);
+
+                return GetList<ValComponentInfo>(command);
+            }
+        }
+        /// <summary>
+        /// 修改零件信息
+        /// </summary>
+        /// <param name="dt">修改的零件信息</param>
+        public void UpdateComponents(DataTable dt)
+        {
+            sqlStr = "UPDATE tblValComponent SET Qty = @Qty,Usage = @Usage, Seconds = @Seconds, IncludeContract = @IncludeContract " +
+                    " WHERE ComponentID = @ComponentID AND EquipmentID = @EquipmentID AND InSystem = @InSystem ";
+
+            SqlParameter parameter = null;
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                parameter = command.Parameters.Add("@EquipmentID", SqlDbType.Int);
+                parameter.SourceColumn = "EquipmentID";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@ComponentID", SqlDbType.Int);
+                parameter.SourceColumn = "ComponentID";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@Qty", SqlDbType.Int);
+                parameter.SourceColumn = "Qty";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@Usage", SqlDbType.Int);
+                parameter.SourceColumn = "Usage";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@Seconds", SqlDbType.Decimal);
+                parameter.SourceColumn = "Seconds";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@IncludeContract", SqlDbType.Bit);
+                parameter.SourceColumn = "IncludeContract";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@InSystem", SqlDbType.Bit);
+                parameter.SourceColumn = "InSystem";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                using (SqlDataAdapter da = new SqlDataAdapter())
+                {
+                    da.InsertCommand = command;
+
+                    da.Update(dt);
+                }
+            }
+        }
+        /// <summary>
+        /// 更新零件使用量
+        /// </summary>
+        public void UpdateComponentUsage()
+        {
+            sqlStr = " UPDATE tblValComponent SET Usage =(CASE WHEN vc.ComponentID = 0 THEN f2.Usage * con.HospitalFactor ELSE  c.Usage * con.HospitalFactor END) " +
+                    " FROM tblValComponent vc " +
+                    " LEFT JOIN tblComponent c ON vc.ComponentID = c.ID " +
+                    " INNER JOIN tblValEquipment ve ON vc.EquipmentID = ve.EquipmentID " +
+                    " LEFT JOIN tblFujiClass2 f2 ON ve.FujiClass2ID = f2.ID " +
+                    " INNER JOIN tblValControl con ON 1=1";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.ExecuteNonQuery();
+            }
+        }
+        /// <summary>
+        /// 删除零件信息
+        /// </summary>
+        /// <param name="notInSystemOnly">是否仅删除不在系统中的零件</param>
+        public void DeleteComponents(bool notInSystemOnly = false)
+        {
+            sqlStr = "DELETE tblValComponent ";
+            if (notInSystemOnly)
+                sqlStr += " WHERE InSystem = 0 ";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.ExecuteNonQuery();
+            }
+        }
+        
+        #endregion
+        
+        #region tblValSpare
+        /// <summary>
+        /// 初始化备用机
+        /// </summary>
+        public void InitSpares()
+        {
+            sqlStr = "INSERT tblValSpare(FujiClass2ID,Price,QtyEnter,QtyEval)" +
+                    " SELECT Distinct(ve.FujiClass2ID),ISNULL(f2.SparePrice*0.01*f2.SpareRentPtg,0),0,0 " +
+                    " FROM tblValEquipment ve " + 
+                    " INNER JOIN tblEquipment e ON ve.EquipmentID = e.ID " +
+                    " INNER JOIN tblFujiClass2 f2 ON ve.FujiClass2ID = f2.ID " +
+                    " WHERE ve.FujiClass2ID NOT IN (SELECT FujiClass2ID FROM tblValSpare) ";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.ExecuteNonQuery();
+            }
+        }
+        /// <summary>
+        /// 获取备用机数据总数
+        /// </summary>
+        /// <returns>备用机列表数据总数</returns>
+        public int GetSpareCount()
+        {
+            sqlStr = "SELECT COUNT(vs.FujiClass2ID) " +
+                    " FROM tblValSpare vs " +
+                    " LEFT JOIN tblFujiClass2 f2 ON vs.FujiClass2ID = f2.ID " +
+                    " WHERE f2.IncludeSpare = 1 " ;
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                return GetCount(command);
+            }
+        }
+        /// <summary>
+        /// 获取备用机列表信息
+        /// </summary>
+        /// <param name="curRowNum">当页第一条数据下标</param>
+        /// <param name="pageSize">每页数据条数</param>
+        /// <returns>备用机列表信息</returns>
+        public List<ValSpareInfo> QuerySpareList(int curRowNum = 0, int pageSize = 0)
+        {
+            sqlStr = @"SELECT vs.*,f2.Name FujiClass2Name FROM tblValSpare vs 
+                      LEFT JOIN tblFujiClass2 f2 ON vs.FujiClass2ID = f2.ID 
+                      WHERE f2.IncludeSpare = 1 ";
+
+            sqlStr += " ORDER BY vs.FujiClass2ID ";
+            sqlStr = AppendLimitClause(sqlStr, curRowNum, pageSize);
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                return GetList<ValSpareInfo>(command);
+            }
+        }
+        /// <summary>
+        /// 批量修改备用机信息
+        /// </summary>
+        /// <param name="dt">备用机列表</param>
+        public void UpdateSpares(DataTable dt)
+        {
+            sqlStr = "UPDATE tblValSpare SET Price = @Price,QtyEnter = @QtyEnter,QtyEval = @QtyEval " +
+                    " WHERE FujiClass2ID = @FujiClass2ID ";
+
+            SqlParameter parameter = null;
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                parameter = command.Parameters.Add("@FujiClass2ID", SqlDbType.Int);
+                parameter.SourceColumn = "FujiClass2ID";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@Price", SqlDbType.Decimal);
+                parameter.SourceColumn = "Price";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@QtyEnter", SqlDbType.Int);
+                parameter.SourceColumn = "QtyEnter";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@QtyEval", SqlDbType.Int);
+                parameter.SourceColumn = "QtyEval";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                using (SqlDataAdapter da = new SqlDataAdapter())
+                {
+                    da.InsertCommand = command;
+
+                    da.Update(dt);
+                }
+            }
+        }
+        /// <summary>
+        /// 删除备用机信息
+        /// </summary>
+        /// <param name="notInSystemOnly">是否仅删除不在系统中的备用机</param>
+        public void DeleteSpares(bool notInSystemOnly = false)
+        {
+            sqlStr = "DELETE tblValSpare ";
+            if (notInSystemOnly)
+                sqlStr += " WHERE FujiClass2ID NOT IN (SELECT FujiClass2ID FROM tblValEquipment) ";
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.ExecuteNonQuery();
+            }
+        }
+
+        #endregion
+
+        #region 成本明细表
+        /// <summary>
+        /// 获取预测备用机成本
+        /// </summary>
+        /// <returns>备用机成本</returns>
+        public double GetSpareAmount()
+        {
+            sqlStr = "SELECT sum(Price*QtyEnter) " +
+                    " FROM tblValSpare ";
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                return GetDouble(command);
+            }
+        }
+
+        #region 维保费
+        /// <summary>
+        /// 获取维保费成本
+        /// </summary>
+        /// <returns>维保费成本</returns>
+        public List<ValEqptOutputInfo> GetValEqptContractAmount()
+        {
+            sqlStr = "SELECT 0 as EqupmentID,eo.Year,eo.Month,SUM(eo.ContractAmount) ContractAmount,0 Repair3partyCost" +
+                    " FROM tblValEqptOutput eo " +
+                    " GROUP BY eo.Year,eo.Month " +
+                    " ORDER BY eo.Year,eo.Month";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                return GetList<ValEqptOutputInfo>(command);
+            }
+        }
+
+        /// <summary>
+        /// 添加设备维保成本、外来服务费成本
+        /// </summary>
+        /// <param name="dt">设备信息</param>
+        public void InsertValEquipmentOutput(DataTable dt)
+        {
+            sqlStr = "INSERT INTO tblValEqptOutput(InSystem,EquipmentID,Year,Month,ContractAmount,Repair3partyCost) " +
+                    " VALUES(@InSystem,@EquipmentID,@Year,@Month,@ContractAmount,@Repair3partyCost)";
+
+            SqlParameter parameter = null;
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                parameter = command.Parameters.Add("@InSystem", SqlDbType.Bit);
+                parameter.SourceColumn = "InSystem";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@EquipmentID", SqlDbType.Int);
+                parameter.SourceColumn = "EquipmentID";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@Year", SqlDbType.Int);
+                parameter.SourceColumn = "Year";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@Month", SqlDbType.Int);
+                parameter.SourceColumn = "Month";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@ContractAmount", SqlDbType.Decimal);
+                parameter.SourceColumn = "ContractAmount";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@Repair3partyCost", SqlDbType.Decimal);
+                parameter.SourceColumn = "Repair3partyCost";
+                parameter.SourceVersion = DataRowVersion.Original;
+                using (SqlDataAdapter da = new SqlDataAdapter())
+                {
+                    da.InsertCommand = command;
+
+                    da.Update(dt);
+                }
+            }
+
+        }
+
+        /// <summary>
+        /// 清空设备成本表
+        /// </summary>
+        public void DeleteValEqptOutput()
+        {
+            sqlStr = "DELETE tblValEqptOutput";
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.ExecuteNonQuery();
+            } 
+        }
+
+        #endregion
+
+        #region 耗材
+        /// <summary>
+        /// 获取耗材成本
+        /// </summary>
+        /// <param name="consumableType">耗材类型</param>
+        /// <returns>耗材成本</returns>
+        public List<ValConsumableOutputInfo> GetValConsumableAmount(int consumableType)
+        {
+            sqlStr = " SELECT 0 as EquipmentID, 0 as ConsumableID, vco.Year, vco.Month, sum(Amount) as Amount " +
+                    " FROM tblValConsumableOutput vco " +
+                    " INNER JOIN tblEquipment e ON vco.EquipmentID = e.ID " +
+                    " INNER JOIN tblConsumable c ON vco.ConsumableID = c.ID ";
+            if (consumableType != -1)
+                sqlStr += " WHERE c.TypeID = " + consumableType;
+
+            sqlStr += " GROUP BY vco.Year,vco.Month " +
+                      " ORDER BY vco.Year,vco.Month";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                return GetList<ValConsumableOutputInfo>(command);
+            }
+        }
+        /// <summary>
+        /// 添加耗材成本信息
+        /// </summary>
+        /// <param name="dt">耗材信息</param>
+        public void InsertValConsumableOutput(DataTable dt)
+        {
+            sqlStr = "INSERT INTO tblValConsumableOutput(InSystem,EquipmentID,ConsumableID,Year,Month,Amount)" +
+                    " VALUES(@InSystem,@EquipmentID,@ConsumableID,@Year,@Month,@Amount)";
+
+            SqlParameter parameter = null;
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                parameter = command.Parameters.Add("@InSystem", SqlDbType.Bit);
+                parameter.SourceColumn = "InSystem";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@EquipmentID", SqlDbType.Int);
+                parameter.SourceColumn = "EquipmentID";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@ConsumableID", SqlDbType.Int);
+                parameter.SourceColumn = "ConsumableID";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@Year", SqlDbType.Int);
+                parameter.SourceColumn = "Year";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@Month", SqlDbType.Int);
+                parameter.SourceColumn = "Month";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@Amount", SqlDbType.Decimal);
+                parameter.SourceColumn = "Amount";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                using (SqlDataAdapter da = new SqlDataAdapter())
+                {
+                    da.InsertCommand = command;
+
+                    da.Update(dt);
+                }
+            }
+        }
+        /// <summary>
+        /// 清空耗材成本表
+        /// </summary>
+        public void DeleteValConsumableOutput()
+        {
+            sqlStr = "DELETE tblValConsumableOutput";
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.ExecuteNonQuery();
+            } 
+        }
+        #endregion
+
+        #region 零件
+        /// <summary>
+        /// 获取零件成本
+        /// </summary>
+        /// <param name="eqptType">设备类别</param>
+        /// <returns>零件成本</returns>
+        public List<ValComponentOutputInfo> GetValComponentAmout(int eqptType)
+        {
+            sqlStr = "SELECT 0 as EquipmentID, 0 as ComponentID, vc.Year,vc.Month,sum(Amount) as Amount" +
+                    " FROM tblValComponentOutput vc " +
+                    " INNER JOIN tblValEquipment ve ON vc.EquipmentID = ve.EquipmentID and ve.InSystem = vc.InSystem " +
+                    " INNER JOIN tblFujiClass2 f2 ON ve.FujiClass2ID = f2.ID ";
+            if (eqptType == FujiClass2Info.LKPEquipmentType.Import)
+                sqlStr += " WHERE f2.EquipmentType = " + FujiClass2Info.LKPEquipmentType.Import;
+            if (eqptType == 0)
+                sqlStr += " WHERE f2.EquipmentType <> " + FujiClass2Info.LKPEquipmentType.Import;
+
+            sqlStr += " GROUP BY vc.Year,vc.Month " +
+                      " ORDER BY vc.Year,vc.Month";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                return GetList<ValComponentOutputInfo>(command);
+            }
+        }
+
+        /// <summary>
+        /// 添加零件成本信息
+        /// </summary>
+        /// <param name="dt">零件信息</param>
+        public void InsertValComponentOutput(DataTable dt)
+        {
+            sqlStr = "INSERT INTO tblValComponentOutput(InSystem,EquipmentID,ComponentID,Year,Month,Amount) " +
+                    " VALUES(@InSystem,@EquipmentID,@ComponentID,@Year,@Month,@Amount)";
+
+            SqlParameter parameter = null;
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                parameter = command.Parameters.Add("@InSystem", SqlDbType.Bit);
+                parameter.SourceColumn = "InSystem";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@EquipmentID", SqlDbType.Int);
+                parameter.SourceColumn = "EquipmentID";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@ComponentID", SqlDbType.Int);
+                parameter.SourceColumn = "ComponentID";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@Year", SqlDbType.Int);
+                parameter.SourceColumn = "Year";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@Month", SqlDbType.Int);
+                parameter.SourceColumn = "Month";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@Amount", SqlDbType.Decimal);
+                parameter.SourceColumn = "Amount";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                using (SqlDataAdapter da = new SqlDataAdapter())
+                {
+                    da.InsertCommand = command;
+
+                    da.Update(dt);
+                }
+            }
+        }
+        /// <summary>
+        /// 删除零件成本表
+        /// </summary>
+        public void DeleteValComponentOutput()
+        {
+            sqlStr = "DELETE tblValComponentOutput";
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.ExecuteNonQuery();
+            }
+        }
+        #endregion
+
+        #region 外来服务费
+        /// <summary>
+        /// 获取设备外来服务费
+        /// </summary>
+        /// <param name="eqptType">设备类别</param>
+        /// <returns>设备外来服务费</returns>
+        public List<ValEqptOutputInfo> GetValEqptService(int eqptType)
+        {
+            sqlStr = "SELECT 0 as EqupmentID,eo.Year,eo.Month,0 as ContractAmount,sum(eo.Repair3partyCost) as Repair3partyCost" +
+                    " FROM tblValEqptOutput eo " +
+                    " INNER JOIN tblValEquipment ve ON eo.EquipmentID = ve.EquipmentID and eo.InSystem = ve.InSystem " +
+                    " INNER JOIN tblFujiClass2 f2 ON ve.FujiClass2ID = f2.ID ";
+            if(eqptType == FujiClass2Info.LKPEquipmentType.Import)
+                sqlStr += " WHERE f2.EquipmentType = " + FujiClass2Info.LKPEquipmentType.Import;
+            if (eqptType == 0)
+                sqlStr += " WHERE f2.EquipmentType <> " + FujiClass2Info.LKPEquipmentType.Import;
+
+            sqlStr += " GROUP BY eo.Year,eo.Month" +
+                      " ORDER BY eo.Year,eo.Month";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                return GetList<ValEqptOutputInfo>(command);
+            }
+        }
+        #endregion
+        #endregion
+
+        #region var
+        public DataTable GetFujiClass2RepairHours(DateTime startDate, DateTime endDate, int fujiClass2ID)
+        {
+            sqlStr = "SELECT DATEDIFF(MINUTE,r.RequestDate,r.CloseDate) *1.0 /60 " +
+                    " FROM tblRequest r " +
+                    " LEFT JOIN jctRequestEqpt jre ON r.ID = jre.RequestID " +
+                    " INNER JOIN tblEquipment e ON e.ID = jre.EquipmentID " +
+                    " WHERE r.RequestType = 1 AND r.CloseDate Between '@StartDate' AND '@EndDate' AND e.FujiClass2ID = " + fujiClass2ID;
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.Parameters.Add("@StartDate", SqlDbType.DateTime).Value = startDate;
+                command.Parameters.Add("@EndDate", SqlDbType.DateTime).Value = endDate;
+
+                return GetDataTable(command);
+            }
+        }
+        #endregion
+    }
+}

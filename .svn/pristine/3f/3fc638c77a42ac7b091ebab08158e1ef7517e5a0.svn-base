@@ -1,0 +1,99 @@
+﻿using BusinessObjects.Manager;
+using BusinessObjects.Util;
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks; 
+
+namespace BusinessObjects.Domain
+{
+    public class InvSpareInfo : EntityInfo
+    {
+        public FujiClass2Info FujiClass2 { get; set; }
+        public string SerialCode { get; set; }
+        public double Price { get; set; }
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
+        public DateTime AddDate { get; set; }
+        public DateTime UpdateDate { get; set; }
+
+        public string OID { get { return LookupManager.GetObjectOID(ObjectTypes.InvSpare, this.ID); } }
+
+        public InvSpareInfo() 
+        {
+            this.FujiClass2 = new FujiClass2Info();
+        }
+
+        public InvSpareInfo(DataRow dr)
+            : this()
+        {
+            this.ID = SQLUtil.ConvertInt(dr["ID"]);
+            this.FujiClass2.ID = SQLUtil.ConvertInt(dr["FujiClass2ID"]);
+            if (dr.Table.Columns.Contains("FujiClass2Name"))
+                this.FujiClass2.Name = SQLUtil.TrimNull(dr["FujiClass2Name"]);
+            this.SerialCode = SQLUtil.TrimNull(dr["SerialCode"]);
+            this.Price = SQLUtil.ConvertDouble(dr["Price"]);
+            this.StartDate = SQLUtil.ConvertDateTime(dr["StartDate"]);
+            this.EndDate = SQLUtil.ConvertDateTime(dr["EndDate"]);
+            this.AddDate = SQLUtil.ConvertDateTime(dr["AddDate"]);
+            this.UpdateDate = SQLUtil.ConvertDateTime(dr["UpdateDate"]);
+        }
+
+        public static class SpareStatus
+        {
+            public const int Unused = 1;
+            public const int Used = 2;
+            public const int Expired = 3;
+
+
+            /// <summary>
+            /// 根据合同状态编号获取查询该状态合同的sql
+            /// </summary>
+            /// <param name="statusId">合同状态编号</param>
+            /// <returns>查询该状态合同的sql</returns>
+            public static string GetSqlFilter(int statusId)
+            {
+                switch (statusId)
+                {
+                    case Expired:
+                        return " AND DATEDIFF(DAY,sp.EndDate, GETDATE()) > 0";
+                    case Used:
+                        return " AND DATEDIFF(DAY,sp.StartDate, GETDATE()) >= 0 AND DATEDIFF(DAY,sp.EndDate, GETDATE()) <= 0";
+                    case Unused:
+                        return " AND (DATEDIFF(DAY,sp.StartDate, GETDATE()) < 0 OR DATEDIFF(SECOND,sp.StartDate, GETDATE()) < 0 )";
+                    default:
+                        return "";
+                }
+            }
+            /// <summary>
+            /// 获取零件状态列表
+            /// </summary>
+            /// <returns>零件状态列表</returns>
+            public static List<KeyValueInfo> GetSpareStatus()
+            {
+                List<KeyValueInfo> statuses = new List<KeyValueInfo>();
+                statuses.Add(new KeyValueInfo() { ID = SpareStatus.Unused, Name = GetTypeDesc(SpareStatus.Unused) });
+                statuses.Add(new KeyValueInfo() { ID = SpareStatus.Used, Name = GetTypeDesc(SpareStatus.Used) });
+                statuses.Add(new KeyValueInfo() { ID = SpareStatus.Expired, Name = GetTypeDesc(SpareStatus.Expired) });
+                return statuses;
+            }
+
+            public static string GetTypeDesc(int id)
+            {
+                switch (id)
+                {
+                    case Unused:
+                        return "未使用";
+                    case Used:
+                        return "当前在用";
+                    case Expired:
+                        return "已经过期";
+                    default:
+                        return "";
+                }
+            }
+        }
+    }
+}

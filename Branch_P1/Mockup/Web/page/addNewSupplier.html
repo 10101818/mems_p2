@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+		<link rel="stylesheet" href="../css/bootstrap.min.css" />
+		<link rel="stylesheet" href="../style.css" />
+		<script src="../js/jquery-1.11.0.js"></script>
+	</head>
+	<body>
+		<div style="width: 800px; margin: auto;">
+			<div style="font-size:18px;text-align:left;width: 800px;margin: 10px auto;"><a class="linkFile" href="#" onclick="window.history.back()">
+					<<返回 </a> 
+			</div> 
+			<h3 align="center">添加新供应商</h3>
+
+			<table class="tblDetail" border="1" style="text-align: left;">
+				<tbody>
+					<tr>
+						<td class="tdDetailHead" width="20%"><span class="requiredItem"></span>名称:</td>
+						<td><input type="text" class="input" value="飞利浦医疗(上海)有限公司" /></td>
+					</tr>
+					<tr>
+						<td class="tdDetailHead"><span class="requiredItem"></span>类型:</td>
+						<td>
+							<select class="shortInput">
+								<option value="1">厂商</option>
+								<option value="2">代理商</option>
+								<option value="3">经销商</option>
+								<option value="4">其他供应商</option>
+							</select>
+						</td>
+					</tr>
+					<tr>
+						<td class="tdDetailHead" width="20%"><span class="requiredItem"></span>省份:</td>
+						<td><input type="text" class="input" value="上海" /></td>
+					</tr>
+					<tr>
+						<td class="tdDetailHead"><span class="requiredItem"></span>电话:</td>
+						<td><input type="text" class="input" value="021-0000001" /></td>
+					</tr>
+					<tr>
+						<td class="tdDetailHead"><span class="requiredItem"></span>地址:</td>
+						<td><input type="text" class="input" value="上海市静安区灵石路718号" /></td>
+					</tr>
+					<tr>
+						<td class="tdDetailHead"><span class="requiredItem"></span>联系人:</td>
+						<td><input class="input" value="张某某"></td>
+					</tr>
+					<tr>
+						<td class="tdDetailHead"><span class="requiredItem"></span>联系人电话:</td>
+						<td><input type="text" class="input" value="13586496548"></td>
+					</tr>
+					<tr>
+						<td class="tdDetailHead"><span class="requiredItem"></span>供应商经营状态:</td>
+						<td>
+							<input name="supplierStatus" type="radio" checked />启用
+							<input name="supplierStatus" type="radio" />停用
+						</td>
+					</tr>
+					<tr>
+						<td class="tdDetailHead"><span class="unrequiredItem"></span>医疗器械经营许可证:</td>
+						<td>
+							<!-- <img src="../img/upload .png" class="update"/> --> <a class="linkFile" href="#">XKZ-05621013</a> </td>
+					</tr>
+				</tbody>
+			</table>
+			<br />
+			<table class="tblDetail" style="text-align: center;">
+				<tbody>
+					<tr>
+						<td><button class="btn btn-info"><span>保存</span></button></td>
+						<td><button class="btn btn-info" onclick="window.history.back()"><span>返回</span></button></td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</body>
+	<script>
+		$(function() {
+			$(".requiredItem").html("*");
+			$(".unrequiredItem").html("&nbsp;&nbsp;");
+			$(".requiredItem").css("color", "red");
+		})
+	</script>
+</html>

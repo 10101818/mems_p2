@@ -1,0 +1,199 @@
+.mui-bar {
+	background: -webkit-linear-gradient(left, #3b4674, #2c5c85);
+	/* Safari 5.1 - 6.0 */
+	background: -o-linear-gradient(right, #3b4674, #2c5c85);
+	/* Opera 11.1 - 12.0 */
+	background: -moz-linear-gradient(right, #3b4674, #2c5c85);
+	/* Firefox 3.6 - 15 */
+	background: linear-gradient(to right, #3b4674, #2c5c85);
+	/* 标准的语法 */
+}
+
+.mui-title {
+	color: #FFFFFF;
+}
+
+.mui-bar .mui-title {
+	right: 50px;
+	left: 20px;
+}
+
+.mui-bar a {
+	color: #FFFFFF;
+}
+
+.mui-content {
+	background: #FFFFFF;
+}
+
+.top-login-info {
+	position: absolute;
+	top: 0;
+	right: 0;
+	line-height: 44px;
+}
+
+.top-login-info img {
+	float: left;
+	margin-top: 10px;
+}
+
+.top-login-name {
+	margin: 0;
+	padding: 0 5px 0 30px;
+	line-height: 44px;
+	color: #FFFFFF;
+	font-size: 14px;
+	font-weight: normal;
+	text-align: right;
+}
+
+.cover-img {
+	display: block;
+	margin: 50px auto 60px;
+	width: 75%;
+}
+
+.scan-wrapper {
+	position: relative;
+	width: 70px;
+	height: 70px;
+	margin: 0 auto 20px;
+}
+
+.scan-wrapper i {
+	position: absolute;
+	z-index: 0;
+	display: block;
+	border: 14px solid #ff9701;
+}
+
+.scan-wrapper i:nth-child(1) {
+	top: -10px;
+	left: -10px;
+	border-top-left-radius: 9px;
+}
+
+.scan-wrapper i:nth-child(2) {
+	top: -10px;
+	right: -10px;
+	border-top-right-radius: 9px;
+}
+
+.scan-wrapper i:nth-child(3) {
+	bottom: -10px;
+	left: -10px;
+	border-bottom-left-radius: 9px;
+}
+
+.scan-wrapper i:nth-child(4) {
+	bottom: -10px;
+	right: -10px;
+	border-bottom-right-radius: 9px;
+}
+
+.scan-cover {
+	position: relative;
+	z-index: 1;
+	margin-bottom: 30px;
+	background: #ffffff;
+	width: 100%;
+	height: 100%;
+}
+
+.scan-title {
+	margin: 0;
+	text-align: center;
+	color: #000000;
+}
+
+.bottom-menu {
+	position: fixed;
+	height: 90px;
+}
+
+.bottom-menu .mui-table-cell img {
+	height: 40px;
+}
+
+.bottom-menu .mui-table-cell p {
+	margin: 0;
+	color: #000000;
+}
+
+.equipment-wrapper {
+	margin: 5px;
+	margin-bottom: 15px;
+	padding: 8px;
+	box-shadow: 0 1px 6px #ccc;
+}
+
+.equipment-header {
+	height: 50px;
+	line-height: 50px;
+}
+
+.equipment-header img {
+	float: left;
+	margin-left: 5px;
+	margin-top: 13px;
+}
+
+.equipment-header .title {
+	margin-left: 15px;
+	line-height: 50px;
+	font-size: 17px;
+}
+
+.equipment-header .mui-icon {
+	float: right;
+	padding: 13px 5px 0 0;
+	font-size: 20px;
+}
+
+.equipment-info.mui-table-view:before,
+.equipment-info.mui-table-view:after,
+.equipment-info .mui-table-view-cell:after {
+	height: 0;
+}
+
+.equipment-info .mui-table-view-cell {
+	margin: 0;
+	padding: 0;
+}
+
+.equipment-info h4 {
+	margin: 0;
+	line-height: 25px;
+	font-size: 15px;
+}
+
+.equipment-info .mui-h5 {
+	color: #767676;
+}
+
+.equipment-info input {
+	margin: 0;
+	margin-bottom: 10px;
+	height: 30px;
+	line-height: 30px;
+	border: none;
+	border-bottom: 1px solid #878787;
+	border-radius: 0;
+}
+
+.equipment-button {
+	background: #FFFFFF;
+	margin-top: 5px;
+}
+
+.btn-submit {
+	margin-bottom: 20px;
+	width: 90px;
+    height: 38px;
+    color: #FFFFFF;
+    box-shadow: 0px 2px 6px #777;
+    background: #3d52b6;
+    border-radius: 19px;
+    border: none;
+}

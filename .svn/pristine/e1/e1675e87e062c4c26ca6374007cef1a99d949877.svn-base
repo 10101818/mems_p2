@@ -1,0 +1,923 @@
+﻿using BusinessObjects.DataAccess;
+using BusinessObjects.Domain;
+using BusinessObjects.Manager;
+using BusinessObjects.Util;
+using MedicalEquipmentHostingSystem.App_Start;
+using MedicalEquipmentHostingSystem.Models;
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Data.OleDb;
+using System.Data.SqlClient;
+using System.IO;
+using System.Linq;
+using System.Web;
+using System.Web.Helpers;
+using System.Web.Mvc;
+
+
+namespace MedicalEquipmentHostingSystem.Controllers
+{
+    public class ValuationController : BaseController
+    {
+        private readonly ValuationDao valuationDao = new ValuationDao();
+        private readonly ValuationManager valuationManager = new ValuationManager();
+
+        /// <summary>
+        /// 估价参数页面
+        /// </summary>
+        /// <returns>估价参数页面</returns>
+        public ActionResult Parameter()
+        {
+            if (CheckSession() == false)
+            {
+                Response.Redirect(Url.Action(ConstDefinition.HOME_ACTION, ConstDefinition.HOME_CONTROLLER), true);
+                return null;
+            }
+            return View();
+        }
+        /// <summary>
+        /// 运营实绩页面
+        /// </summary>
+        /// <returns>运营实绩页面</returns>
+        public ActionResult Actual()
+        {
+            if (CheckSession() == false)
+            {
+                Response.Redirect(Url.Action(ConstDefinition.HOME_ACTION, ConstDefinition.HOME_CONTROLLER), true);
+                return null;
+            }
+            return View();
+        }
+        /// <summary>
+        /// 估价执行页面
+        /// </summary>
+        /// <returns>估价执行页面</returns>
+        public ActionResult Valuation()
+        {
+            if (CheckSession() == false)
+            {
+                Response.Redirect(Url.Action(ConstDefinition.HOME_ACTION, ConstDefinition.HOME_CONTROLLER), true);
+                return null;
+            }
+            return View();
+        }
+
+        #region tblParameter
+        /// <summary>
+        /// 获取估价参数信息
+        /// </summary>
+        /// <returns>估价参数信息</returns>
+        public JsonResult GetParameter()
+        {
+            if (CheckSession() == false)
+            {
+                return Json(ResultModelBase.CreateTimeoutModel(), JsonRequestBehavior.AllowGet);
+            }
+
+            ResultModel<ValParameterInfo> result = new ResultModel<ValParameterInfo>();
+
+            try
+            {
+                result.Data = this.valuationDao.GetParameter();
+            }
+            catch (Exception ex)
+            {
+                NLog.LogManager.GetCurrentClassLogger().Error(ex, ex.Message);
+                result.SetFailed(ResultCodes.SystemError, ControlManager.GetSettingInfo().ErrorMessage);
+            }
+            return JsonResult(result);
+        }
+        /// <summary>
+        /// 保存估价参数信息
+        /// </summary>
+        /// <param name="info">估价参数信息</param>
+        /// <returns>保存结果</returns>
+        [HttpPost]
+        public JsonResult SaveParameter(ValParameterInfo info)
+        {
+            if (CheckSession() == false)
+            {
+                return Json(ResultModelBase.CreateTimeoutModel(), JsonRequestBehavior.AllowGet);
+            }
+
+            ResultModelBase result = new ResultModelBase();
+
+            try
+            {
+                this.valuationManager.UpdateParameter(info);
+            }
+            catch (Exception ex)
+            {
+                NLog.LogManager.GetCurrentClassLogger().Error(ex, ex.Message);
+                result.SetFailed(ResultCodes.SystemError, ControlManager.GetSettingInfo().ErrorMessage);
+            }
+            return JsonResult(result);
+        }
+        #endregion
+
+        #region tblValControl
+        /// <summary>
+        /// 获取估价前提条件信息
+        /// </summary>
+        /// <returns>估价前提条件信息</returns>
+        public JsonResult GetValControl()
+        {
+            if (CheckSession() == false)
+            {
+                return Json(ResultModelBase.CreateTimeoutModel(), JsonRequestBehavior.AllowGet);
+            }
+
+            ResultModel<ValControlInfo> result = new ResultModel<ValControlInfo>();
+
+            try
+            {
+                result.Data = this.valuationDao.GetControl();
+            }
+            catch (Exception ex)
+            {
+                NLog.LogManager.GetCurrentClassLogger().Error(ex, ex.Message);
+                result.SetFailed(ResultCodes.SystemError, ControlManager.GetSettingInfo().ErrorMessage);
+            }
+            return JsonResult(result);
+        }
+        /// <summary>
+        /// 获取预测工程师数量
+        /// </summary>
+        /// <returns>预测工程师数量</returns>
+        public JsonResult GetComputeEngineer()
+        {
+            if (CheckSession() == false)
+            {
+                return Json(ResultModelBase.CreateTimeoutModel(), JsonRequestBehavior.AllowGet);
+            }
+
+            ResultModel<int> result = new ResultModel<int>();
+
+            try
+            {
+                this.valuationManager.UpdateEquipmentHours();
+
+                double totalHours = this.valuationDao.GetTotalHours();
+                ValParameterInfo paraInfo = this.valuationDao.GetParameter();
+
+                result.Data = paraInfo.GetCalculatedEngineers(totalHours);
+            }
+            catch (Exception ex)
+            {
+                NLog.LogManager.GetCurrentClassLogger().Error(ex, ex.Message);
+                result.SetFailed(ResultCodes.SystemError, ControlManager.GetSettingInfo().ErrorMessage);
+            }
+            return JsonResult(result);
+        }
+        /// <summary>
+        /// 保存估价前提条件信息
+        /// </summary>
+        /// <param name="info">估价前提条件信息</param>
+        /// <returns>保存结果</returns>
+        [HttpPost]
+        public JsonResult SaveValControl(ValControlInfo info)
+        {
+            if (CheckSession() == false)
+            {
+                return Json(ResultModelBase.CreateTimeoutModel(), JsonRequestBehavior.AllowGet);
+            }
+
+            ResultModelBase result = new ResultModelBase();
+
+            try
+            {
+                info.User = GetLoginUser();
+                this.valuationManager.SaveValControl(info);
+            }
+            catch (Exception ex)
+            {
+                NLog.LogManager.GetCurrentClassLogger().Error(ex, ex.Message);
+                result.SetFailed(ResultCodes.SystemError, ControlManager.GetSettingInfo().ErrorMessage);
+            }
+            return JsonResult(result);
+        }
+
+        #endregion
+
+        #region Session
+
+        /// <summary>
+        ///  存入缓存
+        /// </summary>
+        /// <param name="infos"></param>
+        /// <returns></returns>
+        public JsonResult SaveValuation(ValuationType type)
+        { 
+            if (CheckSession() == false)
+            {
+                return Json(ResultModelBase.CreateTimeoutModel(), JsonRequestBehavior.AllowGet);
+            }
+
+            ResultModelBase result = new ResultModelBase();
+
+            try
+            { 
+                switch (type)
+                {
+                    case ValuationType.Equipment:
+                        var equipments = GetValSession<ValEquipmentInfo>();
+                        if(equipments!=null )
+                            this.valuationManager.SaveValEquipments(equipments.Values.ToList());
+                        break;
+                    case ValuationType.Spare:
+                        var spares = GetValSession<ValSpareInfo>();
+                        if(spares!=null )
+                            this.valuationManager.SaveValSpares(spares.Values.ToList());
+                        break;
+                    case ValuationType.Consumable:
+                        var consumables = GetValSession<ValConsumableInfo>();
+                        if(consumables!=null )
+                            this.valuationManager.SaveValConsumables(consumables.Values.ToList());
+                        break;
+                    case ValuationType.Component: 
+                    case ValuationType.CTTube:
+                        var components = GetValSession<ValComponentInfo>();
+                        if(components!=null )
+                            this.valuationManager.SaveValComponents(components.Values.ToList());
+                        break;
+                }
+                ClearValSession();
+            }
+            catch (Exception ex)
+            {
+                NLog.LogManager.GetCurrentClassLogger().Error(ex, ex.Message);
+                result.SetFailed(ResultCodes.SystemError, ControlManager.GetSettingInfo().ErrorMessage);
+            }
+            return JsonResult(result);
+        }
+
+        public JsonResult ClearValuationSession()
+        {
+            if (CheckSession() == false)
+            {
+                return Json(ResultModelBase.CreateTimeoutModel(), JsonRequestBehavior.AllowGet);
+            }
+
+            ResultModelBase result = new ResultModelBase();
+
+            try
+            {
+                ClearValSession();
+            }
+            catch (Exception ex)
+            {
+                NLog.LogManager.GetCurrentClassLogger().Error(ex, ex.Message);
+                result.SetFailed(ResultCodes.SystemError, ControlManager.GetSettingInfo().ErrorMessage);
+            }
+            return JsonResult(result);
+        }
+        #endregion
+
+        #region tblValEquipment
+        /// <summary>
+        /// 初始化设备信息
+        /// </summary>
+        /// <returns>初始化结果</returns>
+        public JsonResult InitValEquipments()
+        {
+            if (CheckSession() == false)
+            {
+                return Json(ResultModelBase.CreateTimeoutModel(), JsonRequestBehavior.AllowGet);
+            }
+
+            ResultModelBase result = new ResultModelBase();
+            try
+            {
+                this.valuationDao.DeleteEquipments();
+                this.valuationDao.InitEquipments();
+            }
+            catch (Exception ex)
+            {
+                NLog.LogManager.GetCurrentClassLogger().Error(ex, ex.Message);
+                result.SetFailed(ResultCodes.SystemError, ControlManager.GetSettingInfo().ErrorMessage);
+            }
+            return JsonResult(result);
+        }
+
+        /// <summary>
+        /// 获取设备列表信息
+        /// </summary>
+        /// <param name="infos">已更改集合</param>
+        /// <param name="equipmentType">设备类别</param>
+        /// <param name="amountType">金额</param>
+        /// <param name="equipmentName">设备名称</param>
+        /// <param name="serialCode">设备序列号</param>
+        /// <param name="departmentName">科室名称</param>
+        /// <param name="class1ID">富士I类id</param>
+        /// <param name="class2ID">腐蚀II类id</param>
+        /// <param name="filterField">搜索字段</param>
+        /// <param name="filterText">搜索内容</param>
+        /// <param name="sortField">排序字段</param>
+        /// <param name="sortDirection">排序方式</param>
+        /// <param name="currentPage">页码</param>
+        /// <param name="pageSize">每页信息条数</param>
+        /// <returns>设备信息</returns>
+        [HttpPost]
+        public JsonResult QueryValEquipments(List<ValEquipmentInfo> infos, int equipmentType, int amountType, string equipmentName, string serialCode, string departmentName, int class1ID, int class2ID, string filterField, string filterText, string sortField, bool sortDirection, int currentPage, int pageSize = ConstDefinition.PAGE_SIZE)
+        {
+            if (CheckSession() == false)
+            {
+                return Json(ResultModelBase.CreateTimeoutModel(), JsonRequestBehavior.AllowGet);
+            }
+
+            ResultModel<List<ValEquipmentInfo>> result = new ResultModel<List<ValEquipmentInfo>>();
+
+            try
+            {
+                BaseDao.ProcessFieldFilterValue(filterField, ref filterText);
+                if (infos != null && infos.Count != 0)
+                { 
+                    SaveValSession(infos.ToDictionary(info => info.SessionKey));
+                }				
+				List<ValEquipmentInfo> datas = new List<ValEquipmentInfo>();                
+				if (currentPage > 0)
+                {
+                    int totalRecord = this.valuationDao.GetEquipmentCount(equipmentType, amountType, equipmentName, serialCode, departmentName, class1ID, class2ID, filterField, filterText);
+
+                    result.SetTotalPages(totalRecord, pageSize);
+                    if (totalRecord > 0)
+                        datas = this.valuationDao.QueryEquipmentList(equipmentType, amountType, equipmentName, serialCode, departmentName, class1ID, class2ID, filterField, filterText, sortField, sortDirection, result.GetCurRowNum(currentPage, pageSize), pageSize);
+                }
+                else
+                    datas = this.valuationDao.QueryEquipmentList(equipmentType, amountType, equipmentName, serialCode, departmentName, class1ID, class2ID, filterField, filterText, sortField, sortDirection);
+
+                Dictionary<string, ValEquipmentInfo> valSessions = GetValSession<ValEquipmentInfo>();
+                if (valSessions != null)
+                {
+                    for (int i = 0; i < datas.Count; i++)
+                    {
+                        string key = datas[i].SessionKey;
+                        if (valSessions.ContainsKey(key))
+                            datas[i] = valSessions[key];
+                    }
+                }
+                result.Data = datas;
+            }
+            catch (Exception ex)
+            {
+                NLog.LogManager.GetCurrentClassLogger().Error(ex, ex.Message);
+                result.SetFailed(ResultCodes.SystemError, ControlManager.GetSettingInfo().ErrorMessage);
+            }
+            return JsonResult(result);
+        }
+
+        public JsonResult UpdateValEqptHours()
+        {
+            if (CheckSession() == false)
+            {
+                return Json(ResultModelBase.CreateTimeoutModel(), JsonRequestBehavior.AllowGet);
+            }
+
+            ResultModelBase result = new ResultModelBase();
+
+            try
+            {
+                List<ValEquipmentInfo> datas = this.valuationDao.QueryEquipmentList(-1, -1, "", "", "", 0, 0, "", "", "ve.EquipmentID", true);
+                this.valuationManager.SaveValEquipments(datas);
+            }
+            catch (Exception ex)
+            {
+                NLog.LogManager.GetCurrentClassLogger().Error(ex, ex.Message);
+                result.SetFailed(ResultCodes.SystemError, ControlManager.GetSettingInfo().ErrorMessage);
+            }
+            return JsonResult(result);
+        }
+
+        /// <summary>
+        /// 导入设备
+        /// </summary>
+        /// <param name="base64String">设备信息</param>
+        /// <returns>导入结果</returns>
+        [HttpPost]
+        public JsonResult ImportValEquipment(string base64String)
+        {
+            if (CheckSession() == false)
+            {
+                return Json(ResultModelBase.CreateTimeoutModel(), JsonRequestBehavior.AllowGet);
+            }
+
+            ResultModelBase result = new ResultModelBase();
+            try
+            {
+                base64String = ParseBase64String(base64String);
+                if(string.IsNullOrEmpty(base64String))
+                {
+                    result.SetFailed(ResultCodes.ParameterError, "上传文件为空");
+                }
+                else
+                {
+                    byte[] excelFile = Convert.FromBase64String(base64String);
+                    string message = null;
+                    List<ValEquipmentInfo> importEquipments = null;
+                    List<ValEquipmentInfo> updateEquipments = null;
+                    int parseResult = this.valuationManager.ParseImportFile(excelFile, out message, out importEquipments, out updateEquipments);
+                    if(parseResult == 1)
+                        result.SetFailed(ResultCodes.BusinessError, message);
+                    else
+                        this.valuationManager.SaveValEquipments(updateEquipments, importEquipments);
+                }
+            }
+            catch (Exception ex)
+            {
+                NLog.LogManager.GetCurrentClassLogger().Error(ex, ex.Message);
+                result.SetFailed(ResultCodes.SystemError, ControlManager.GetSettingInfo().ErrorMessage);
+            }
+
+            return Json(result, JsonRequestBehavior.AllowGet);
+        }
+
+        /// <summary>
+        /// 导出设备清单
+        /// </summary>
+        /// <param name="equipmentType">设备类别</param>
+        /// <param name="amountType">金额</param>
+        /// <param name="equipmentName">设备名称</param>
+        /// <param name="serialCode">设备序列号</param>
+        /// <param name="departmentName">科室名称</param>
+        /// <param name="class1ID">富士I类id</param>
+        /// <param name="class2ID">腐蚀II类id</param>
+        /// <param name="filterField">搜索字段</param>
+        /// <param name="filterText">搜索内容</param>
+        /// <param name="sortField">排序字段</param>
+        /// <param name="sortDirection">排序方式</param>
+        /// <returns>设备清单</returns>
+        public ActionResult ExportValEquipments(int equipmentType, int amountType, string equipmentName, string serialCode, string departmentName, int class1ID, int class2ID, string filterField, string filterText, string sortField, bool sortDirection)
+        {
+            if (CheckSession() == false)
+            {
+                return Json(ResultModelBase.CreateTimeoutModel(), JsonRequestBehavior.AllowGet);
+            }
+
+            ResultModel<List<ValEquipmentInfo>> result = new ResultModel<List<ValEquipmentInfo>>();
+            try{
+                List<ValEquipmentInfo> infos = this.valuationDao.QueryEquipmentList(equipmentType, amountType, equipmentName, serialCode, departmentName, class1ID, class2ID, filterField, filterText, sortField, sortDirection);
+
+                DataTable dt = new DataTable();
+                dt.Columns.Add("是否在系统中");
+                dt.Columns.Add("系统编号");
+                dt.Columns.Add("资产编号");
+                dt.Columns.Add("名称");
+                dt.Columns.Add("设备序列号");
+                dt.Columns.Add("厂商");
+                dt.Columns.Add("科室");
+                dt.Columns.Add("金额");
+                dt.Columns.Add("设备类型");
+                dt.Columns.Add("富士I类");
+                dt.Columns.Add("富士II类");
+                dt.Columns.Add("目前维保种类");
+                dt.Columns.Add("维保到期日");
+                dt.Columns.Add("下期维保种类");
+
+                foreach(ValEquipmentInfo info in infos)
+                {
+                    dt.Rows.Add(info.InSystem ? 'Y' : 'N',info.Equipment.OID, info.Equipment.AssetCode, info.Equipment.Name, info.Equipment.SerialCode, info.Equipment.Manufacturer.Name, info.Equipment.Department.Name, info.Equipment.PurchaseAmount, info.Equipment.FujiClass2.EquipmentType.Name, info.Equipment.FujiClass2.FujiClass1.Name, info.Equipment.FujiClass2.Name, info.CurrentScope.Name, info.EndDate == DateTime.MinValue ? "" : info.EndDate.ToString("yyyy-MM-dd"), info.NextScope.Name);
+                }
+
+                MemoryStream ms = ExportUtil.ToExcel(dt);
+                Response.AddHeader("Set-Cookie", "fileDownload=true; path=/");
+                return File(ms, "application/excel", "估价执行:设备清单.xlsx");
+            }
+            catch (Exception ex)
+            {
+                NLog.LogManager.GetCurrentClassLogger().Error(ex, ex.Message);
+                result.SetFailed(ResultCodes.SystemError, ControlManager.GetSettingInfo().ErrorMessage);
+            }
+
+            return Json(result, JsonRequestBehavior.AllowGet);
+        }
+        #endregion
+
+        #region tblValComponent
+        /// <summary>
+        /// 初始化零件
+        /// </summary>
+        /// <param name="componentType">零件类型</param>
+        /// <returns>初始化结果</returns>
+        public JsonResult InitValComponents()
+        {
+            if (CheckSession() == false)
+            {
+                return Json(ResultModelBase.CreateTimeoutModel(), JsonRequestBehavior.AllowGet);
+            }
+
+            ResultModelBase result = new ResultModelBase();
+            try
+            {
+                this.valuationDao.DeleteComponents(false);
+                this.valuationDao.InitComponents();
+            }
+            catch (Exception ex)
+            {
+                NLog.LogManager.GetCurrentClassLogger().Error(ex, ex.Message);
+                result.SetFailed(ResultCodes.SystemError, ControlManager.GetSettingInfo().ErrorMessage);
+            }
+            return JsonResult(result);
+        }
+
+        /// <summary>
+        /// 查询执行零件、CT球管
+        /// </summary>
+        /// <param name="infos">已更改集合</param>
+        /// <param name="componentType">零件类型</param>
+        /// <param name="equipmentType">设备类别</param>
+        /// <param name="filterField">搜索字段</param>
+        /// <param name="filterText">搜索内容</param>
+        /// <param name="currentPage">页码</param>
+        /// <param name="pageSize">每页信息条数</param>
+        /// <returns>零件列表</returns>
+        [HttpPost]
+        public JsonResult QueryValComponents(List<ValComponentInfo> infos, int componentType, int equipmentType, string filterField, string filterText, int currentPage = 0, int pageSize = ConstDefinition.PAGE_SIZE)
+        {
+            if (CheckSession() == false)
+            {
+                return Json(ResultModelBase.CreateTimeoutModel(), JsonRequestBehavior.AllowGet);
+            }
+
+            ResultModel<List<ValComponentInfo>> result = new ResultModel<List<ValComponentInfo>>();
+
+            try
+            {
+                if (infos != null && infos.Count != 0)
+                { 
+                    SaveValSession(infos.ToDictionary(info => info.SessionKey));
+                }
+
+                int currentRow = 0;
+
+                if (currentPage > 0)
+                {
+                    int totalRecord = this.valuationDao.GetComponentCount(componentType, equipmentType, filterField, filterText); 
+                    result.SetTotalPages(totalRecord, pageSize);
+                    if (totalRecord > 0)
+                    {
+                        result.SetTotalPages(totalRecord, pageSize);
+                        currentRow = result.GetCurRowNum(currentPage, pageSize);
+                    }
+                }
+                List <ValComponentInfo> datas = this.valuationDao.QueryComponentList(componentType, equipmentType, filterField, filterText, false, currentRow, pageSize);
+                Dictionary<string, ValComponentInfo> valSessions = GetValSession<ValComponentInfo>();
+                if(valSessions !=null){
+                    for (int i = 0; i < datas.Count; i++)
+                    {
+                        string key = datas[i].SessionKey;
+                        if (valSessions.ContainsKey(key))
+                            datas[i] = valSessions[key];
+                    }
+                }
+                result.Data = datas;
+            }
+            catch (Exception ex)
+            {
+                NLog.LogManager.GetCurrentClassLogger().Error(ex, ex.Message);
+                result.SetFailed(ResultCodes.SystemError, ControlManager.GetSettingInfo().ErrorMessage);
+            }
+            return JsonResult(result);
+        }
+
+        public JsonResult UpdateComponentUsage()
+        {
+            if (CheckSession() == false)
+            {
+                return Json(ResultModelBase.CreateTimeoutModel(), JsonRequestBehavior.AllowGet);
+            }
+
+            ResultModelBase result = new ResultModelBase();
+
+            try
+            {
+                this.valuationDao.UpdateComponentUsage();
+            }
+            catch (Exception ex)
+            {
+                NLog.LogManager.GetCurrentClassLogger().Error(ex, ex.Message);
+                result.SetFailed(ResultCodes.SystemError, ControlManager.GetSettingInfo().ErrorMessage);
+            }
+            return JsonResult(result);
+        }
+        #endregion
+        
+        #region tblValConsumable
+        /// <summary>
+        /// 初始化耗材列表
+        /// </summary>
+        /// <returns>初始化结果</returns>
+        public JsonResult InitValConsumables()
+        {
+            if (CheckSession() == false)
+            {
+                return Json(ResultModelBase.CreateTimeoutModel(), JsonRequestBehavior.AllowGet);
+            }
+
+            ResultModelBase result = new ResultModelBase();
+
+            try
+            {
+                this.valuationDao.DeleteConsumables();
+                this.valuationDao.InitConsumables();
+            }
+            catch (Exception ex)
+            {
+                NLog.LogManager.GetCurrentClassLogger().Error(ex, ex.Message);
+                result.SetFailed(ResultCodes.SystemError, ControlManager.GetSettingInfo().ErrorMessage);
+            }
+            return JsonResult(result);
+        }
+
+        /// <summary>
+        /// 获取耗材列表信息
+        /// </summary>
+        /// <param name="infos">已更改集合</param>
+        /// <param name="class2ID">富士II类id</param>
+        /// <param name="filterField">搜索字段</param>
+        /// <param name="filterText">搜索内容</param>
+        /// <param name="currentPage">页码</param>
+        /// <param name="pageSize">每页信息条数</param>
+        /// <returns>耗材列表信息</returns>
+        [HttpPost]
+        public JsonResult QueryValConsumables(List<ValConsumableInfo> infos, int class2ID, string filterField, string filterText, int currentPage, int pageSize = ConstDefinition.PAGE_SIZE)
+        {
+            if (CheckSession() == false)
+            {
+                return Json(ResultModelBase.CreateTimeoutModel(), JsonRequestBehavior.AllowGet);
+            }
+
+            ResultModel<List<ValConsumableInfo>> result = new ResultModel<List<ValConsumableInfo>>();
+
+            try
+            {
+
+                if (infos != null && infos.Count != 0)
+                { 
+                    SaveValSession(infos.ToDictionary(info => info.SessionKey));
+                }
+				List<ValConsumableInfo> datas = new List<ValConsumableInfo>();                
+                
+                if (currentPage > 0)
+                {
+                    int totalRecord = this.valuationDao.GetConsumableCount(class2ID, filterField, filterText);
+
+                    result.SetTotalPages(totalRecord, pageSize);
+                    if (totalRecord > 0)
+                        datas = this.valuationDao.QueryConsumableList(class2ID, filterField, filterText, result.GetCurRowNum(currentPage, pageSize), pageSize);
+                }
+                else
+                { 
+                    datas = this.valuationDao.QueryConsumableList(class2ID, filterField, filterText);
+                }
+
+                Dictionary<string, ValConsumableInfo> valSessions = GetValSession<ValConsumableInfo>();
+                if (valSessions != null)
+                {
+                    for (int i = 0; i < datas.Count; i++)
+                    {
+                        string key = datas[i].SessionKey;
+                        if (valSessions.ContainsKey(key))
+                            datas[i] = valSessions[key];
+            }
+                }
+
+                result.Data = datas;
+
+            }
+            catch (Exception ex)
+            {
+                NLog.LogManager.GetCurrentClassLogger().Error(ex, ex.Message);
+                result.SetFailed(ResultCodes.SystemError, ControlManager.GetSettingInfo().ErrorMessage);
+            }
+            return JsonResult(result);
+        }
+
+        #endregion
+
+        #region tblValSpare
+        /// <summary>
+        /// 初始化备用机
+        /// </summary>
+        /// <returns>初始化结果</returns>
+        public JsonResult InitValSpares()
+        {
+            if (CheckSession() == false)
+            {
+                return Json(ResultModelBase.CreateTimeoutModel(), JsonRequestBehavior.AllowGet);
+            }
+
+            ResultModelBase result = new ResultModelBase();
+
+            try
+            {
+                this.valuationDao.DeleteSpares();
+                this.valuationDao.InitSpares();
+            }
+            catch (Exception ex)
+            {
+                NLog.LogManager.GetCurrentClassLogger().Error(ex, ex.Message);
+                result.SetFailed(ResultCodes.SystemError, ControlManager.GetSettingInfo().ErrorMessage);
+            }
+            return JsonResult(result);
+        }
+        /// <summary>
+        /// 获取备用机列表
+        /// </summary>
+        /// <param name="infos">已更改集合</param>
+        /// <returns>备用机列表</returns>
+        [HttpPost]
+        public JsonResult QueryValSpares(List<ValSpareInfo> infos)
+        {
+            if (CheckSession() == false)
+            {
+                return Json(ResultModelBase.CreateTimeoutModel(), JsonRequestBehavior.AllowGet);
+            }
+
+            ResultModel<List<ValSpareInfo>> result = new ResultModel<List<ValSpareInfo>>();
+
+            try
+            { 
+				if (infos != null && infos.Count != 0)
+                { 
+                    SaveValSession(infos.ToDictionary(info => info.SessionKey));
+                }
+				List<ValSpareInfo> datas = new List<ValSpareInfo>();
+                datas = this.valuationDao.QuerySpareList();
+
+                Dictionary<string, ValSpareInfo> valSessions = GetValSession<ValSpareInfo>();
+                if (valSessions != null)
+                {
+                    for (int i = 0; i < datas.Count; i++)
+                    {
+                        string key = datas[i].SessionKey;
+                        if (valSessions.ContainsKey(key))
+                            datas[i] = valSessions[key];            
+					}
+                }
+
+                result.Data = datas;
+            }
+            catch (Exception ex)
+            {
+                NLog.LogManager.GetCurrentClassLogger().Error(ex, ex.Message);
+                result.SetFailed(ResultCodes.SystemError, ControlManager.GetSettingInfo().ErrorMessage);
+            }
+            return JsonResult(result);
+        }
+        
+        #endregion
+
+        #region 成本明细表
+        [HttpPost]
+        public ActionResult RunVal()
+        {
+            if (CheckSession() == false)
+            {
+                return Json(ResultModelBase.CreateTimeoutModel(), JsonRequestBehavior.AllowGet);
+            }
+
+            ResultModelBase result = new ResultModelBase();
+            try
+            {
+                this.valuationManager.RunVal();
+            }
+            catch (Exception ex)
+            {
+                NLog.LogManager.GetCurrentClassLogger().Error(ex, ex.Message);
+                result.SetFailed(ResultCodes.SystemError, ControlManager.GetSettingInfo().ErrorMessage);
+            }
+            return JsonResult(result);
+        }
+
+        public ActionResult GetDateList()
+        {
+            if (CheckSession() == false)
+            {
+                return Json(ResultModelBase.CreateTimeoutModel(), JsonRequestBehavior.AllowGet);
+            }
+            ResultModel<Dictionary<string, List<KeyValueInfo>>> result = new ResultModel<Dictionary<string, List<KeyValueInfo>>>();
+
+            try
+            {
+                ValControlInfo control = this.valuationDao.GetControl();
+                //List<KeyValueInfo> actualList = MonthDesc.GetValActualDateDescList(control.ContractStartDate, control.EndDate);
+                List<KeyValueInfo> forecastList = MonthDesc.GetValForecastDateDescList(control.ContractStartDate, control.Years);
+
+                Dictionary<string, List<KeyValueInfo>> resultData = new Dictionary<string, List<KeyValueInfo>>();
+                //resultData.Add("Actual", actualList);
+                resultData.Add("Forecast", forecastList);
+
+                result.Data = resultData;
+            }
+            catch (Exception ex)
+            {
+                NLog.LogManager.GetCurrentClassLogger().Error(ex, ex.Message);
+                result.SetFailed(ResultCodes.SystemError, ControlManager.GetSettingInfo().ErrorMessage);
+            }
+            return JsonResult(result);
+        }
+
+        public ActionResult GetSpareAmount()
+        {
+            if (CheckSession() == false)
+            {
+                return Json(ResultModelBase.CreateTimeoutModel(), JsonRequestBehavior.AllowGet);
+            }
+            ResultModel<double> result = new ResultModel<double>();
+
+            try
+            {
+                result.Data = this.valuationDao.GetSpareAmount();
+            }
+            catch (Exception ex)
+            {
+                NLog.LogManager.GetCurrentClassLogger().Error(ex, ex.Message);
+                result.SetFailed(ResultCodes.SystemError, ControlManager.GetSettingInfo().ErrorMessage);
+            }
+            return JsonResult(result);
+        }
+
+        public ActionResult GetValEqptContractAmount()
+        {
+            if (CheckSession() == false)
+            {
+                return Json(ResultModelBase.CreateTimeoutModel(), JsonRequestBehavior.AllowGet);
+            }
+            ResultModel<List<ValEqptOutputInfo>> result = new ResultModel<List<ValEqptOutputInfo>>();
+
+            try
+            {
+                result.Data = this.valuationDao.GetValEqptContractAmount();
+            }
+            catch (Exception ex)
+            {
+                NLog.LogManager.GetCurrentClassLogger().Error(ex, ex.Message);
+                result.SetFailed(ResultCodes.SystemError, ControlManager.GetSettingInfo().ErrorMessage);
+            }
+            return JsonResult(result);
+        }
+
+        public ActionResult GetValComponentAmount(int eqptType)
+        {
+            if (CheckSession() == false)
+            {
+                return Json(ResultModelBase.CreateTimeoutModel(), JsonRequestBehavior.AllowGet);
+            }
+            ResultModel<List<ValComponentOutputInfo>> result = new ResultModel<List<ValComponentOutputInfo>>();
+
+            try
+            {
+                result.Data = this.valuationDao.GetValComponentAmout(eqptType);
+            }
+            catch (Exception ex)
+            {
+                NLog.LogManager.GetCurrentClassLogger().Error(ex, ex.Message);
+                result.SetFailed(ResultCodes.SystemError, ControlManager.GetSettingInfo().ErrorMessage);
+            }
+            return JsonResult(result);
+        }
+
+
+        public ActionResult GetValEqptService(int eqptType)
+        {
+            if (CheckSession() == false)
+            {
+                return Json(ResultModelBase.CreateTimeoutModel(), JsonRequestBehavior.AllowGet);
+            }
+            ResultModel<List<ValEqptOutputInfo>> result = new ResultModel<List<ValEqptOutputInfo>>();
+
+            try
+            {
+                result.Data = this.valuationDao.GetValEqptService(eqptType);
+            }
+            catch (Exception ex)
+            {
+                NLog.LogManager.GetCurrentClassLogger().Error(ex, ex.Message);
+                result.SetFailed(ResultCodes.SystemError, ControlManager.GetSettingInfo().ErrorMessage);
+            }
+            return JsonResult(result);
+        }
+
+        public ActionResult GetValConsumableAmount(int eqptType)
+        {
+            if (CheckSession() == false)
+            {
+                return Json(ResultModelBase.CreateTimeoutModel(), JsonRequestBehavior.AllowGet);
+            }
+            ResultModel<List<ValConsumableOutputInfo>> result = new ResultModel<List<ValConsumableOutputInfo>>();
+
+            try
+            {
+                result.Data = this.valuationDao.GetValConsumableAmount(eqptType);
+            }
+            catch (Exception ex)
+            {
+                NLog.LogManager.GetCurrentClassLogger().Error(ex, ex.Message);
+                result.SetFailed(ResultCodes.SystemError, ControlManager.GetSettingInfo().ErrorMessage);
+            }
+            return JsonResult(result);
+        }
+        #endregion
+    }
+}

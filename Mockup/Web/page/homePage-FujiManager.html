@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html style="width: 100%;">
+	<head>
+	<base target="middleiframe">
+		<meta charset="utf-8">
+		<title>富士超级管理员页面</title>
+		<link rel="stylesheet" type="text/css" href="../css/bootstrap.min.css" />
+		<link rel="stylesheet" type="text/css" href="../style.css" />
+		<link rel="stylesheet" type="text/css" href="../css/iconfont.css" />
+		<style>
+			.iframeBody{padding: 0px;background-color: #D7E0EF;}
+			.table {margin-bottom: 0px;}
+			.table th {height: 30px;}
+			.table td {height: 30px;padding: 0px;}
+			.card-deck{margin:0px;}
+			.card-body {padding-right: 0px;}
+			p {font-size: 20px;font-weight: bold;}
+		</style>
+	</head>
+	<body class="iframeBody">
+		<div style="padding: 0px;flex-wrap: nowrap;width: 100%;height: 100%;">
+			<div style="width: 100%;">
+			<table width="100%" border="0" cellpadding="10" cellspacing="10">
+				<tr>
+					<td>
+						<iframe src="../index.html#/EVENTLIST" target="_blank" width="100%" height="300px" class="iframe" ></iframe>
+					</td>
+					<td>
+						<iframe src="../index.html#/KPI" width="100%" height="300px" class="iframe"></iframe>
+					</td>
+				</tr>
+			</table>
+			</div>
+			<!-- <div class="card-deck"> -->
+				<div class="card" style="margin: 10px;">
+				<div class="card-body">
+					<p><span class="iconfont icon-baoxiu"></span> 待派工 <a href="clientRequest.html" style="float: right;margin-right:5%;font-size:14px;font-weight: normal;"
+						 class="linkFile">更多...</a></p>
+						 <table class="table " cellspacing="0px" cellpadding="5px">
+							<thead class="thead-light">
+								<tr>
+									<th scope="col">请求编号</th>
+									<th scope="col">设备系统编号</th>
+									<th scope="col">设备名称</th>
+									<th scope="col">科室</th>
+									<th scope="col">请求人</th>
+									<th scope="col">请求日期<span class="sortIcon">▼</span></th>
+									<th scope="col">请求来源</th>
+									<th scope="col">类型</th>
+									<th scope="col">状态</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td>C00000001</td>
+									<td>ZC00000001</td>
+									<td>彩超</td>
+									<td>功能科</td>
+									<td>刘宇</td>
+									<td>2019-04-11</td>
+									<td>服务请求</td>
+									<td>维修</td>
+									<td>待分配</td>
+								</tr>
+								<tr>
+									<td>C00000002</td>
+									<td>ZC00000002</td>
+									<td>CT机</td>
+									<td>放射科</td>
+									<td>系统</td>
+									<td>2019-04-11</td>
+									<td>计划服务</td>
+									<td>强检</td>
+									<td>问题升级</td>
+								</tr>
+								<tr>
+									<td>C00000003</td>
+									<td>ZC00000003</td>
+									<td>呼吸机</td>
+									<td>重症医学科</td>
+									<td>魏宸园</td>
+									<td>2019-04-11</td>
+									<td>服务请求</td>
+									<td>强检</td>
+									<td>待审批</td>
+								</tr>
+								<tr>
+									<td>C00000004</td>
+									<td>多设备</td>
+									<td>多设备</td>
+									<td>功能科</td>
+									<td>刘宇</td>
+									<td>2019-04-14</td>
+									<td>系统</td>
+									<td>巡检</td>
+									<td>已审批</td>
+								</tr>
+								<tr>
+									<td >C00000005</td>
+									<td>ZC00000005</td>
+									<td>医用磁共振成像系统</td>
+									<td>核磁共振</td>
+									<td>顾长善</td>
+									<td>2019-04-16</td>
+									<td>服务请求</td>
+									<td>校正</td>
+									<td>关闭</td>
+								</tr>
+							</tbody>
+						</table>
+				</div>
+			</div>
+				<div class="card" style="margin: 10px;">
+				<!-- margin: 10px 20px 10px 5px; -->
+				<div class="card-body">
+					<p><span class="iconfont icon-gongdanliebiao"></span> 待审批<a href="dispatchList.html" style="float: right;margin-right:5%;font-size:14px;font-weight: normal;"
+						 class="linkFile">更多...</a></p>
+						 <table class="table " cellspacing="0px" cellpadding="5px">
+							<thead class="thead-light">
+								<tr>
+									<th scope="col">派工单编号</th>
+									<th scope="col">请求编号</th>
+									<th scope="col">设备系统编号</th>
+									<th scope="col">设备名称</th>
+									<th scope="col">派工类型</th>
+									<th scope="col">紧急程度</th>
+									<th scope="col">派工日期</th>
+									<th scope="col">结束日期<span class="sortIcon">▼</span></th>
+									<th scope="col">状态</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td>
+										<a class="linkFile" href="uploadServerInfo.html">PGD00000001</a>
+									</td>
+									<td>C00000001</td>
+									<td>ZC00000001</td>
+									<td>彩超</td>
+									<td>维修</td>
+									<td>紧急</td>
+									<td>2019-04-11</td>
+									<td></td>
+									<td>终止</td>
+								</tr>
+								<tr>
+									<td>
+										<a class="linkFile" href="uploadServerInfo.html">PGD00000002</a>
+									</td>
+									<td>C00000002</td>
+									<td>ZC00000002</td>
+									<td>CT机</td>
+									<td>强检</td>
+									<td>紧急</td>
+									<td>2019-04-11</td>
+									<td></td>
+									<td>已响应</td>
+								</tr>
+								<tr>
+									<td>
+										<a class="linkFile" href="uploadServerInfo.html">PGD00000003</a>
+									</td>
+									<td>C00000003</td>
+									<td>ZC00000003</td>
+									<td>呼吸机</td>
+									<td>强检</td>
+									<td>紧急</td>
+									<td>2019-04-11</td>
+									<td>2019-04-11</td>
+									<td>待审批</td>
+								</tr>
+								<tr>
+									<td>
+										<a class="linkFile" href="uploadServerInfo.html">PGD00000004</a>
+									</td>
+									<td>C00000004</td>
+									<td>多设备</td>
+									<td>多设备</td>
+									<td>巡检</td>
+									<td>普通</td>
+									<td>2019-04-14</td>
+									<td>2019-04-15</td>
+									<td>已审批</td>
+								</tr>
+								<tr>
+									<td>
+										<a class="linkFile" href="uploadServerInfo.html">PGD00000005</a>
+									</td>
+									<td>C00000005</td>
+									<td>ZC00000005</td>
+									<td>医用磁共振成像系统	</td>
+									<td>校正</td>
+									<td>紧急</td>
+									<td>2019-04-16</td>
+									<td>2019-04-16</td>
+									<td>已审批</td>
+								</tr>
+							</tbody>
+						</table>
+				</div>
+			</div>
+			<!-- </div> -->
+		</div>
+	</body>
+	<script>
+		function approve() {
+			window.location = "ApproveRepairApplication.html";
+		}
+
+		function update() {
+			window.location.href = "updateServerRequest.html";
+		}
+
+		function cat() {
+			window.location = "AllocatedRepairApplication.html";
+		}
+	</script>
+</html>

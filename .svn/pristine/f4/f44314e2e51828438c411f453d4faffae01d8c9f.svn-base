@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<link rel="stylesheet" type="text/css" href="../css/bootstrap.min.css" />
+		<link rel="stylesheet" type="text/css" href="../style.css" />
+		<script src="../js/jquery-1.11.0.js" type="text/javascript" charset="utf-8"></script>
+		<style type="text/css">
+			.NoLeftSection {
+				text-align: center;
+				margin: 0 10.5%;
+			}
+
+			.routeTable {
+				width: 800px;
+				text-align: left;
+			}
+		</style>
+	</head>
+	<body>
+		<div style="width: 800px; margin: auto;">
+			<div style="font-size:18px;text-align: left;width: 800px;margin: 10px auto;"><a class="linkFile" href="#" onclick="window.history.back()">
+					<<返回 </a> </div> <h3 align="center">审核请求</h3>
+						<table class="routeTable" border="1px" align="center" cellpadding="6px" cellspacing="0">
+							<tr class="headtr">
+								<td colspan="4">设备基本信息</td>
+							</tr>
+							<tr>
+								<td class="headtd" width="20%">设备系统编号</td>
+								<td width="30%">
+									<label class="disableContent">ZC00000001</label>
+								</td>
+								<td class="headtd" width="20%">资产等级</td>
+								<td width="30%">
+									<label class="disableContent">重要</label>
+								</td>
+							</tr>
+							<tr>
+								<td class="headtd" width="20%">设备名称</td>
+								<td width="30%">
+									<label class="disableContent">医用磁共振设备</label>
+								</td>
+								<td class="headtd" width="20%">设备型号</td>
+								<td width="30%">
+									<label class="disableContent">HA 710 二郎神</label>
+								</td>
+							</tr>
+							<tr>
+								<td class="headtd" width="20%">使用科室</td>
+								<td width="30%">
+									<label class="disableContent">磁共振</label>
+								</td>
+								<td class="headtd" width="20%">安装地点</td>
+								<td width="30%">
+									<label class="disableContent">磁共振1室</label>
+								</td>
+							</tr>
+							<tr>
+								<td class="headtd" width="20%">设备厂商</td>
+								<td width="30%">
+									<label class="disableContent">飞利浦</label>
+								</td>
+								<td class="headtd" width="20%">保修状况</td>
+								<td width="30%">
+									<label class="disableContent">保内</label>
+								</td>
+							</tr>
+						</table>
+						</br>
+						<table class="routeTable" border="1px" align="center" cellpadding="6px" cellspacing="0">
+							<tr class="headtr">
+								<td colspan="4">请求内容</td>
+							</tr>
+							<tr>
+								<td class="headtd" width="20%">类型</td>
+								<td width="30%">
+									<label class="disableContent">客户请求-维修</label>
+								</td>
+								<td class="headtd" width="20%">故障分类</td>
+								<td width="30%">
+									<label class="disableContent">未知</label>
+								</td>
+							</tr>
+							<tr>
+								<td class="headtd" width="20%">主题</td>
+								<td width="30%">
+									<label class="disableContent">系统报错</label>
+								</td>
+								<td class="headtd" width="20%">请求人</td>
+								<td width="30%">
+									<label class="disableContent">宋XX</label>
+								</td>
+							</tr>
+							<tr>
+								<td class="headtd" width="20%">故障描述</td>
+								<td colspan="3">
+									<label class="disableContent">系统报错，设备无法启动</label>
+								</td>
+							</tr>
+							<tr>
+								<td class="headtd" width="20%">请求附件</td>
+								<td colspan="3"><a href="#" class="linkFile">2019-10-10.png (点击附件名下载)</a></td>
+							</tr>
+							<tr>
+								<td class="headtd" width="20%">处理方式</td>
+								<td width="30%">
+									<select name="">
+										<option value="">现场服务</option>
+										<option value="">电话解决</option>
+										<option value="">远程解决</option>
+									</select>
+								</td>
+								<td class="headtd" width="20%">优先级</td>
+								<td width="30%">
+									<select name="" id="">
+										<option value="">高</option>
+										<option value="">中</option>
+										<option value="">低</option>
+									</select>
+								</td>
+
+							</tr>
+							<tr>
+								<td class="headtd" width="20%">备注</td>
+								<td colspan="3"><textarea name="" rows="2" cols="90"></textarea></td>
+							</tr>
+						</table>
+						</br>
+						<table width="600px" style="text-align: center; margin: 20px auto;">
+							<tr class="tblList">
+								<td width="30%">
+									<button class="btn btn-info">通过</button>
+								</td>
+								<td width="30%">
+									<button class="btn btn-info">拒绝</button>
+								</td>
+								<td width="30%">
+									<button class="btn btn-info" onclick="goBack()">返回</button>
+								</td>
+							</tr>
+						</table>
+			</div>
+	</body>
+	<script>
+		function goBack() {
+			window.history.back();
+		}
+	</script>
+
+</html>

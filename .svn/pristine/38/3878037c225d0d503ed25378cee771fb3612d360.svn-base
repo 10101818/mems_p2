@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html style="height: 100%;">
+
+	<head>
+		<base target="middleiframe" />
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1" />
+		<title></title>
+		<link rel="stylesheet" type="text/css" href="../css/bootstrap.min.css" />
+		<link rel="stylesheet" type="text/css" href="../style.css" />
+		<script src="../js/jquery-1.11.0.js"></script>
+	</head>
+	<body>
+		<div class="comment">
+			<iframe src="compoment/comment-Devicemanagement.html" class="iframe commentiframe"></iframe>
+		</div>
+		<div class="middle">
+			<iframe src="compoment/left-DeviceManagement.html" class="iframe middleiframe leftiframe"></iframe>
+			<iframe src="clientRequestMaintain.html" name="middleiframe" class="iframe middleiframe rightiframe"></iframe>
+		</div>
+	</body>
+	<script type="text/javascript">
+		$(function(){
+			$("body").bind("keydown",function(event){
+				if(event.keyCode ==116){
+					event.preventDefault();
+					$('.rightiframe').attr('src', $('.rightiframe').attr('src'));
+				}
+			})
+		})
+	</script>
+</html>

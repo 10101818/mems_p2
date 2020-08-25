@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>分配请求</title>
+		<link rel="stylesheet" type="text/css" href="../css/bootstrap.min.css" />
+		<link rel="stylesheet" type="text/css" href="../style.css" />
+	</head>
+	<body>
+		<div style="width: 800px; margin: auto;">
+			<div style="font-size:18px;text-align:left;width: 800px;margin: 10px auto;"><a class="linkFile" href="#" onclick="window.history.back()">
+					<<返回 </a> </div> <h3 align="center">分配请求</h3>
+						<!-- 设备信息 -->
+						<table class="routeTable" border="1px" align="center" cellpadding="6px" cellspacing="0">
+							<tr class="headtr">
+								<td colspan="4">设备基本信息</td>
+							</tr>
+							<tr>
+								<td class="headtd" width="20%">设备系统编号</td>
+								<td width="30%">
+									<label class="disableContent">ZC00000001</label>
+								</td>
+								<td class="headtd" width="20%">资产等级</td>
+								<td width="30%">
+									<label class="disableContent">重要</label>
+								</td>
+							</tr>
+							<tr>
+								<td class="headtd">设备名称</td>
+								<td>
+									<label class="disableContent">彩超</label>
+								</td>
+								<td class="headtd">使用科室</td>
+								<td>
+									<label class="disableContent">功能科</label>
+								</td>
+							</tr>
+							<tr>
+								<td class="headtd">设备型号</td>
+								<td>
+									<label class="disableContent">HA 710 二郎神</label>
+								</td>
+								<td class="headtd">安装地点</td>
+								<td>
+									<label class="disableContent">放射科1室</label>
+								</td>
+							</tr>
+							<tr>
+								<td class="headtd">序列号</td>
+								<td>
+									<label class="disableContent">KE12975105</label>
+								</td>
+								<td class="headtd">保修状况</td>
+								<td>
+									<label class="disableContent">保内</label>
+								</td>
+							</tr>
+							<tr>
+								<td class="headtd">设备厂商</td>
+								<td>
+									<label class="disableContent">飞利浦</label>
+								</td>
+								<td class="headtd">保修范围</td>
+								<td>
+									<label class="disableContent">全保</label>
+								</td>
+							</tr>
+						</table>
+						</br>
+						<!-- 报修详细信息 -->
+						<table class="routeTable" border="1px" align="center" cellpadding="6px" cellspacing="0">
+							<tr class="headtr">
+								<td colspan="4">请求内容</td>
+							</tr>
+							<tr>
+								<td class="headtd" width="20%">类型</td>
+								<td width="30%">
+									<label class="disableContent">客户请求-维修</label>
+								</td>
+								<td class="headtd" width="20%">故障分类</td>
+								<td width="30%">
+									<label class="disableContent">开机故障</label>
+								</td>
+							</tr>
+							<tr>
+								<td class="headtd" width="20%">主题</td>
+								<td width="30%">
+									<label class="disableContent">彩超——维修</label>
+								</td>
+								<td class="headtd" width="20%">请求人</td>
+								<td width="30%">
+									<label class="disableContent">刘宇</label>
+								</td>
+							</tr>
+							<tr>
+								<td class="headtd" width="20%">故障描述</td>
+								<td colspan="3">
+									<label class="disableContent">系统报错，设备无法启动</label>
+								</td>
+							</tr>
+							<tr>
+								<td class="headtd" width="20%">请求附件</td>
+								<td colspan="3"><a href="#" class="linkFile">2019-4-11.png (点击附件名下载)</a></td>
+							</tr>
+							<tr>
+								<td class="headtd" width="20%">处理方式</td>
+								<td width="30%">
+									<select name="">
+										<option value="">现场服务</option>
+										<option value="">电话解决</option>
+										<option value="">远程解决</option>
+										<option value="">第三方支持</option>
+									</select>
+
+								</td>
+								<td class="headtd" width="20%">紧急程度</td>
+								<td width="30%">
+									<select name="" id="">
+										<option value="">普通</option>
+										<option value="">紧急</option>
+									</select>
+
+								</td>
+							</tr>
+						</table>
+						</br>
+						<!-- 派工 -->
+						<table class="routeTable" border="1px" align="center" cellpadding="6px" cellspacing="0">
+							<tr class="headtr">
+								<td colspan="4">派工内容<span style="color:dimgrey;float: right;">编号:PGD00000001(系统自动生成)</span>
+								</td>
+							</tr>
+							<tr>
+								<td class="headtd" width="20%">派工类型</td>
+								<td width="30%">
+									<select>
+										<option value="维修">维修</option>
+										<option value="保养">保养</option>
+										<option value="强检">强检</option>
+										<option value="巡检">巡检</option>
+										<option value="校正">校正</option>
+										<option value="设备新增">设备新增</option>
+										<option value="不良事件">不良事件</option>
+										<option value="生命周期管理">合同档案</option>
+										<option value="生命周期管理">验收安装</option>
+										<option value="生命周期管理">调拨</option>
+										<option value="生命周期管理">借用</option>
+										<option value="生命周期管理">盘点</option>
+										<option value="生命周期管理">报废</option>
+										<option value="其他服务">其他服务</option>
+									</select>
+								</td>
+								<td class="headtd" width="20%">紧急程度</td>
+								<td width="30%">
+									<select>
+										<option>普通</option>
+										<option>紧急</option>
+									</select>
+								</td>
+							</tr>
+							<tr>
+								<td class="headtd" width="20%">机器状态</td>
+								<td width="30%">
+									<select>
+										<option>正常</option>
+										<option>勉强使用</option>
+										<option>停机</option>
+									</select>
+								</td>
+								<td class="headtd" width="20%">出发时间</td>
+								<td width="30%"><input type="date" id="today"></td>
+							</tr>
+							<tr>
+								<td class="headtd" width="20%">工程师姓名</td>
+								<td width="30%" colspan="3"><select>
+										<option>刘宇</option>
+										<option>魏宸园</option>
+									</select></td>
+							</tr>
+							<tr>
+								<td class="headtd" width="20%">主管备注</td>
+								<td colspan="3">
+									<input type="text" style="width:80%">
+								</td>
+							</tr>
+						</table>
+						</br>
+						<table class="routeTable" border="0" align="center" style="text-align: center;">
+							<tr>
+								<td width="30%">
+									<button class="btn btn-info">确定派工</button>
+								</td>
+								<td width="30%">
+									<button class="btn btn-info">关闭请求</button>
+								</td>
+							</tr>
+						</table>
+			</div>
+	</body>
+</html>
+<script type="text/javascript">
+function today(){
+    var today=new Date();
+    var h=today.getFullYear();
+    var m=today.getMonth()+1;
+    var d=today.getDate();
+    return h+"-"+m+"-"+d;
+}
+ 
+document.getElementById("today").value = today();
+</script>

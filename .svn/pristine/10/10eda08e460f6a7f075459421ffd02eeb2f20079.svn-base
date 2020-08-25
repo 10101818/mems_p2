@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<title>查看设备</title>
+	<link rel="stylesheet" type="text/css" href="../css/bootstrap.min.css" />
+	<link rel="stylesheet" type="text/css" href="../style.css" />
+	<script src="../js/jquery-1.11.0.js"></script>
+	<script type="text/javascript" src="../js/bootstrap.min.js"></script>
+</head>
+
+<body>
+	<div class="body addDeviceDetails">
+		<div style="font-size:18px;margin-top:3%;"><a href="DeviceManagement.html" class="linkFile">
+				<<返回  </a>
+		</div>
+		<div>
+			<p class="tblTitle">查看设备</p>
+			<!--设备信息-->
+			<table class="tblDetail" width="800" border="1" bordercolor="000000" cellpadding="0" cellspacing="0">
+				<tbody>
+					<tr>
+						<td colspan="4" class="headtr">设备信息</td>
+					</tr>
+					<tr>
+						<td class="tdDetailHead" width="20%">系统编号</td>
+						<td width="30%" class="inputContent">
+							<label>ZC00000001</label>
+						</td>
+						<td class="tdDetailHead" width="20%">等级</td>
+						<td class="inputContent" width="30%">
+							<label>3类</label>
+						</td>
+					</tr>
+					<tr>
+						<td class="tdDetailHead" width="20%">设备名称</td>
+						<td width="30%" class="inputContent">
+							<label>医用磁共振设备</label>
+						</td>
+						<td class="tdDetailHead">设备类别 (I)</td>
+						<td class="inputContent">
+							<label>医用成像器械</label>
+						</td>
+					</tr>
+					<tr>
+						<td class="tdDetailHead">设备序列号</td>
+						<td class="inputContent">
+							<label>54625464</label>
+						</td>
+						<td class="tdDetailHead">设备类别 (II)</td>
+						<td class="inputContent">
+							<label>磁共振成像设备(MRI)</label>
+						</td>
+					</tr>
+					<tr>
+						<td class="tdDetailHead">设备型号</td>
+						<td class="inputContent">
+							<label>HA 710 二郎神</label>
+						</td>
+
+						<td class="tdDetailHead">设备类别 (III)</td>
+						<td class="inputContent">
+							<label>常导型磁共振成像系统</label>
+						</td>
+					</tr>
+					<tr>
+						<td class="tdDetailHead" width="20%">设备厂商</td>
+						<td width="30%" class="inputContent">
+							<label>飞利浦</label>
+						</td>
+						<td class="tdDetailHead">设备分类编码</td>
+						<td class="inputContent">
+							<label>060802</label>
+						</td>
+					</tr>
+					<tr>
+						<td class="tdDetailHead">标准响应时间(分)</td>
+						<td class="inputContent">
+							<label>30</label>
+						</td>
+						<td class="tdDetailHead">整包范围</td>
+						<td class="inputContent">
+							<label>是</label>
+						</td>
+					</tr>
+					<tr>
+						<td class="tdDetailHead">品牌</td>
+						<td class="inputContent">
+							<label>品牌</label>
+						</td>
+						<td class="tdDetailHead">出厂日期</td>
+						<td class="inputContent">
+							<label></label>
+						</td>
+					</tr>
+					<tr>
+						<td class="tdDetailHead">备注</td>
+						<td class="inputContent" colspan="3">
+							<label>备注</label>
+						</td>
+					</tr>
+					<tr>
+						<td class="tdDetailHead">富士I类</td>
+						<td class="inputContent">
+							<label>内窥镜</label>
+						</td>
+						<td class="tdDetailHead">富士II类</td>
+						<td class="inputContent">
+							<label>硬式内窥镜</label>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+			<br />
+			<!--CT球管信息-->
+			<table class="tblDetail" width="800" border="1" bordercolor="000000" cellpadding="0" cellspacing="0">
+				<tbody>
+					<tr>
+						<td class="headtr" colspan="6">CT球管信息
+						</td>
+					</tr>
+					<tr>
+						<td class="tdDetailHead">序列号</td>
+						<td class="tdDetailHead">简称</td>
+						<td class="tdDetailHead">描述</td>
+						<td class="tdDetailHead">已使用秒次</td>
+					</tr>
+					<tr>
+						<td><label>LSMR0000243</label></td>
+						<td><label> CT球管</label></td>
+						<td><label>CT类CT机球管</label></td>
+						<td><label>206</label></td>
+					</tr>
+				</tbody>
+			</table>
+			<br />
+			<table class="tblDetail" width="800" border="1" bordercolor="000000" cellpadding="0" cellspacing="0">
+				<tbody>
+					<tr>
+						<td colspan="4" class="headtr">资产信息</td>
+					</tr>
+					<tr>
+						<td class="tdDetailHead">固定资产</td>
+						<td class="inputContent">
+							<label>是</label>
+						</td>
+						<td class="tdDetailHead" width="20%">资产编号</td>
+						<td width="30%" class="inputContent">
+							<label>LSRM002020900002</label>
+						</td>
+					</tr>
+					<tr>
+						<td class="tdDetailHead">资产等级</td>
+						<td width="30%" class="inputContent">
+							<label>重要</label>
+						</td>
+						<td class="tdDetailHead" width="20%">折旧年限(年)</td>
+						<td width="30%" class="inputContent">
+							<label>3</label>
+						</td>
+					</tr>
+					<tr>
+						<td class="tdDetailHead" width="20%">注册证有效日期</td>
+						<td width="30%" class="inputContent" colspan="3">
+							<label>2010-12-01 - 2019-12-20</label>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+			<br />
+			<!-- 采购信息 -->
+			<table class="tblDetail" width="800" border="1" bordercolor="000000" cellpadding="0" cellspacing="0">
+				<tr class="tblList">
+					<td colspan="9" class="headtr">采购信息<span style="color:dimgrey;float: right">
+							<button class="btn btn-outline-info btn-sm btn-newContract"
+								style="height:24px;width:120px;font-size:0.8rem;line-height:1;">
+								历史合同信息</span>
+					</td>
+				</tr>
+				<tr>
+					<td class="tdDetailHead" width="20%">销售合同名称</td>
+					<td width="30%" class="inputContent">
+						<label>某某合同</label>
+					</td>
+					<td class="tdDetailHead" width="20%">经销商</td>
+					<td width="30%" class="inputContent">
+						<label>飞利浦医疗(上海)有限公司</label>
+					</td>
+				</tr>
+				<tr>
+					<td class="tdDetailHead">购入方式</td>
+					<td>
+						<label>直接购入</label>
+					</td>
+					<td class="tdDetailHead">采购金额</td>
+					<td><label>1080000</label></td>
+				</tr>
+				<tr>
+					<td class="tdDetailHead">采购日期</td>
+					<td colspan="3">
+						<label>2019-05-01</label>
+					</td>
+				</tr>
+				</tbody>
+			</table>
+			<br />
+			<!-- 使用状态 -->
+			<table class="tblDetail" width="800" border="1" bordercolor="000000" cellpadding="0" cellspacing="0">
+				<tbody>
+					<tr>
+						<td colspan="4" class="headtr">使用状态<span style="color:dimgrey;float: right"
+								onclick="window.location.href = " clientRequ.html";">
+								<button class="btn btn-outline-info btn-sm btn-newContract"
+									style="height:24px;width:120px;font-size:0.8rem;line-height:1;">
+									历史请求信息</span></td>
+					</tr>
+					<tr>
+						<td class="tdDetailHead" width="20%">安装科室</td>
+						<td width="30%" class="inputContent">
+							<label>磁共振</label>
+						</td>
+						<td class="tdDetailHead" width="20%">安装位置</td>
+						<td width="30%" class=" inputContent">
+							<label>磁共振1室</label>
+						</td>
+					</tr>
+					<tr>
+						<td class="tdDetailHead">安装日期</td>
+						<td>
+							<label>2019-12-20</label>
+						</td>
+						<td class="tdDetailHead">启用日期</td>
+						<td>
+							<label>2019-12-20</label>
+						</td>
+					</tr>
+					<tr>
+						<td class="tdDetailHead">验收状态</td>
+						<td class="inputContent">
+							<label>已验收</label>
+						</td>
+						<td class="tdDetailHead">验收时间</td>
+						<td class="inputContent">
+							<label>2019-05-01</label>
+						</td>
+					</tr>
+					<tr>
+						<td class="tdDetailHead">使用状态</td>
+						<td class="inputContent">
+							<label>使用</label>
+						</td>
+						<td class="tdDetailHead">设备状态</td>
+						<td class="inputContent">
+							<label>正常</label>
+						</td>
+					</tr>
+					<tr>
+						<td class="tdDetailHead">强检标记</td>
+						<td class="inputContent">
+							<label>无</label>
+						</td>
+						<td class="tdDetailHead">维保状态</td>
+						<td class="inputContent">
+							<label>保内</label>
+						</td>
+					</tr>
+					<tr>
+						<td class="tdDetailHead">强检时间</td>
+						<td class="inputContent">
+							<label>2019-04-01</label>
+						</td>
+						<td class="tdDetailHead">巡检周期</td>
+						<td class="inputContent">
+							<label>无</label>
+						</td>
+					</tr>
+					<tr>
+						<td class="tdDetailHead" width="20%">召回标记</td>
+						<td width="30%" class="inputContent">
+							<label>是</label>
+						</td>
+						<td class="tdDetailHead">保养周期</td>
+						<td class="inputContent"><label>无</label>
+						</td>
+					</tr>
+					<tr>
+						<td class="tdDetailHead" width="20%">召回时间</td>
+						<td width="30%" class=" inputContent">
+							<label>2019-05-21</label>
+						</td>
+						<td class="tdDetailHead">校正周期</td>
+						<td class="inputContent"><label>无</label>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+			<br />
+			<!--零件信息-->
+			<table class="tblDetail" width="800" border="1" bordercolor="000000" cellpadding="0" cellspacing="0">
+				<tbody>
+					<tr>
+						<td class="headtr" colspan="6">历史零件
+							<img src="../img/collect.png" style="vertical-align: middle;" class="update" />
+						</td>
+					</tr>
+					<tr>
+						<td class="tdDetailHead">序列号</td>
+						<td class="tdDetailHead">简称</td>
+						<td class="tdDetailHead">描述</td>
+						<td class="tdDetailHead">安装日期</td>
+						<td class="tdDetailHead">拆下日期</td>
+					</tr>
+					<tr>
+						<td><label>LSMR0000243</label></td>
+						<td><label>球管</label></td>
+						<td><label>CT类CT机球管</label></td>
+						<td><label><a href="DMcheckJobInfo.html" class="linkFile">2020-02-03</a></label></td>
+						<td><label><a href="#"></a></label></td>
+					</tr>
+					<tr>
+						<td><label>LSMR0000241</label></td>
+						<td><label>探测器</label></td>
+						<td><label>CT机探测器</label></td>
+						<td><label><a href="DMcheckJobInfo.html" class="linkFile">2020-01-30</a></label></td>
+						<td><label><a href="#"></a></label></td>
+					</tr>
+					<tr>
+						<td><label>LSMR0000242</label></td>
+						<td><label>球管</label></td>
+						<td><label>CT类CT机球管</label></td>
+						<td><label><a href="DMcheckJobInfo.html" class="linkFile">2020-01-30</a></label></td>
+						<td><label><a href="DMcheckJobInfo.html" class="linkFile">2020-02-03</a></label></td>
+					</tr>
+				</tbody>
+			</table>
+			<br />
+			<!--耗材信息-->
+			<table class="tblDetail" width="800" border="1" bordercolor="000000" cellpadding="0" cellspacing="0">
+				<tbody>
+					<tr>
+						<td class="headtr" colspan="6">历史耗材
+							<img src="../img/collect.png" style="vertical-align: middle;" class="update" />
+						</td>
+					</tr>
+					<tr>
+						<td class="tdDetailHead">批次号</td>
+						<td class="tdDetailHead">简称</td>
+						<td class="tdDetailHead">描述</td>
+						<td class="tdDetailHead">数量</td>
+						<td class="tdDetailHead">使用日期</td>
+					</tr>
+					<tr>
+						<td><label>LSMR0000104</label></td>
+						<td><label>反渗膜（血透）</label></td>
+						<td><label>水处理（血透）</label></td>
+						<td><label>5</label></td>
+						<td><label><a href="DMcheckJobInfo.html" class="linkFile">2020-03-03</a></label></td>
+					</tr>
+					<tr>
+						<td><label>LSMR0000105</label></td>
+						<td><label>反渗膜（一般）</label></td>
+						<td><label>水处理（一般）</label></td>
+						<td><label>1</label></td>
+						<td><label><a href="DMcheckJobInfo.html" class="linkFile">2020-02-03</a></label></td>
+					</tr>
+					<tr>
+						<td><label>LSMR0000101</label></td>
+						<td><label>云母片</label></td>
+						<td><label>呼吸机</label></td>
+						<td><label>10</label></td>
+						<td><label><a href="DMcheckJobInfo.html" class="linkFile">2020-01-30</a></label></td>
+					</tr>
+				</tbody>
+			</table>
+			<br />
+			<!-- 附件 -->
+			<table class="tblDetail" width="800" border="1" bordercolor="000000" cellpadding="0" cellspacing="0">
+				<tbody>
+					<tr>
+						<td colspan="4" class="headtr">证件</td>
+					</tr>
+					<tr>
+						<td class="tdDetailHead" width="20%">销售合同文件</td>
+						<td width="30%" class="inputContent">
+							<a href="#" class="linkFile">销售合同文件.docx</a>
+						</td>
+						<td class="tdDetailHead" width="20%">注册证文件</td>
+						<td width="30%" class="inputContent">
+							<a href="#" class="linkFile">注册证文件.docx</a>
+						</td>
+					</tr>
+					<tr>
+						<td class="tdDetailHead">采购配置清单</td>
+						<td class="inputContent">
+							<a href="#" class="linkFile">采购清单.docx</a>
+						</td>
+						<td class="tdDetailHead">配置许可报告</td>
+						<td class="inputContent">
+							<a href="#" class="linkFile">配置许可报告.docx</a>
+						</td>
+					</tr>
+					<tr>
+						<td class="tdDetailHead">设备铭牌</td>
+						<td class="inputContent">
+							<a href="#" class="linkFile">设备铭牌.docx</a>
+						</td>
+						<td class="tdDetailHead">设备标签</td>
+						<td class="inputContent">
+							<a href="#" class="linkFile">设备标签.docx</a>
+						</td>
+					</tr>
+					<tr>
+						<td class="tdDetailHead">技术文档</td>
+						<td colspan="3" class="inputContent" align="left">
+							<a href="#" class="linkFile">技术文档.docx</a>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+			<br />
+			<table class="tblDetail" width="800" border="1" bordercolor="000000" cellpadding="0" cellspacing="0">
+				<tbody>
+					<tr>
+						<td colspan="4" class="headtr" style="border-right:none">附件 </td>
+					</tr>
+					<tr>
+						<td class="tdDetailHead" width="40%">文件名</td>
+						<td class="tdDetailHead" colspan="2" width="50%">备注</td>
+					</tr>
+					<tr>
+						<td><a href="#" class="linkFile">附件文件1.docx</a></td>
+						<td colspan="2"><label>附件文件1备注内容</label></td>
+					</tr>
+					<tr>
+						<td><a href="#" class="linkFile">附件文件2.docx</a></td>
+						<td colspan="2"><label>附件文件2备注内容</label></td>
+					</tr>
+					</tr>
+				</tbody>
+			</table>
+			<br />
+			<table border="0" width="800" class="tblDetail" style="text-align: center;">
+				<tbody>
+					<tr>
+						<td><button class="btn btn-info" onclick="goBack()"><span>返回</span></button></td>
+					</tr>
+				</tbody>
+			</table>
+			<!-- 新增附件 -->
+			<div class="modal fade" id="lpjModalCenter" tabindex="-1" role="dialog"
+				aria-lableledby="lpjModalCenterTitle" aria-hidden="true">
+				<div class="modal-dialog  modal-dialog-centered" role="document">
+					<div class="modal-content">
+						<div class="modal-header">
+							<h6 class="modal-title" id="lpjModalLongTitle">新增附件</h6>
+							<button type="button" class="close" data-dismiss="modal" aria-lable="Close"><span
+									class="modal-icon" aria-hidden="true">&times;</span></button>
+						</div>
+						<div class="modal-body">
+							<table class="table table-sm  table-input modal-table" style="text-align: left;">
+								<tbody>
+									<tr>
+										<td width="35%"><span class="requiredItem"></span>备注:</td>
+										<td width="65%"><input type="text" class="input" /></td>
+									</tr>
+									<tr>
+										<td><span class="unrequiredItem"></span>附件:</td>
+										<td><img src="../img/upload%20.png" class="update"></td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+						<div class="modal-footer">
+							<button type="button" class="btn btn-info btn-sm">保存</button>
+							<button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">关闭</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+	</div>
+	</div>
+</body>
+<script>
+	function goBack() {
+		window.history.back();
+	}
+	$(function () {
+		$(".btn-newContract").click(function () {
+			// window.open("historyContract.html");
+			window.location.href = "contractManagementList.html";
+		})
+	})
+
+	var options = {};
+	$(function () {
+		$("#btn-newLpj").click(function () {
+			$("#lpjModalCenter").modal(options);
+		})
+	})
+</script>
+<script>
+	$("#checkedStatus").click(function () {
+		var s = $("#checkedStatus").is(":checked");
+		if (s) {
+			$(".ystime").css('display', "block");
+			$("#uncheckedStatus").removeAttr("checked");
+		}
+	})
+
+	$("#uncheckedStatus").click(function () {
+		var s = $("#uncheckedStatus").is(":checked");
+		if (s) {
+			$("#checkedStatus").removeAttr("checked");
+			$(".ystime").css("display", "none");
+		}
+	})
+</script>
+
+</html>

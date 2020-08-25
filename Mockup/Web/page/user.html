@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1" />
+		<title></title>
+		<link rel="stylesheet" type="text/css" href="../css/bootstrap.min.css" />
+		<link rel="stylesheet" type="text/css" href="../style.css" />
+		<script src="../js/jquery-1.11.0.js"></script>
+		<script src="../js/bootstrap.min.js"></script>
+
+	</head>
+
+	<body>
+		<div class="iframeBody">
+			<table class="filterTable">
+				<tr>
+					<td style="width:200px;">
+						<table class="toolsTable" cellspacing="0">
+							<tr>
+								<td>
+									<h3 align="left">用户列表</h3>
+								</td>
+							</tr>
+						</table>
+					</td>
+					<td>
+						<table cellspacing="0px" cellpadding="9px" class="hiddenTable">
+							<tr>
+								<td>
+									<button class="btn btn-sm btn-danger "><span class="btnContent">隐藏信息</span><span class="btnBadge">01</span></button>
+								</td>
+								<td>
+									<button class="btn btn-sm btn-warning "><span class="btnContent">隐藏信息</span><span class="btnBadge">02</span></button>
+								</td>
+							</tr>
+						</table>
+					</td>
+					<td width="1%">
+						<table style="width: 200px;" cellspacing="0" cellpadding="5px">
+							<tr>
+								<td>
+									<button class="btn btn-secondary  btn-sm">打印</button>
+								</td>
+								<td>
+									<button class="btn btn-secondary  btn-sm">导出</button>
+								</td>
+								<td>
+									<button class="btn btn-secondary btn-sm">刷新</button>
+								</td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+			</table>
+			<table class="operationTable">
+				<tr>
+					<td>
+						<table>
+							<tr>
+								<td>
+									状态：
+									<select>
+										<option>全部</option>
+										<option>启用</option>
+										<option>停用</option>
+									</select>&nbsp;&nbsp;
+								</td>
+								<td>角色：
+									<select>
+										<option>全部</option>
+										<option>超级用户</option>
+										<option>普通用户</option>
+										<option>超级管理员</option>
+										<option>管理员</option>
+									</select>&nbsp;&nbsp;
+								</td>
+								<td>
+									搜索：
+									<select>
+										<option>姓名</option>
+										<option>电话</option>
+									</select>&nbsp;&nbsp;
+									<input type="text" /><img src="../img/icons8-search-48.png" class="update">
+								</td>
+							</tr>
+						</table>
+					</td>
+
+				</tr>
+			</table>
+			<table class="table" cellspacing="0px" cellpadding="5px">
+				<thead class="thead-light">
+					<tr>
+						<th scope="col" style="color:#17A2B8;">账号<span class="sortIcon">▼</span></th>
+						<th scope="col" style="color:#17A2B8;">角色</th>
+						<th scope="col">姓名</th>
+						<th scope="col">电话</th>
+						<th scope="col">地址</th>
+						<th scope="col" style="color:#17A2B8;">添加日期</th>
+						<th scope="col" style="color:#17A2B8;">状态</th>
+						<th scope="col">编辑</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td>zhangheng@163.com</td>
+						<td>超级用户</td>
+						<td>张恒</td>
+						<td>15022223334</td>
+						<td>上海浦东</td>
+						<td>2019-04-01</td>
+						<td>启用</td>
+						<td><img src="../img/edit.png" class="update btn-editUser"></td>
+					</tr>
+					<tr>
+						<td>alice@163.com</td>
+						<td>普通用户</td>
+						<td>alice</td>
+						<td>13265986254</td>
+						<td>上海浦东</td>
+						<td>2019-04-02</td>
+						<td>启用</td>
+						<td><img src="../img/edit.png" class="update btn-editUser"></td>
+					</tr>
+					<tr>
+						<td>lisheng@163.com</td>
+						<td>超级管理员</td>
+						<td>李生</td>
+						<td>18635556969</td>
+						<td>上海浦东</td>
+						<td>2019-04-03</td>
+						<td>停用</td>
+						<td><img src="../img/edit.png" class="update btn-editUser"></td>
+					</tr>
+					<tr>
+						<td>Leo@163.com</td>
+						<td>管理员</td>
+						<td>Leo</td>
+						<td>13366333399</td>
+						<td>上海浦东</td>
+						<td>2019-04-04</td>
+						<td>启用</td>
+						<td><img src="../img/edit.png" class="update btn-editUser"></td>
+					</tr>
+					<tr>
+						<td>hanlei@163.com</td>
+						<td>管理员</td>
+						<td>韩磊</td>
+						<td>15666994523</td>
+						<td>上海徐家汇</td>
+						<td>2019-04-04</td>
+						<td>启用</td>
+						<td><img src="../img/edit.png" class="update btn-editUser"></td>
+					</tr>
+					<tr>
+						<td>liuyu@163.com</td>
+						<td>管理员</td>
+						<td>刘宇</td>
+						<td>17756966885</td>
+						<td>上海黄浦</td>
+						<td>2019-04-04</td>
+						<td>启用</td>
+						<td><img src="../img/edit.png" class="update btn-editUser"></td>
+					</tr>
+					<tr>
+						<td>
+							<div>
+								<button class="btn btn-info btn-sm btn-newUser" data-toggle="modal" style="float: left;">新增用户</button>
+							</div>
+						</td>
+						<td colspan="8">
+							<div class="pagenationDiv">
+								<nav aria-lable="Page navigation example">
+									<ul class="pagination">
+										<li class="page-item">
+											<a class="page-link" href="#">首页</a>
+										</li>
+										<li class="page-item">
+											<a class="page-link" href="#">上一页</a>
+										</li>
+										<li class="page-item">
+											<a class="page-link" href="#">1</a>
+										</li>
+										<li class="page-item">
+											<a class="page-link" href="#">2</a>
+										</li>
+										<li class="page-item">
+											<a class="page-link" href="#">3</a>
+										</li>
+										<li class="page-item">
+											<a class="page-link" href="#">下一页</a>
+										</li>
+										<li class="page-item">
+											<a class="page-link" href="#">末页</a>
+										</li>
+									</ul>
+								</nav>
+							</div>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+
+			<!-- 新增用户 -->
+			<div class="modal fade" id="userModalCenter" tabindex="-1" role="dialog" aria-lableledby="userModalCenterTitle"
+			 aria-hidden="true">
+				<div class="modal-dialog  modal-dialog-centered" role="document">
+					<div class="modal-content">
+						<div class="modal-header">
+							<h6 class="modal-title" id="userModalLongTitle">添加新用户</h6>
+							<button type="button" class="close" data-dismiss="modal" aria-lable="Close"><span class="modal-icon" aria-hidden="true">&times;</span></button>
+						</div>
+						<div class="modal-body">
+							<table class="table table-sm  table-input modal-table" style="text-align: left;">
+								<tbody>
+									<tr>
+										<td width="15%" class=""><span class="requiredItem"></span>账号:</td>
+										<td width="85%"><input type="text" class="input" /></td>
+									</tr>
+									<tr>
+										<td  class=""><span class="requiredItem"></span>密码:</td>
+										<td ><input type="text" class="input" /></td>
+									</tr>
+									<tr>
+										<td class=""><span class="requiredItem"></span>角色:</td>
+										<td>
+											<select class="input">
+												<option value="1">管理员</option>
+												<option value="2">超级管理员</option>
+												<option value="3">超级用户</option>
+											</select>
+										</td>
+									</tr>
+									<tr>
+										<td class=""><span class="requiredItem"></span>姓名:</td>
+										<td><input type="text" class="input" /></td>
+
+									</tr>
+									<tr>
+										<td class=""><span class="unrequiredItem"></span>电话:</td>
+										<td><input type="text" class="input" /></td>
+									</tr>
+									<tr>
+										<td class=""><span class="unrequiredItem"></span>地址:</td>
+										<td><input type="text" class="input" /></td>
+									</tr>
+									<!-- <tr>
+										<td><span class="unrequiredItem"></span>添加日期:</td>
+										<td id="time"></td>
+									</tr> -->
+									<tr>
+										<td class=""><span class="requiredItem"></span>状态:</td>
+										<td>
+											<input name="select" type="radio" checked />启用
+											<input name="select" type="radio" />停用
+											<!-- <select class="input">
+												<option value="1">启用</option>
+												<option value="2">停用</option>
+											</select> -->
+										</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+						<div class="modal-footer">
+							<button type="button" class="btn btn-info " >保存</button>
+							<button type="button" class="btn btn-secondary " data-dismiss="modal">关闭</button>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- 编辑用户 -->
+			<div class="modal fade" id="userModal" tabindex="-1" role="dialog" aria-lableledby="userModalCenterTitle"
+			 aria-hidden="true">
+				<div class="modal-dialog  modal-dialog-centered" role="document">
+					<div class="modal-content">
+						<div class="modal-header">
+							<h6 class="modal-title" id="userModalLongTitle">编辑用户</h6>
+							<button type="button" class="close" data-dismiss="modal" aria-lable="Close"><span class="modal-icon" aria-hidden="true">&times;</span></button>
+						</div>
+						<div class="modal-body">
+							<table class="table table-sm  modal-table" style="text-align: left;">
+								<tbody>
+									<tr>
+										<td width="15%">
+											<span class="requiredItem"></span>账号:</td>
+										<td width="85%"><input type="text" class="input" value="zhangheng@163.com" /></td>
+									</tr>
+									<tr>
+										<td ><span class="requiredItem"></span>密码:</td>
+										<td ><input type="text" class="input" value="123" /></td>
+									</tr>
+									<tr>
+										<td><span class="requiredItem"></span>角色:</td>
+										<td>
+											<select class="input">
+												<option value="1">管理员</option>
+												<option value="2">超级管理员</option>
+												<option value="3">超级用户</option>
+											</select>
+										</td>
+									</tr>
+									<tr>
+										<td><span class="requiredItem"></span>姓名:</td>
+										<td><input type="text" class="input" value="张恒" /></td>
+
+									</tr>
+									<tr>
+										<td><span class="unrequiredItem"></span>电话:</td>
+										<td><input type="text" class="input" value="15022223334" /></td>
+									</tr>
+									<tr>
+										<td><span class="unrequiredItem"></span>地址:</td>
+										<td><input type="text" class="input" value="上海浦东" /></td>
+									</tr>
+									<tr>
+										<td><span class="requiredItem"></span>状态:</td>
+										<td>
+											<input name="select1" type="radio" checked />启用
+											<input name="select1" type="radio" />停用
+										</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+						<div class="modal-footer">
+							<button type="button" class="btn btn-info " >保存</button>
+							<button type="button" class="btn btn-secondary " data-dismiss="modal">关闭</button>
+						</div>
+					</div>
+				</div>
+			</div>
+	</body>
+	<script>
+		$(document).ready(function() {
+			var x = $("#id1").css("display")
+			$("#show").click(function() {
+				$("#id1").show();
+				$("#show").hide();
+				$("#hide").show();
+			});
+			$("#hide").click(function() {
+				$("#id1").hide();
+				$("#show").show();
+				$("#hide").hide();
+			});
+		});
+		$(document).ready(function() {
+			$("#15452").click(function() {
+				$("#showslow").animate({
+					right: '250px',
+				});
+			});
+		});
+		$(function() {
+			$(".requiredItem").html("*");
+			$(".unrequiredItem").html("&nbsp;&nbsp;");
+			$(".requiredItem").css("color", "red");
+		});
+		var options = {};
+		$(function() {
+			$(".btn-newUser").click(function() {
+				$("#userModalCenter").modal(options);
+			})
+			$(".btn-editUser").click(function() {
+				$("#userModal").modal(options);
+			})
+		})
+	</script>
+
+</html>

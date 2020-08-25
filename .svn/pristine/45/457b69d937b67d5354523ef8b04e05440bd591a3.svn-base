@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<title>编辑采购单</title>
+	<link rel="stylesheet" type="text/css" href="../css/bootstrap.min.css" />
+	<link rel="stylesheet" type="text/css" href="../style.css" />
+	<script src=" ../js/jquery-1.11.0.js"></script>
+	<script type="text/javascript" src="../js/bootstrap.min.js"></script>
+</head>
+
+<body>
+	<div class="body addDeviceDetails">
+		<div>
+			<div style="font-size:18px;margin-top:3%;"><a onclick="window.history.back()" href="#" class="linkFile">
+					<<返回 </a>
+			</div>
+			<p class="tblTitle">编辑采购单</p>
+			<table class="tblDetail" width="800" border="1" bordercolor="000000" cellpadding="0" cellspacing="0">
+				<tbody>
+					<tr>
+						<td colspan="4" class="headtr">基本信息</td>
+					</tr>
+					<tr>
+					<tr>
+						<td class="tdDetailHead" width="20%">采购单编号</td>
+						<td width="30%" class="inputContent disableContent">
+							CGD00000001
+						</td>
+						<td class="tdDetailHead" width="20%">请求人</td>
+						<td width="30%" class="inputContent disableContent">
+							超级管理员
+						</td>
+					</tr>
+					<td class="tdDetailHead" width="20%">采购日期</td>
+					<td width="30%" class="inputContent">
+						<input type="date" class="deviceName" value="2020-04-01" name="deviceName" />
+					</td>
+					<td class="tdDetailHead" width="20%">到货日期</td>
+					<td width="30%" class="inputContent">
+						<input type="date" class="deviceName" value="2020-05-01" name="deviceName" />
+					</td>
+					</tr>
+					<tr>
+						<td class="tdDetailHead" width="20%">供应商</td>
+						<td width="30%" class="inputContent">
+							<input type="text" class="deviceName" value="飞利浦" /><img src="../img/find.png"
+								class="update">
+						</td>
+						<td class="tdDetailHead" width="20%">备注</td>
+						<td class="inputContent">
+							<input type="text" class="deviceName" value="医用磁共振" name="deviceName" />
+						</td>
+					</tr>
+				</tbody>
+			</table>
+			<br />
+			<table class="tblDetail" width="800" border="1" bordercolor="000000" cellpadding="0" cellspacing="0">
+				<tbody>
+					<tr>
+						<td colspan="10" style="border-right: none;width:95%" class="headtr">零件信息 <span
+								class="btn btn-info btn-sm btn-newComponent" style="float: right;">新增零件</span></td>
+					</tr>
+					<tr>
+						<td class="tdDetailHead">简称</td>
+						<td class="tdDetailHead">描述</td>
+						<td class="tdDetailHead">规格</td>
+						<td class="tdDetailHead">型号</td>
+						<td class="tdDetailHead">类型</td>
+						<td class="tdDetailHead">关联设备</td>
+						<td class="tdDetailHead">单价</td>
+						<td class="tdDetailHead">数量</td>
+						<td class="tdDetailHead" style="min-width: 50px;" scope="col">删除</td>
+					</tr>
+					<tr>
+						<td><input style="width:80px;" type="text" value="探测器" /></td>
+						<td><input style="width:80px;" type="text" value="CT机探测器" /></td>
+						<td><input class="input" type="text" value="0.5规格" /></td>
+						<td><input class="input" type="text" value="0301" /></td>
+						<td><input style="width:80px;" type="text" value="重要零件" /></td>
+						<td><input style="width:80px;" text="text" value="CT机" /></td>
+						<td><input style="width:80px;" type="text" value="3580000" /></td>
+						<td><input style="width:80px;" type="number" value="10" /></td>
+						<td><img src="../img/delete.png"></td>
+					</tr>
+				</tbody>
+			</table>
+			<br />
+			<table class="tblDetail" width="800" border="1" bordercolor="000000" cellpadding="0" cellspacing="0">
+				<tbody>
+					<tr>
+						<td colspan="9" style="border-right: none;width:95%" class="headtr">耗材 <span
+								class="btn btn-info btn-sm btn-newConsumables" style="float: right;">新增耗材</span></td>
+					</tr>
+					<tr>
+						<th class="tdDetailHead">简称</th>
+						<th class="tdDetailHead">描述</th>
+						<td class="tdDetailHead">规格</td>
+						<td class="tdDetailHead">型号</td>
+						<td class="tdDetailHead">关联富士II类</td>
+						<th class="tdDetailHead">单价</th>
+						<th class="tdDetailHead" scope="col">数量</th>
+						<th class="tdDetailHead" style="min-width: 50px;" scope="col">删除</th>
+					</tr>
+					<tr>
+						<td><input style="width:80px;" type="text" value="探测器" /></td>
+						<td><input style="width:80px;" type="text" value="CT机探测器" /></td>
+						<td><input class="input" type="text" value="0.5规格" /></td>
+						<td><input class="input" type="text" value="0301" /></td>
+						<td><input style="width:80px;" text="text" value="医用刀类" /></td>
+						<td><input style="width:80px;" type="text" value="3580000" /></td>
+						<td><input style="width:60px;" type="number" value="10" /></td>
+						<td><img src="../img/delete.png" style="width:20px"></td>
+					</tr>
+				</tbody>
+			</table>
+			<br />
+			<table class="tblDetail" width="800" border="1" bordercolor="000000" cellpadding="0" cellspacing="0">
+				<tbody>
+					<tr>
+						<td colspan="7" style="border-right: none;width:95%" class="headtr">服务 <span
+								class="btn btn-info btn-sm btn-newService" style="float: right;">新增服务</span></td>
+					</tr>
+					<tr>
+						<th class="tdDetailHead">服务名称</th>
+						<td class="tdDetailHead">关联富士II类</td>
+						<th class="tdDetailHead">金额(元)</th>
+						<th class="tdDetailHead">服务开始时间</th>
+						<th class="tdDetailHead">服务结束时间</th>
+						<th class="tdDetailHead" scope="col">服务次数</th>
+						<th class="tdDetailHead" scope="col">删除</th>
+					</tr>
+					<tr>
+						<td>维修服务</td>
+						<td>医用刀类</td>
+						<td>1000</td>
+						<td>2020-05-01</td>
+						<td>2021-04-30</td>
+						<td>10</td>
+						<td><img src="../img/delete.png" style="width:20px"></td>
+					</tr>
+				</tbody>
+			</table>
+			<br />
+			<table border="0" width="800" class="tblDetail" style="text-align: center;">
+				<tbody>
+					<tr>
+						<td><button class="btn btn-info"><span>保存</span></button></td>
+						<td><button class="btn btn-info"><span>提交</span></button></td>
+						<td><button class="btn btn-info" onclick="window.history.back()"><span>返回</span></button></td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
+	<!-- 新增零件 -->
+	<div class="modal fade" id="Component" tabindex="-1" role="dialog" aria-hidden="true">
+		<div class="modal-dialog  modal-dialog-centered" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h6 class="modal-title" id="userModalLongTitle">添加零件</h6>
+					<button type="button" class="close" data-dismiss="modal" aria-lable="Close"><span class="modal-icon"
+							aria-hidden="true">&times;</span></button>
+				</div>
+				<div class="modal-body">
+					<table class="table table-sm  table-input modal-table" style="text-align: left;">
+						<tbody>
+							<tr>
+								<td width="20%" class=""><span class="requiredItem">*</span>关联设备:</td>
+								<td width="80%">
+									<input type="text" class="input" />
+									<img src="../img/find.png" class="update" />
+								</td>
+							</tr>
+							<tr>
+								<td width="20%" class=""><span class="requiredItem">*</span>选择零件:</td>
+								<td width="80%">
+									<input type="text" class="input" />
+									<img src="../img/find.png" class="update searchComponent" />
+								</td>
+							</tr>
+							<tr>
+								<td class=""><span class="requiredItem">*</span>规格:</td>
+								<td><input type="text" class="input" /></td>
+							</tr>
+							<tr>
+								<td class=""><span class="requiredItem">*</span>型号:</td>
+								<td><input type="text" class="input" /></td>
+							</tr>
+							<tr>
+								<td class=""><span class="requiredItem">*</span>单价:</td>
+								<td><input type="text" class="input" /></td>
+							</tr>
+							<tr>
+								<td class=""><span class="requiredItem">*</span>数量:</td>
+								<td><input type="number" class="input" /></td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-info ">保存</button>
+					<button type="button" class="btn btn-secondary " data-dismiss="modal">关闭</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- 选择零件 -->
+	<div class="modal fade" id="SearchComponent" tabindex="-1" role="dialog" aria-hidden="true">
+		<div class="modal-dialog modal-blg modal-dialog-centered" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h6 class="modal-title" id="userModalLongTitle">选择零件</h6>
+					<button type="button" class="close" data-dismiss="modal" aria-lable="Close"><span class="modal-icon"
+							aria-hidden="true">&times;</span></button>
+				</div>
+				<div class="modal-body">
+					<table class="operationTable">
+						<tr>
+							<td>
+								<table>
+									<tr>
+										<td>
+											状态：
+											<select>
+												<option>全部</option>
+												<option>启用</option>
+												<option>停用</option>
+											</select>&nbsp;&nbsp;
+										</td>
+										<td>
+											搜索：
+											<select>
+												<option>简称</option>
+												<option>描述</option>
+											</select>&nbsp;&nbsp;
+											<input type="text" /><img src="../img/icons8-search-48.png" class="update">
+										</td>
+									</tr>
+								</table>
+							</td>
+
+						</tr>
+					</table>
+					<table class="table" cellspacing="0px" cellpadding="5px">
+						<thead class="thead-light">
+							<tr>
+								<th scope="col">富士II类</th>
+								<th scope="col" style="color:#17A2B8;">简称<span class="sortIcon">▼</span></th>
+								<th scope="col">描述</th>
+								<th scope="col">类型</th>
+								<th scope="col">标准单价（元）</th>
+								<th scope="col">标准使用量</th>
+								<th scope="col">是否参与估值</th>
+								<th scope="col">状态</th>
+								<th scope="col">选择</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td>医用刀类</td>
+								<td>CT机探测器</td>
+								<td>CT类CT机探测器</td>
+								<td>重要零件</td>
+								<td>3580000</td>
+								<td>200</td>
+								<td>是</td>
+								<td>启用</td>
+								<td><input type="radio" name="componentSelect" /></td>
+							</tr>
+							<tr>
+								<td>医用刀类</td>
+								<td>DR探测器</td>
+								<td>普放类DR探测器</td>
+								<td>一般零件</td>
+								<td>3580000</td>
+								<td>200</td>
+								<td>否</td>
+								<td>启用</td>
+								<td><input type="radio" name="componentSelect" /></td>
+							</tr>
+							<tr>
+								<td>医用刀类</td>
+								<td>CT球管</td>
+								<td>CT类CT机球管</td>
+								<td>CT球管</td>
+								<td>3580000</td>
+								<td>200</td>
+								<td>是</td>
+								<td>启用</td>
+								<td><input type="radio" name="componentSelect" /></td>
+							</tr>
+							<tr>
+								<td><button class="btn btn-info btn-sm editComponent">添加零件</button></td>
+								<td colspan="18">
+									<div class="pagenationDiv">
+										<nav aria-lable="Page navigation example">
+											<ul class="pagination">
+												<li class="page-item">
+													<a class="page-link" href="#">首页</a>
+												</li>
+												<li class="page-item">
+													<a class="page-link" href="#">上一页</a>
+												</li>
+												<li class="page-item">
+													<a class="page-link" href="#">1</a>
+												</li>
+												<li class="page-item">
+													<a class="page-link" href="#">2</a>
+												</li>
+												<li class="page-item">
+													<a class="page-link" href="#">3</a>
+												</li>
+												<li class="page-item">
+													<a class="page-link" href="#">下一页</a>
+												</li>
+												<li class="page-item">
+													<a class="page-link" href="#">末页</a>
+												</li>
+											</ul>
+										</nav>
+									</div>
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-info ">保存</button>
+					<button type="button" class="btn btn-secondary " data-dismiss="modal">关闭</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- 新增耗材 -->
+	<div class="modal fade" id="Consumables" tabindex="-1" role="dialog" aria-hidden="true">
+		<div class="modal-dialog  modal-dialog-centered" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h6 class="modal-title" id="userModalLongTitle">添加耗材</h6>
+					<button type="button" class="close" data-dismiss="modal" aria-lable="Close"><span class="modal-icon"
+							aria-hidden="true">&times;</span></button>
+				</div>
+				<div class="modal-body">
+					<table class="table table-sm  table-input modal-table" style="text-align: left;">
+						<tbody>
+							<tr>
+								<td width="25%" class=""><span class="requiredItem">*</span>关联富士II类:</td>
+								<td width="75%">
+									<select class="deviceType">
+										<option value="1">医用刀类</option>
+										<option value="6801">医用激光类</option>
+										<option value="6802">灯床塔</option>
+									</select>
+								</td>
+							</tr>
+							<tr>
+								<td width="20%" class=""><span class="requiredItem">*</span>选择耗材:</td>
+								<td width="80%">
+									<input type="text" class="input" />
+									<img src="../img/find.png" class="update searchConsumable" />
+								</td>
+							</tr>
+							<tr>
+								<td class=""><span class="requiredItem">*</span>规格:</td>
+								<td><input type="text" class="input" /></td>
+							</tr>
+							<tr>
+								<td class=""><span class="requiredItem">*</span>型号:</td>
+								<td><input type="text" class="input" /></td>
+							</tr>
+							<tr>
+								<td class=""><span class="requiredItem">*</span>单价:</td>
+								<td><input type="text" class="input" /></td>
+							</tr>
+							<tr>
+								<td class=""><span class="requiredItem">*</span>数量:</td>
+								<td><input type="number" class="input" /></td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-info ">保存</button>
+					<button type="button" class="btn btn-secondary " data-dismiss="modal">关闭</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- 选择耗材 -->
+	<div class="modal fade" id="SearchConsumable" tabindex="-1" role="dialog" aria-hidden="true">
+		<div class="modal-dialog modal-blg modal-dialog-centered" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h6 class="modal-title" id="userModalLongTitle">选择耗材</h6>
+					<button type="button" class="close" data-dismiss="modal" aria-lable="Close"><span class="modal-icon"
+							aria-hidden="true">&times;</span></button>
+				</div>
+				<div class="modal-body">
+					<table class="operationTable">
+						<tr>
+							<td>
+								<table>
+									<tr>
+										<td>
+											状态：
+											<select>
+												<option>全部</option>
+												<option>启用</option>
+												<option>停用</option>
+											</select>&nbsp;&nbsp;
+										</td>
+										<td>
+											搜索：
+											<select>
+												<option>简称</option>
+												<option>描述</option>
+											</select>&nbsp;&nbsp;
+											<input type="text" /><img src="../img/icons8-search-48.png" class="update">
+										</td>
+									</tr>
+								</table>
+							</td>
+
+						</tr>
+					</table>
+					<table class="table" cellspacing="0px" cellpadding="5px">
+						<thead class="thead-light">
+							<tr>
+								<th style="min-width: 50px;" scope="col">富士II类</th>
+								<th style="min-width: 50px;" scope="col" style="color:#17A2B8;">简称<span
+										class="sortIcon">▼</span></th>
+								<th style="min-width: 50px;" scope="col">描述</th>
+								<th style="min-width: 50px;" scope="col">类型</th>
+								<th style="min-width: 50px;" scope="col">更换频率（次/年）</th>
+								<th style="min-width: 50px;" scope="col">单次保养耗材成本（元）</th>
+								<th style="min-width: 50px;" scope="col">标准单价（元）</th>
+								<th style="min-width: 50px;" scope="col">是否参与估值</th>
+								<th style="min-width: 50px;" scope="col">状态</th>
+								<th style="min-width: 50px;" scope="col">选择</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td>医用刀类</td>
+								<td>过滤器</td>
+								<td>呼吸机</td>
+								<td>定期</td>
+								<td>2</td>
+								<td>1000</td>
+								<td>1600</td>
+								<td>是</td>
+								<td>启用</td>
+								<td><input type="radio" name="consumableSelect" /></td>
+							</tr>
+							<tr>
+								<td>医用刀类</td>
+								<td>导联线</td>
+								<td>心电监护仪</td>
+								<td>定量</td>
+								<td>2</td>
+								<td>1000</td>
+								<td>1600</td>
+								<td>否</td>
+								<td>启用</td>
+								<td><input type="radio" name="consumableSelect" /></td>
+							</tr>
+							<tr>
+								<td>医用刀类</td>
+								<td>氧电池</td>
+								<td>麻醉机</td>
+								<td>小额成本</td>
+								<td>2</td>
+								<td>1000</td>
+								<td>2000</td>
+								<td>是</td>
+								<td>启用</td>
+								<td><input type="radio" name="consumableSelect" /></td>
+							</tr>
+							<tr>
+								<td><button class="btn btn-info btn-sm editConsumable">添加耗材</button></td>
+								<td colspan="18">
+									<div class="pagenationDiv">
+										<nav aria-lable="Page navigation example">
+											<ul class="pagination">
+												<li class="page-item">
+													<a class="page-link" href="#">首页</a>
+												</li>
+												<li class="page-item">
+													<a class="page-link" href="#">上一页</a>
+												</li>
+												<li class="page-item">
+													<a class="page-link" href="#">1</a>
+												</li>
+												<li class="page-item">
+													<a class="page-link" href="#">2</a>
+												</li>
+												<li class="page-item">
+													<a class="page-link" href="#">3</a>
+												</li>
+												<li class="page-item">
+													<a class="page-link" href="#">下一页</a>
+												</li>
+												<li class="page-item">
+													<a class="page-link" href="#">末页</a>
+												</li>
+											</ul>
+										</nav>
+									</div>
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-info ">保存</button>
+					<button type="button" class="btn btn-secondary " data-dismiss="modal">关闭</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- 新增服务 -->
+	<div class="modal fade" id="Service" tabindex="-1" role="dialog" aria-hidden="true">
+		<div class="modal-dialog  modal-dialog-centered" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h6 class="modal-title" id="userModalLongTitle">添加服务</h6>
+					<button type="button" class="close" data-dismiss="modal" aria-lable="Close"><span class="modal-icon"
+							aria-hidden="true">&times;</span></button>
+				</div>
+				<div class="modal-body">
+					<table class="table table-sm  table-input modal-table" style="text-align: left;">
+						<tbody>
+							<tr>
+								<td width="25%" class=""><span class="requiredItem">*</span>关联富士II类:</td>
+								<td width="75%">
+									<select class="deviceType">
+										<option value="1">医用刀类</option>
+										<option value="6801">医用激光类</option>
+										<option value="6802">灯床塔</option>
+									</select>
+								</td>
+							</tr>
+							<tr>
+								<td class=""><span class="requiredItem">*</span>服务名称:</td>
+								<td>
+									<input type="text" class="input" />
+								</td>
+							</tr>
+							<tr>
+								<td class=""><span class="requiredItem">*</span>金额(元):</td>
+								<td><input type="text" class="input" /></td>
+							</tr>
+							<tr>
+								<td class=""><span class="requiredItem">*</span>服务开始时间:</td>
+								<td><input type="date" class="input" /></td>
+							</tr>
+							<tr>
+								<td class=""><span class="requiredItem">*</span>服务结束时间:</td>
+								<td><input type="date" class="input" /></td>
+							</tr>
+							<tr>
+								<td class=""><span class="requiredItem">*</span>服务次数:</td>
+								<td><input type="number" class="input" /></td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-info ">保存</button>
+					<button type="button" class="btn btn-secondary " data-dismiss="modal">关闭</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- 编辑零件 -->
+	<div class="modal fade" id="EditComponent" tabindex="-1" role="dialog" aria-hidden="true">
+		<div class="modal-dialog  modal-dialog-centered" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h6 class="modal-title" id="userModalLongTitle">添加零件</h6>
+					<button type="button" class="close" data-dismiss="modal" aria-lable="Close"><span class="modal-icon"
+							aria-hidden="true">&times;</span></button>
+				</div>
+				<div class="modal-body">
+					<table class="table table-sm  modal-table" style="text-align: left;">
+						<tbody>
+							<tr>
+								<td width="30%" class=""><span class="requiredItem">*</span>富士II类:</td>
+								<td width="70%">
+									<select class="deviceType">
+										<option value="1">医用刀类</option>
+										<option value="6801">医用激光类</option>
+										<option value="6802">灯床塔</option>
+									</select>
+								</td>
+							</tr>
+							<tr>
+								<td width="30%" class=""><span class="requiredItem">*</span>简称:</td>
+								<td width="70%"><input type="text" class="input" value="" /></td>
+							</tr>
+							<tr>
+								<td class=""><span class="requiredItem">*</span>描述:</td>
+								<td><input type="text" class="input" value="" /></td>
+							</tr>
+							<tr>
+								<td class=""><span class="requiredItem">*</span>类型:</td>
+								<td><select class="deviceType">
+										<option value="1">重要零件</option>
+										<option value="2">一般零件</option>
+										<option value="3">CT球管</option>
+									</select></td>
+							</tr>
+							<tr>
+								<td class=""><span class="requiredItem"></span>标准单价（元）:</td>
+								<td><input type="text" class="input" value="" /></td>
+							</tr>
+							<tr>
+								<td class=""><span class="requiredItem">*</span>标准使用量(CT日使用人次):</td>
+								<td><input type="text" class="input" value="" /></td>
+							</tr>
+							<tr>
+								<td class=""><span class="requiredItem">*</span>CT球管理论寿命秒次:</td>
+								<td><input type="text" class="input" value="" /></td>
+							</tr>
+							<tr>
+								<td class=""><span class="requiredItem">*</span>秒次/人:</td>
+								<td><input type="text" class="input" value="" /></td>
+							</tr>
+							<tr>
+								<td class=""><span class="requiredItem">*</span>是否参与估值:</td>
+								<td><input name="selectComponent" type="radio" />是
+									<input name="selectComponent" type="radio" checked />否</td>
+							</tr>
+							<tr>
+								<td class=""><span class="requiredItem">*</span>状态:</td>
+								<td><input name="select" type="radio" checked />启用
+									<input name="select" type="radio" />停用</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-info ">保存</button>
+					<button type="button" class="btn btn-secondary " data-dismiss="modal">关闭</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- 编辑耗材 -->
+	<div class="modal fade" id="EditConsumable" tabindex="-1" role="dialog" aria-hidden="true">
+		<div class="modal-dialog modal-dialog-centered" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h6 class="modal-title" id="userModalLongTitle">添加耗材</h6>
+					<button type="button" class="close" data-dismiss="modal" aria-lable="Close"><span class="modal-icon"
+							aria-hidden="true">&times;</span></button>
+				</div>
+				<div class="modal-body">
+					<table class="table table-sm  modal-table" style="text-align: left;">
+						<tbody>
+							<tr>
+								<td width="40%" class=""><span class="requiredItem">*</span>富士II类:</td>
+								<td width="60%">
+									<select class="deviceType">
+										<option value="1">医用刀类</option>
+										<option value="6801">医用激光类</option>
+										<option value="6802">灯床塔</option>
+									</select>
+								</td>
+							</tr>
+							<tr>
+								<td width="40%">
+									<span class="requiredItem">*</span>简称:</td>
+								<td width="60%"><input type="text" class="input" value="" /></td>
+							</tr>
+							<tr>
+								<td><span class="requiredItem">*</span>描述:</td>
+								<td><input type="text" class="input" value="" /></td>
+							</tr>
+							<tr>
+								<td><span class="requiredItem">*</span>类型:</td>
+								<td>
+									<select class="deviceType">
+										<option value="1">定期</option>
+										<option value="2">定量</option>
+										<option value="3">小额成本</option>
+									</select>
+								</td>
+							</tr>
+							<tr>
+								<td class=""><span class="requiredItem">*</span>更换频率（次/年）:</td>
+								<td><input type="text" class="input" value="" /></td>
+							</tr>
+							<tr>
+								<td class=""><span class="requiredItem">*</span>单次保养耗材成本（元）:</td>
+								<td><input type="text" class="input" value="" /></td>
+							</tr>
+							<tr>
+								<td class=""><span class="unrequiredItem"></span>标准单价（元）:</td>
+								<td><input type="text" class="input" value="" /></td>
+							</tr>
+							<tr>
+								<td class=""><span class="requiredItem">*</span>是否参与估值:</td>
+								<td><input name="selectFore" type="radio" />是
+									<input name="selectFore" type="radio" checked />否</td>
+							</tr>
+							<tr>
+								<td><span class="requiredItem"></span>状态:</td>
+								<td>
+									<input name="select1" type="radio" checked />启用
+									<input name="select1" type="radio" />停用
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-info ">保存</button>
+					<button type="button" class="btn btn-secondary " data-dismiss="modal">关闭</button>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+<script>
+	var options = {};
+	$(function () {
+		$(".btn-newLpj").click(function () {
+			$("#lpjModalCenter").modal(options);
+		})
+
+		$(".btn-newComponent").click(function () {
+			$("#Component").modal(options);
+		})
+		$(".btn-newConsumables").click(function () {
+			$("#Consumables").modal(options);
+		})
+		$(".btn-newService").click(function () {
+			$("#Service").modal(options);
+		})
+
+		$(".editComponent").click(function () {
+			$("#EditComponent").modal(options);
+		})
+		$(".editConsumable").click(function () {
+			$("#EditConsumable").modal(options);
+		})
+		$(".searchComponent").click(function () {
+			$("#SearchComponent").modal(options);
+		})
+		$(".searchConsumable").click(function () {
+			$("#SearchConsumable").modal(options);
+		})
+	})
+</script>
+
+</html>

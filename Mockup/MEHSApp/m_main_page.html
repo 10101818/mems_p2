@@ -1,0 +1,147 @@
+<!DOCTYPE <!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>管理员主页</title>
+	<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+	<link type="text/css" rel="stylesheet" href="css/materialize.css"  media="screen,projection"/>
+	<link type="text/css" rel="stylesheet" href="css/style.css"  media="screen,projection"/>
+    <!--Let browser know website is optimized for mobile-->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <script src="js/lib.js" type="text/javascript" charset="utf-8" async defer></script>
+</head>
+<body>
+	<div class="container">
+		<div class="row top-row">
+			<div class="header">
+				<div class="row">
+					<div class="col s9">
+						<span>设备管理系统</span>
+					</div>
+					<div class="col s3">
+						<span>
+							<i class="material-icons icon-header">face</i>
+						</span>
+						<span>Jin</span>
+					</div>
+				</div>
+			</div>
+			<div class="top-menu">
+				<div class="row">
+					<div class="col s3 center waves-effect waves-teal" onclick="navigateTo('m_audit_request_page')">
+						<div class="icon-top">
+							<span class="menu-badge">1</span>
+							<i class="material-icons icon-md">assignment_late</i>
+						</div>
+						<div class="text-btm">待审批请求</div>
+					</div>
+					<div class="col s3 center waves-effect waves-teal" onclick="navigateTo('m_pending_task')">
+						<div class="icon-top">
+							<span class="menu-badge">2</span>
+							<i class="material-icons icon-md">hourglass_full</i>
+						</div>
+						<div class="text-btm">待派工请求</div>
+					</div>
+					<div class="col s3 center waves-effect waves-teal" onclick="navigateTo('m_repair_audit_page')">
+						<div class="icon-top">
+							<span class="menu-badge">3</span>
+							<i class="material-icons icon-md">event_note</i>
+						</div>
+						<div class="text-btm">待审核工单</div>
+					</div>
+					<div class="col s3 center waves-effect waves-teal" onclick="navigateTo('m_update_request_list')">
+						<div class="icon-top">
+							<span class="menu-badge">3</span>
+							<i class="material-icons icon-md">people</i>
+						</div>
+						<div class="text-btm">待更新请求</div>
+					</div>
+				</div>
+			</div>
+			<div class="sub-menu">
+				<div class="row" style="margin-bottom: 0px;">
+					<div class="col s4 center">
+						<div class="item-body">
+							<div class="icon-container waves-effect waves-teal">
+								<i class="material-icons icon-sm">build</i>
+							</div>
+							<div class="text-footer">维修</div>
+						</div>
+					</div>
+					<div class="col s4 center">
+						<div class="item-body">
+							<div class="icon-container waves-effect waves-teal" >
+								<i class="material-icons icon-sm">assignment_turned_in</i>
+							</div>
+							<div class="text-footer">保养</div>
+						</div>
+					</div>
+					<div class="col s4 center">
+						<div class="item-body">
+							<div class="icon-container waves-effect waves-teal" >
+								<i class="material-icons icon-sm">people</i>
+							</div>
+							<div class="text-footer">巡检</div>
+						</div>
+					</div>
+				</div>
+				<div class="row" style="margin-bottom: 0px;">
+					<div class="col s4 center">
+						<div class="item-body">
+							<div class="icon-container waves-effect waves-teal" >
+								<i class="material-icons icon-sm">thumb_down</i>
+							</div>
+							<div class="text-footer">不良</div>
+						</div>
+					</div>
+					<div class="col s4 center">
+						<div class="item-body">
+							<div class="icon-container waves-effect waves-teal" >
+								<i class="material-icons icon-sm">store</i>
+							</div>
+							<div class="text-footer">强检</div>
+						</div>
+					</div>
+					<div class="col s4 center">
+						<div class="item-body">
+							<div class="icon-container waves-effect waves-teal" >
+								<i class="material-icons icon-sm">remove_red_eye</i>
+							</div>
+							<div class="text-footer">校正</div>
+						</div>
+					</div>
+				</div>
+				<div class="row" style="margin-bottom: 0px;">
+					<div class="col s4 center">
+						<div class="item-body">
+							<div class="icon-container waves-effect waves-teal" >
+								<i class="material-icons icon-sm">queue</i>
+							</div>
+							<div class="text-footer">新增设备</div>
+						</div>
+					</div>
+					<div class="col s4 center">
+						<div class="item-body">
+							<div class="icon-container waves-effect waves-teal" >
+								<i class="material-icons icon-sm">insert_chart</i>
+							</div>
+							<div class="text-footer">生命周期管理</div>
+						</div>
+					</div>
+					<div class="col s4 center">
+						<div class="item-body">
+							<div class="icon-container waves-effect waves-teal" >
+								<i class="material-icons icon-sm">bookmarks</i>
+							</div>
+							<div class="text-footer">其他服务</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!--JavaScript at end of body for optimized loading-->
+    <script type="text/javascript" src="js/materialize.min.js"></script>
+</body>
+</html>

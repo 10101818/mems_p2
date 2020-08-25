@@ -1,0 +1,2182 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width,initial-scale=1" />
+	<title></title>
+	<link rel="stylesheet" type="text/css" href="../css/bootstrap.min.css" />
+	<link rel="stylesheet" type="text/css" href="../style.css" />
+	<script src="../js/jquery-1.11.0.js"></script>
+	<script src="../js/bootstrap.min.js"></script>
+</head>
+
+<body>
+	<div>
+		<div style="width: 100%; height: 100%; display:inline-flex;">
+			<div style="width: auto; padding-right: 10px; border-right: 1px dashed gray; ">
+				<!--前提条件-->
+				<div id="Premise">
+					<div class="title" style="margin: 40px auto 0;">
+						<span>估价前提条件</span>
+					</div>
+					<table class="routeTable" border="1" cellpadding="6px" align="center" style="width: 380px;">
+						<tbody>
+							<tr>
+								<td class="headtd"><span class="requiredItem">* </span>运营实际截至月</td>
+								<td>
+									<input type="text" value="2020-04" />
+								</td>
+							</tr>
+							<tr>
+								<td class="headtd"><span class="requiredItem">* </span>合同起始月</td>
+								<td>
+									<input type="text" value="2020-04" />
+								</td>
+							</tr>
+							<tr>
+								<td class="headtd"><span class="requiredItem">* </span>预测年数</td>
+								<td>
+									<input type="text" value="1" /> 年
+								</td>
+							</tr>
+							<tr>
+								<td class="headtd"><span class="requiredItem">* </span>医院等级</td>
+								<td>
+									<select>
+										<option value="1">1</option>
+										<option value="2">2</option>
+										<option value="3">3</option>
+									</select>
+								</td>
+							</tr>
+							<tr>
+								<td class="headtd"><span class="requiredItem">* </span>导入期成本</td>
+								<td>
+									<input type="text" value="5000" /> 元
+								</td>
+							</tr>
+							<tr>
+								<td class="headtd"><span class="requiredItem">* </span>边际利润率</td>
+								<td>
+									<input type="text" value="30" /> %
+								</td>
+							</tr>
+							<tr>
+								<td class="headtd"><span class="requiredItem">* </span>风险控制度</td>
+								<td>
+									<input type="text" value="98" /> %
+								</td>
+							</tr>
+							<tr>
+								<td class="headtd"><span class="requiredItem">* </span>VaR资产金额比例</td>
+								<td>
+									<input type="text" value="1.0" /> %
+								</td>
+							</tr>
+							<tr>
+								<td class="headtd"><span class="requiredItem">&nbsp;&nbsp;</span>预测工程师数量</td>
+								<td>
+									<input type="text" value="0" disabled /> 人
+									<img src="../img/refresh.png" class="update">
+								</td>
+							</tr>
+							<tr>
+								<td class="headtd"><span class="requiredItem">* </span>预定工程师数量</td>
+								<td>
+									<input type="text" value="10" /> 人
+								</td>
+							</tr>
+							<tr>
+								<td class="headtd"><span class="requiredItem">* </span>实绩工程师数量</td>
+								<td>
+									<input type="text" value="8" /> 人
+								</td>
+							</tr>
+						</tbody>
+					</table>
+					<br>
+					<div id="btns">
+						<ul style="width: 100%;">
+							<li><button class="btn btn-outline-info btn-sm GoToEquipmentList">设备清单</button>
+								<button class="btn btn-info" style="float:right;"><span>执行</span></button>
+							</li>
+							<li><button class="btn btn-outline-info btn-sm GoToInvSpareList">备用机清单</button>
+								<button class="btn btn-info" style="float:right;"><span>保存</span></button>
+							</li>
+							<li><button class="btn btn-outline-info btn-sm GoToCoverSupplies">维保对耗材的覆盖情况</button></li>
+							<li><button class="btn btn-outline-info btn-sm GoToImportantEqpt">使用量</button></li>
+							<li>
+								<button class="btn btn-outline-info btn-sm GoToCTList">CT球管登记表</button>
+								<button class="btn btn-info" style="float:right;"><span>历史</span></button>
+							</li>
+						</ul>
+					</div>
+				</div>
+				<!--设备清单-->
+				<div id="EquipmentList" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+					<div class="modal-dialog modal-llg modal-dialog-centered" role="document" style="width: 1500px;">
+						<div class="modal-content">
+							<div class="modal-header">
+								<h6 class="modal-title">估价执行条件: 设备清单</h6>
+								<button type="button" class="close" data-dismiss="modal" aria-lable="Close"><span
+										class="modal-icon" aria-hidden="true">&times;</span></button>
+							</div>
+							<div class="modal-body">
+								<table class="operationTable">
+									<tr>
+										<td>
+											设备类型：
+											<select>
+												<option>全部</option>
+												<option>重点</option>
+												<option>次重点</option>
+												<option>一般</option>
+											</select>&nbsp;&nbsp;
+										</td>
+										<td>
+											金额：
+											<select>
+												<option>不限</option>
+												<option>0-10万</option>
+												<option>10-30万</option>
+												<option>30-50万</option>
+												<option>50-100万</option>
+												<option>100万以上</option>
+											</select>
+										</td>
+										<td width="180px">设备名称:
+											<input style="width:100px;" type="text" class="   " />
+										</td>
+										<td width="200px">设备序列号:
+											<input style="width:100px" type="text" class="   " />
+										</td>
+										<td>
+											科室名称：
+											<input style="width:100px;" type="text" />
+										</td>
+										<td>
+											富士I类：
+											<select class="deviceType">
+												<option value="0">全部</option>
+												<option value="1">医用激光类</option>
+												<option value="6801">医用刀类</option>
+												<option value="6802">灯床塔</option>
+												<option value="6807">输注泵</option>
+											</select>&nbsp;&nbsp;
+										</td>
+										<td>
+											富士II类：
+											<select class="deviceType">
+												<option value="0">全部</option>
+												<option value="1">医用激光类</option>
+												<option value="6801">医用刀类</option>
+												<option value="6802">灯床塔</option>
+												<option value="6807">输注泵</option>
+											</select>&nbsp;&nbsp;
+										</td>
+										<td>搜索:
+											<select name="" class="">
+												<option value="">系统编号</option>
+												<option value="">资产编号</option>
+												<option value="">设备型号</option>
+											</select>
+											<input type="text" class=" shortInput  " style="width:100px;" /><img
+												src="../img/icons8-search-48.png" alt="" class="update" />
+										</td>
+									</tr>
+									<tr>
+									</tr>
+								</table>
+								<table class="table" cellspacing="0px" cellpadding="5px">
+									<thead class="thead-light">
+										<tr>
+											<th style="min-width: 100px;color:#17A2B8;">系统编号<span
+													class="sortIcon">▼</span></th>
+											<th style="min-width: 100px;color:#17A2B8;">资产编号</th>
+											<th style="min-width: 100px;">名称</th>
+											<th style="min-width: 100px;">设备序列号</th>
+											<th style="min-width: 100px;">厂商</th>
+											<th style="min-width: 100px;">科室</th>
+											<th style="min-width: 100px;">富士II类名称</th>
+											<th style="min-width: 100px;">目前维保种类</th>
+											<th style="min-width: 100px;">维保到期日</th>
+											<th style="min-width: 100px;">下期维保种类</th>
+										</tr>
+									</thead>
+									<tbody>
+										<tr>
+											<td>ZC00000001</td>
+											<td>LSRM002020300006</td>
+											<td>全自动生化分析仪</td>
+											<td>77870227787</td>
+											<td>卡尔史托斯</td>
+											<td>麻醉手术室</td>
+											<td>医用刀类</td>
+											<td>
+												<select>
+													<option selected>全保</option>
+													<option>技术保</option>
+													<option>不保</option>
+												</select>
+											</td>
+											<td><input style="width:140px" type="date" value="2020-04-17" /></td>
+											<td>
+												<select>
+													<option>全保</option>
+													<option>技术保</option>
+													<option selected>不保</option>
+												</select>
+											</td>
+										</tr>
+										<tr>
+											<td>ZC00000002</td>
+											<td>LSRM000001857</td>
+											<td>CT机</td>
+											<td>SOMATOM huanyue</td>
+											<td>西门子</td>
+											<td>放射科</td>
+											<td>医用刀类</td>
+											<td>
+												<select>
+													<option>全保</option>
+													<option selected>技术保</option>
+													<option>不保</option>
+												</select>
+											</td>
+											<td><input style="width:140px" type="date" value="2020-04-17" /></td>
+											<td>
+												<select>
+													<option>全保</option>
+													<option>技术保</option>
+													<option selected>不保</option>
+												</select>
+											</td>
+										</tr>
+										<tr>
+											<td>ZC00000003</td>
+											<td>LSRM002021500001</td>
+											<td>呼吸机</td>
+											<td>Servo-s</td>
+											<td>迈柯唯</td>
+											<td>重症医学科</td>
+											<td>医用激光类</td>
+											<td>
+												<select>
+													<option>全保</option>
+													<option>技术保</option>
+													<option selected>不保</option>
+												</select>
+											</td>
+											<td><input style="width:140px" type="date" value="2020-04-20" /></td>
+											<td>
+												<select>
+													<option>全保</option>
+													<option>技术保</option>
+													<option selected>不保</option>
+												</select>
+											</td>
+										</tr>
+										<tr>
+											<td>ZC00000004</td>
+											<td>LSRM002021000004</td>
+											<td>超声诊断仪</td>
+											<td>Voluson E8</td>
+											<td>GE</td>
+											<td>功能科</td>
+											<td>灯床塔</td>
+											<td>
+												<select>
+													<option>全保</option>
+													<option>技术保</option>
+													<option selected>不保</option>
+												</select>
+											</td>
+											<td><input style="width:140px" type="date" value="2020-04-20" /></td>
+											<td>
+												<select>
+													<option>全保</option>
+													<option>技术保</option>
+													<option selected>不保</option>
+												</select>
+											</td>
+										</tr>
+										<tr>
+											<td>ZC00000005</td>
+											<td>LSRM002020300004</td>
+											<td>医用磁共振成像系统</td>
+											<td>飞利浦781-296</td>
+											<td>飞利浦</td>
+											<td>核磁共振</td>
+											<td>医用刀类</td>
+											<td>
+												<select>
+													<option selected>全保</option>
+													<option>技术保</option>
+													<option>不保</option>
+												</select>
+											</td>
+											<td><input style="width:140px" type="date" value="2020-04-20" /></td>
+											<td>
+												<select>
+													<option>全保</option>
+													<option>技术保</option>
+													<option selected>不保</option>
+												</select>
+											</td>
+										</tr>
+										<tr>
+											<td>ZC00000001</td>
+											<td>LSRM002020300006</td>
+											<td>彩超</td>
+											<td>HA 710 二郎神</td>
+											<td>日立</td>
+											<td>功能科</td>
+											<td>医用激光类</td>
+											<td>
+												<select>
+													<option selected>全保</option>
+													<option>技术保</option>
+													<option>不保</option>
+												</select>
+											</td>
+											<td><input style="width:140px" type="date" value="2020-04-17" /></td>
+											<td>
+												<select>
+													<option>全保</option>
+													<option>技术保</option>
+													<option selected>不保</option>
+												</select>
+											</td>
+										</tr>
+										<tr>
+											<td>ZC00000002</td>
+											<td>LSRM000001857</td>
+											<td>CT机</td>
+											<td>SOMATOM huanyue</td>
+											<td>西门子</td>
+											<td>放射科</td>
+											<td>医用刀类</td>
+											<td>
+												<select>
+													<option>全保</option>
+													<option selected>技术保</option>
+													<option>不保</option>
+												</select>
+											</td>
+											<td><input style="width:140px" type="date" value="2020-04-17" /></td>
+											<td>
+												<select>
+													<option>全保</option>
+													<option>技术保</option>
+													<option selected>不保</option>
+												</select>
+											</td>
+										</tr>
+										<tr>
+											<td>ZC00000003</td>
+											<td>LSRM002021500001</td>
+											<td>呼吸机</td>
+											<td>Servo-s</td>
+											<td>迈柯唯</td>
+											<td>重症医学科</td>
+											<td>医用激光类</td>
+											<td>
+												<select>
+													<option>全保</option>
+													<option>技术保</option>
+													<option selected>不保</option>
+												</select>
+											</td>
+											<td><input style="width:140px" type="date" value="2020-04-20" /></td>
+											<td>
+												<select>
+													<option>全保</option>
+													<option>技术保</option>
+													<option selected>不保</option>
+												</select>
+											</td>
+										</tr>
+										<tr>
+											<td>ZC00000004</td>
+											<td>LSRM002021000004</td>
+											<td>超声诊断仪</td>
+											<td>Voluson E8</td>
+											<td>GE</td>
+											<td>功能科</td>
+											<td>医用刀类</td>
+											<td>
+												<select>
+													<option>全保</option>
+													<option>技术保</option>
+													<option selected>不保</option>
+												</select>
+											</td>
+											<td><input style="width:140px" type="date" value="2020-04-20" /></td>
+											<td>
+												<select>
+													<option>全保</option>
+													<option>技术保</option>
+													<option selected>不保</option>
+												</select>
+											</td>
+										</tr>
+										<tr>
+											<td>ZC00000005</td>
+											<td>LSRM002020300004</td>
+											<td>医用磁共振成像系统</td>
+											<td>飞利浦781-296</td>
+											<td>飞利浦</td>
+											<td>核磁共振</td>
+											<td>医用刀类</td>
+											<td>
+												<select>
+													<option selected>全保</option>
+													<option>技术保</option>
+													<option>不保</option>
+												</select>
+											</td>
+											<td><input style="width:140px" type="date" value="2020-04-20" /></td>
+											<td>
+												<select>
+													<option>全保</option>
+													<option>技术保</option>
+													<option selected>不保</option>
+												</select>
+											</td>
+										</tr>
+										<tr>
+											<td>
+												<button type="button" class="btn btn-info ">导入设备</button>
+											</td>
+											<td>
+												<button type="button" class="btn btn-info ">导出设备</button>
+											</td>
+											<td colspan="10">
+												<div class="pagenationDiv">
+													<nav aria-lable="Page navigation example">
+														<ul class="pagination">
+															<li class="page-item">
+																<a class="page-link" href="#">首页</a>
+															</li>
+															<li class="page-item">
+																<a class="page-link" href="#">上一页</a>
+															</li>
+															<li class="page-item">
+																<a class="page-link" href="#">1</a>
+															</li>
+															<li class="page-item">
+																<a class="page-link" href="#">2</a>
+															</li>
+															<li class="page-item">
+																<a class="page-link" href="#">3</a>
+															</li>
+															<li class="page-item">
+																<a class="page-link" href="#">下一页</a>
+															</li>
+															<li class="page-item">
+																<a class="page-link" href="#">末页</a>
+															</li>
+														</ul>
+													</nav>
+												</div>
+											</td>
+										</tr>
+									</tbody>
+								</table>
+							</div>
+							<div class="modal-footer">
+								<button type="button" class="btn btn-info ">保存</button>
+								<button type="button" class="btn btn-secondary " data-dismiss="modal">关闭</button>
+							</div>
+						</div>
+					</div>
+				</div>
+				<!-- 备用机清单 -->
+				<div id="InvSpareList" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+					<div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+						<div class="modal-content">
+							<div class="modal-header">
+								<h6 class="modal-title">估价执行条件: 备用机清单</h6>
+								<button type="button" class="close" data-dismiss="modal" aria-lable="Close"><span
+										class="modal-icon" aria-hidden="true">&times;</span></button>
+							</div>
+							<div class="modal-body">
+								<table class="operationTable">
+									<tr>
+										<td>
+											搜索：
+											<select>
+												<option>分类</option>
+											</select>&nbsp;&nbsp;
+											<input type="text" /><img src="../img/icons8-search-48.png" class="update">
+										</td>
+									</tr>
+								</table>
+								<table class="table" cellspacing="0px" cellpadding="5px">
+									<thead class="thead-light">
+										<tr>
+											<th scope="col" width="250">富士II类</th>
+											<th scope="col" width="250">月租租金</th>
+											<th scope="col" width="250">租用台数</th>
+										</tr>
+
+									</thead>
+									<tbody>
+										<tr>
+											<td>高频电刀</td>
+											<td><input style="width: 100PX;" type="number" value="150000" />元</td>
+											<td>
+												<input style="width: 100PX;" type="number" value="10" />
+											</td>
+										</tr>
+										<tr>
+											<td>医用激光类</td>
+											<td><input style="width: 100PX;" type="number" value="150000" />元</td>
+											<td>
+												<input style="width: 100PX;" type="number" value="10" />
+											</td>
+										</tr>
+										<tr>
+											<td>灯床塔</td>
+											<td><input style="width: 100PX;" type="number" value="150000" />元</td>
+											<td>
+												<input style="width: 100PX;" type="number" value="10" />
+											</td>
+										</tr>
+										<tr>
+											<td>输注泵</td>
+											<td><input style="width: 100PX;" type="number" value="150000" />元</td>
+											<td>
+												<input style="width: 100PX;" type="number" value="10" />
+											</td>
+										</tr>
+										<tr>
+											<td>高频电刀</td>
+											<td><input style="width: 100PX;" type="number" value="150000" />元</td>
+											<td>
+												<input style="width: 100PX;" type="number" value="10" />
+											</td>
+										</tr>
+										<tr>
+											<td>医用激光类</td>
+											<td><input style="width: 100PX;" type="number" value="150000" />元</td>
+											<td>
+												<input style="width: 100PX;" type="number" value="10" />
+											</td>
+										</tr>
+										<tr>
+											<td>灯床塔</td>
+											<td><input style="width: 100PX;" type="number" value="150000" />元</td>
+											<td>
+												<input style="width: 100PX;" type="number" value="10" />
+											</td>
+										</tr>
+										<tr>
+											<td>输注泵</td>
+											<td><input style="width: 100PX;" type="number" value="150000" />元</td>
+											<td>
+												<input style="width: 100PX;" type="number" value="10" />
+											</td>
+										</tr>
+										<tr>
+											<td>高频电刀</td>
+											<td><input style="width: 100PX;" type="number" value="150000" />元</td>
+											<td>
+												<input style="width: 100PX;" type="number" value="10" />
+											</td>
+										</tr>
+										<tr>
+											<td>高频电刀</td>
+											<td><input style="width: 100PX;" type="number" value="150000" />元</td>
+											<td>
+												<input style="width: 100PX;" type="number" value="10" />
+											</td>
+										</tr>
+										<tr>
+											<td></td>
+											<td colspan="10">
+												<div class="pagenationDiv">
+													<nav aria-lable="Page navigation example">
+														<ul class="pagination">
+															<li class="page-item">
+																<a class="page-link" href="#">首页</a>
+															</li>
+															<li class="page-item">
+																<a class="page-link" href="#">上一页</a>
+															</li>
+															<li class="page-item">
+																<a class="page-link" href="#">1</a>
+															</li>
+															<li class="page-item">
+																<a class="page-link" href="#">2</a>
+															</li>
+															<li class="page-item">
+																<a class="page-link" href="#">3</a>
+															</li>
+															<li class="page-item">
+																<a class="page-link" href="#">下一页</a>
+															</li>
+															<li class="page-item">
+																<a class="page-link" href="#">末页</a>
+															</li>
+														</ul>
+													</nav>
+												</div>
+											</td>
+										</tr>
+									</tbody>
+								</table>
+							</div>
+							<div class="modal-footer">
+								<button type="button" class="btn btn-info ">保存</button>
+								<button type="button" class="btn btn-secondary " data-dismiss="modal">关闭</button>
+							</div>
+						</div>
+					</div>
+				</div>
+				<!-- 维保对耗材的覆盖情况 -->
+				<div id="CoverSupplies" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+					<div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+						<div class="modal-content">
+							<div class="modal-header">
+								<h6 class="modal-title">估价执行条件: 维保对耗材的覆盖情况</h6>
+								<button type="button" class="close" data-dismiss="modal" aria-lable="Close"><span
+										class="modal-icon" aria-hidden="true">&times;</span></button>
+							</div>
+							<div class="modal-body">
+								<table class="operationTable">
+									<tr>
+										<td>搜索:
+											<select name="" class="">
+												<option>富士II类</option>
+												<option value="">设备分类</option>
+											</select>
+											<input type="text" class="" /><img src="../img/icons8-search-48.png" alt=""
+												class="update" />
+										</td>
+									</tr>
+								</table>
+								<table class="table" cellspacing="0px" cellpadding="5px">
+									<thead class="thead-light">
+										<tr>
+											<th scope="col" width="250">富士II类</th>
+											<th scope="col" width="250">耗材</th>
+											<th scope="col" width="250">是否被维保覆盖</th>
+										</tr>
+									</thead>
+									<tbody>
+										<tr>
+											<td>医用激光类</td>
+											<td>探测器</td>
+											<td>
+												<select>
+													<option>是</option>
+													<option>否</option>
+												</select>
+											</td>
+										</tr>
+										<tr>
+											<td>医用激光类</td>
+											<td>探测器</td>
+											<td>
+												<select>
+													<option>是</option>
+													<option>否</option>
+												</select>
+											</td>
+										</tr>
+										<tr>
+											<td>医用激光类</td>
+											<td>高压发生器</td>
+											<td>
+												<select>
+													<option>是</option>
+													<option>否</option>
+												</select>
+											</td>
+										</tr>
+										<tr>
+											<td>医用激光类</td>
+											<td>高压滑环</td>
+											<td>
+												<select>
+													<option>是</option>
+													<option>否</option>
+												</select>
+											</td>
+										</tr>
+										<tr>
+											<td>医用刀类</td>
+											<td>高压发生器</td>
+											<td>
+												<select>
+													<option>是</option>
+													<option>否</option>
+												</select>
+											</td>
+										</tr>
+										<tr>
+											<td>医用刀类</td>
+											<td>高压滑环</td>
+											<td>
+												<select>
+													<option>是</option>
+													<option>否</option>
+												</select>
+											</td>
+										</tr>
+										<tr>
+											<td>医用刀类</td>
+											<td>探测器</td>
+											<td>
+												<select>
+													<option>是</option>
+													<option>否</option>
+												</select>
+											</td>
+										</tr>
+										<tr>
+											<td>灯床塔</td>
+											<td>高压滑环</td>
+											<td>
+												<select>
+													<option>是</option>
+													<option selected>否</option>
+												</select>
+											</td>
+										</tr>
+										<tr>
+											<td>灯床塔</td>
+											<td>探测器</td>
+											<td>
+												<select>
+													<option>是</option>
+													<option selected>否</option>
+												</select>
+											</td>
+										</tr>
+										<tr>
+											<td>灯床塔</td>
+											<td>高压发生器</td>
+											<td>
+												<select>
+													<option>是</option>
+													<option selected>否</option>
+												</select>
+											</td>
+										</tr>
+										<tr>
+											<td></td>
+											<td colspan="10">
+												<div class="pagenationDiv">
+													<nav aria-lable="Page navigation example">
+														<ul class="pagination">
+															<li class="page-item">
+																<a class="page-link" href="#">首页</a>
+															</li>
+															<li class="page-item">
+																<a class="page-link" href="#">上一页</a>
+															</li>
+															<li class="page-item">
+																<a class="page-link" href="#">1</a>
+															</li>
+															<li class="page-item">
+																<a class="page-link" href="#">2</a>
+															</li>
+															<li class="page-item">
+																<a class="page-link" href="#">3</a>
+															</li>
+															<li class="page-item">
+																<a class="page-link" href="#">下一页</a>
+															</li>
+															<li class="page-item">
+																<a class="page-link" href="#">末页</a>
+															</li>
+														</ul>
+													</nav>
+												</div>
+											</td>
+										</tr>
+									</tbody>
+								</table>
+							</div>
+							<div class="modal-footer">
+								<button type="button" class="btn btn-info ">保存</button>
+								<button type="button" class="btn btn-secondary " data-dismiss="modal">关闭</button>
+							</div>
+						</div>
+					</div>
+				</div>
+				<!-- 使用量 -->
+				<div id="ImportantEqpt" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+					<div class="modal-dialog modal-blg modal-dialog-centered" role="document">
+						<div class="modal-content">
+							<div class="modal-header">
+								<h6 class="modal-title">估价执行条件: 使用量</h6>
+								<button type="button" class="close" data-dismiss="modal" aria-lable="Close"><span
+										class="modal-icon" aria-hidden="true">&times;</span></button>
+							</div>
+							<div class="modal-body">
+								<table class="operationTable">
+									<tr>
+										<td>
+											设备等级：
+											<select>
+												<option>全部</option>
+												<option>重点</option>
+												<option>次重点</option>
+												<option>一般</option>
+											</select>&nbsp;&nbsp;
+										</td>
+										<td>搜索:
+											<select name="" class="">
+												<option value="">零件名称</option>
+												<option value="">设备资产编号</option>
+												<option value="">设备名称</option>
+											</select>
+											<input type="text" class="" /><img src="../img/icons8-search-48.png" alt=""
+												class="update" />
+										</td>
+									</tr>
+								</table>
+								<table class="table" cellspacing="0px" cellpadding="5px">
+									<thead class="thead-light">
+										<tr>
+											<th style="min-width: 100px;">零件名称</th>
+											<th style="min-width: 100px;">设备资产编号</th>
+											<th style="min-width: 100px;">设备名称</th>
+											<th style="min-width: 100px;">设备等级</th>
+											<th style="min-width: 100px;">数量</th>
+											<th style="min-width: 100px;">使用量</th>
+											<th style="min-width: 100px;">使用量参考值</th>
+											<th style="min-width: 80px;">以后维保是否包含该零件</th>
+										</tr>
+									</thead>
+									<tbody>
+										<tr>
+											<td>整机</td>
+											<td>LSRM00000003</td>
+											<td>CT机</td>
+											<td>次重点</td>
+											<td><input type="text" value="1" /></td>
+											<td><input type="text" value="20" /></td>
+											<td>20</td>
+											<td>
+												<select>
+													<option>是</option>
+													<option>否</option>
+												</select>
+											</td>
+										</tr>
+										<tr>
+											<td>CTCT球管</td>
+											<td>LSRM00000003</td>
+											<td>CT机</td>
+											<td>一般</td>
+											<td><input type="text" value="1" /></td>
+											<td><input type="text" value="20" /></td>
+											<td>20</td>
+											<td>
+												<select>
+													<option>是</option>
+													<option>否</option>
+												</select>
+											</td>
+										</tr>
+										<tr>
+											<td>MRI线圈</td>
+											<td>LSRM002020900002</td>
+											<td>医用磁共振成像系统</td>
+											<td>重点</td>
+											<td><input type="text" value="5" /></td>
+											<td><input type="text" value="20" /></td>
+											<td>20</td>
+											<td>
+												<select>
+													<option>是</option>
+													<option selected>否</option>
+												</select>
+											</td>
+										</tr>
+										<tr>
+											<td>整机</td>
+											<td>LSRM00000003</td>
+											<td>CT机</td>
+											<td>次重点</td>
+											<td><input type="text" value="1" /></td>
+											<td><input type="text" value="20" /></td>
+											<td>20</td>
+											<td>
+												<select>
+													<option>是</option>
+													<option>否</option>
+												</select>
+											</td>
+										</tr>
+										<tr>
+											<td>CTCT球管</td>
+											<td>LSRM00000003</td>
+											<td>CT机</td>
+											<td>一般</td>
+											<td><input type="text" value="5" /></td>
+											<td><input type="text" value="20" /></td>
+											<td>20</td>
+											<td>
+												<select>
+													<option>是</option>
+													<option>否</option>
+												</select>
+											</td>
+										</tr>
+										<tr>
+											<td>MRI线圈</td>
+											<td>LSRM002020900002</td>
+											<td>医用磁共振成像系统</td>
+											<td>重点</td>
+											<td><input type="text" value="6" /></td>
+											<td><input type="text" value="20" /></td>
+											<td>20</td>
+											<td>
+												<select>
+													<option>是</option>
+													<option selected>否</option>
+												</select>
+											</td>
+										</tr>
+										<tr>
+											<td>整机</td>
+											<td>LSRM00000003</td>
+											<td>CT机</td>
+											<td>次重点</td>
+											<td><input type="text" value="1" /></td>
+											<td><input type="text" value="20" /></td>
+											<td>20</td>
+											<td>
+												<select>
+													<option>是</option>
+													<option>否</option>
+												</select>
+											</td>
+										</tr>
+										<tr>
+											<td>CTCT球管</td>
+											<td>LSRM00000003</td>
+											<td>CT机</td>
+											<td>一般</td>
+											<td><input type="text" value="4" /></td>
+											<td><input type="text" value="20" /></td>
+											<td>20</td>
+											<td>
+												<select>
+													<option>是</option>
+													<option>否</option>
+												</select>
+											</td>
+										</tr>
+										<tr>
+											<td>MRI线圈</td>
+											<td>LSRM002020900002</td>
+											<td>医用磁共振成像系统</td>
+											<td>重点</td>
+											<td><input type="text" value="4" /></td>
+											<td><input type="text" value="20" /></td>
+											<td>20</td>
+											<td>
+												<select>
+													<option>是</option>
+													<option selected>否</option>
+												</select>
+											</td>
+										</tr>
+										<tr>
+											<td>整机</td>
+											<td>LSRM00000003</td>
+											<td>CT机</td>
+											<td>次重点</td>
+											<td><input type="text" value="1" /></td>
+											<td><input type="text" value="20" /></td>
+											<td>20</td>
+											<td>
+												<select>
+													<option>是</option>
+													<option>否</option>
+												</select>
+											</td>
+										</tr>
+										<tr>
+											<td></td>
+											<td colspan="10">
+												<div class="pagenationDiv">
+													<nav aria-lable="Page navigation example">
+														<ul class="pagination">
+															<li class="page-item">
+																<a class="page-link" href="#">首页</a>
+															</li>
+															<li class="page-item">
+																<a class="page-link" href="#">上一页</a>
+															</li>
+															<li class="page-item">
+																<a class="page-link" href="#">1</a>
+															</li>
+															<li class="page-item">
+																<a class="page-link" href="#">2</a>
+															</li>
+															<li class="page-item">
+																<a class="page-link" href="#">3</a>
+															</li>
+															<li class="page-item">
+																<a class="page-link" href="#">下一页</a>
+															</li>
+															<li class="page-item">
+																<a class="page-link" href="#">末页</a>
+															</li>
+														</ul>
+													</nav>
+												</div>
+											</td>
+										</tr>
+									</tbody>
+								</table>
+							</div>
+							<div class="modal-footer">
+								<button type="button" class="btn btn-info ">保存</button>
+								<button type="button" class="btn btn-secondary " data-dismiss="modal">关闭</button>
+							</div>
+						</div>
+					</div>
+				</div>
+				<!-- CT球管登记表 -->
+				<div id="CTList" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+					<div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+						<div class="modal-content">
+							<div class="modal-header">
+								<h6 class="modal-title">估价执行条件 : CT球管登记表</h6>
+								<button type="button" class="close" data-dismiss="modal" aria-lable="Close"><span
+										class="modal-icon" aria-hidden="true">&times;</span></button>
+							</div>
+							<div class="modal-body">
+								<table class="operationTable">
+									<tr>
+										<td>搜索:
+											<select name="" class="">
+												<option value="">名称</option>
+												<option value="">CT机资产编号</option>
+											</select>
+											<input type="text" class="" /><img src="../img/icons8-search-48.png" alt=""
+												class="update" />
+										</td>
+									</tr>
+								</table>
+								<table class="table" cellspacing="0px" cellpadding="5px">
+									<thead class="thead-light">
+										<tr>
+											<th style="min-width: 100px;">名称</th>
+											<th style="min-width: 100px;">对应CT机资产编号</th>
+											<th style="min-width: 100px;">CT球管理论寿命秒次</th>
+											<th style="min-width: 100px;">CT日使用人次</th>
+											<th style="min-width: 100px;">日使用人次参考值</th>
+											<th style="min-width: 100px;">CT球管已使用秒次</th>
+										</tr>
+									</thead>
+									<tbody>
+										<tr>
+											<td>CT球管3.5M2排</td>
+											<td>LSRM00000003</td>
+											<td><input style="width: 80px;" type="number" value="300000" /></td>
+											<td><input style="width: 80px;" type="number" value="200" /></td>
+											<td>200</td>
+											<td><input style="width: 80px;" type="number" value="170000" /></td>
+										</tr>
+										<tr>
+											<td>CT球管3.5M16排</td>
+											<td>LSRM00000003</td>
+											<td><input style="width: 80px;" type="number" value="300000" /></td>
+											<td><input style="width: 80px;" type="number" value="200" /></td>
+											<td>200</td>
+											<td><input style="width: 80px;" type="number" value="170000" /></td>
+										</tr>
+										<tr>
+											<td>CT球管3.5M64排</td>
+											<td>LSRM00000003</td>
+											<td><input style="width: 80px;" type="number" value="300000" /></td>
+											<td><input style="width: 80px;" type="number" value="200" /></td>
+											<td>200</td>
+											<td><input style="width: 80px;" type="number" value="170000" /></td>
+										</tr>
+										<tr>
+											<td>CT球管5.5M2排</td>
+											<td>LSRM00000003</td>
+											<td><input style="width: 80px;" type="number" value="300000" /></td>
+											<td><input style="width: 80px;" type="number" value="200" /></td>
+											<td>200</td>
+											<td><input style="width: 80px;" type="number" value="170000" /></td>
+										</tr>
+										<tr>
+											<td>CT球管5.5M16排</td>
+											<td>LSRM00000003</td>
+											<td><input style="width: 80px;" type="number" value="300000" /></td>
+											<td><input style="width: 80px;" type="number" value="200" /></td>
+											<td>200</td>
+											<td><input style="width: 80px;" type="number" value="170000" /></td>
+										</tr>
+										<tr>
+											<td>CT球管5.5M64排</td>
+											<td>LSRM00000003</td>
+											<td><input style="width: 80px;" type="number" value="300000" /></td>
+											<td><input style="width: 80px;" type="number" value="200" /></td>
+											<td>200</td>
+											<td><input style="width: 80px;" type="number" value="170000" /></td>
+										</tr>
+										<tr>
+											<td>CT球管6M2排</td>
+											<td>LSRM00000003</td>
+											<td><input style="width: 80px;" type="number" value="300000" /></td>
+											<td><input style="width: 80px;" type="number" value="200" /></td>
+											<td>200</td>
+											<td><input style="width: 80px;" type="number" value="170000" /></td>
+										</tr>
+										<tr>
+											<td>CT球管6M16排</td>
+											<td>LSRM00000003</td>
+											<td><input style="width: 80px;" type="number" value="300000" /></td>
+											<td><input style="width: 80px;" type="number" value="200" /></td>
+											<td>200</td>
+											<td><input style="width: 80px;" type="number" value="170000" /></td>
+										</tr>
+										<tr>
+											<td>CT球管6M64排</td>
+											<td>LSRM00000003</td>
+											<td><input style="width: 80px;" type="number" value="300000" /></td>
+											<td><input style="width: 80px;" type="number" value="200" /></td>
+											<td>200</td>
+											<td><input style="width: 80px;" type="number" value="170000" /></td>
+										</tr>
+										<tr>
+											<td></td>
+											<td colspan="10">
+												<div class="pagenationDiv">
+													<nav aria-lable="Page navigation example">
+														<ul class="pagination">
+															<li class="page-item">
+																<a class="page-link" href="#">首页</a>
+															</li>
+															<li class="page-item">
+																<a class="page-link" href="#">上一页</a>
+															</li>
+															<li class="page-item">
+																<a class="page-link" href="#">1</a>
+															</li>
+															<li class="page-item">
+																<a class="page-link" href="#">2</a>
+															</li>
+															<li class="page-item">
+																<a class="page-link" href="#">3</a>
+															</li>
+															<li class="page-item">
+																<a class="page-link" href="#">下一页</a>
+															</li>
+															<li class="page-item">
+																<a class="page-link" href="#">末页</a>
+															</li>
+														</ul>
+													</nav>
+												</div>
+											</td>
+										</tr>
+									</tbody>
+								</table>
+							</div>
+							<div class="modal-footer">
+								<button type="button" class="btn btn-info ">保存</button>
+								<button type="button" class="btn btn-secondary " data-dismiss="modal">关闭</button>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div style=" height: 100%; margin-left: 10px;">
+				<!--最终定价表-->
+				<div id="Pricing">
+					<div class="title" style="margin: 40px auto 0;">
+						<span>最终定价表</span>
+					</div>
+					<table style="text-align: left; width: 1000px ;">
+						<tbody>
+							<tr>
+								<th style="background-color: #1b4082;; border-bottom:none; color:white" colspan="16"
+									class="headtr"><span style="float: right;">元</span></th>
+							</tr>
+							<tr class="">
+								<th style="width: 150px; border-top:none; background-color: #1b4082;" colspan="2"
+									rowspan="3"></th>
+								<th style="width: 1200px; text-align: center; color: white; background-color: #41589b;"
+									colspan="13">Forecast</th>
+								<th style="background-color: #1b4082;" rowspan="2"></th>
+							</tr>
+							<tr>
+								<th style="text-align: center; color: white; background-color: #41589b;">第一年</th>
+								<th colspan="12" style="width: 1200px; text-align: center; color: white; background-color: #41589b;">第二年<img src="../img/reduce.png" class="update"></th>
+							</tr>
+							<tr class="">
+								<td class="forecasrTh" style="text-align: center;"><img src="../img/add.png" class="update" ></td>
+								<td class="forecasrTh">Apr-2020</td>
+								<td class="forecasrTh">May-2020</td>
+								<td class="forecasrTh">Jun-2020</td>
+								<td class="forecasrTh">Jul-2020</td>
+								<td class="forecasrTh">Aug-2020</td>
+								<td class="forecasrTh">Sep-2020</td>
+								<td class="forecasrTh">Oct-2020</td>
+								<td class="forecasrTh">Nov-2020</td>
+								<td class="forecasrTh">Dec-2020</td>
+								<td class="forecasrTh">Jan-2021</td>
+								<td class="forecasrTh">Feb-2021</td>
+								<td class="forecasrTh">Mar-2021</td>
+								<th style="background-color: #c8d8ef; text-align: center; ">小计</th>
+							</tr>
+							<tr class="sub">
+								<th class="menu1" colspan="2"><b>成本汇总</b></th>
+								<td>3,117,525</td>
+								<td>208,636</td>
+								<td>208,702</td>
+								<td>208,768</td>
+								<td>208,834</td>
+								<td>208,900</td>
+								<td>208,966</td>
+								<td>218,899</td>
+								<td>218,966</td>
+								<td>219,032</td>
+								<td>769,098</td>
+								<td>219,329</td>
+								<td>219,395</td>
+								<td style=" background-color: #c8d8ef;">6,235,050</td>
+							</tr>
+							<tr class="">
+								<th class="menu1"></th>
+								<th class="menu2">固定类</th>
+								<td>757,602</td>
+								<td>58,200</td>
+								<td>58,200</td>
+								<td>58,200</td>
+								<td>58,200</td>
+								<td>58,200</td>
+								<td>58,200</td>
+								<td>68,067</td>
+								<td>68,067</td>
+								<td>68,067</td>
+								<td>68,067</td>
+								<td>68,067</td>
+								<td>68,067</td>
+								<td style=" background-color: #c8d8ef;">1,515,204</td>
+							</tr>
+							<tr class="">
+								<th class="menu1"></th>
+								<th class="menu2">变动类-保养</th>
+								<td>458,844</td>
+								<td>38,237</td>
+								<td>38,237</td>
+								<td>38,237</td>
+								<td>38,237</td>
+								<td>38,237</td>
+								<td>38,237</td>
+								<td>38,237</td>
+								<td>38,237</td>
+								<td>38,237</td>
+								<td>38,237</td>
+								<td>38,237</td>
+								<td>38,237</td>
+								<td style=" background-color: #c8d8ef;">917,688</td>
+							</tr>
+							<tr class="">
+								<th class="menu1"></th>
+								<th class="menu2">变动类-维修</th>
+								<td>1,901,079</td>
+								<td>112,199</td>
+								<td>112,265</td>
+								<td>112,331</td>
+								<td>112,397</td>
+								<td>112,463</td>
+								<td>112,529</td>
+								<td>112,595</td>
+								<td>112,662</td>
+								<td>112,728</td>
+								<td>662,794</td>
+								<td>113,025</td>
+								<td>113,091</td>
+								<td style=" background-color: #c8d8ef;">3,802,158</td>
+							</tr>
+							<tr class="">
+								<th class="menu1" colspan="2"><b>导入期成本</b></th>
+								<td>200,000</td>
+								<td>16,667</td>
+								<td>16,667</td>
+								<td>16,667</td>
+								<td>16,667</td>
+								<td>16,667</td>
+								<td>16,667</td>
+								<td>16,667</td>
+								<td>16,667</td>
+								<td>16,667</td>
+								<td>16,667</td>
+								<td>16,667</td>
+								<td>16,667</td>
+								<td style=" background-color: #c8d8ef;">400,000</td>
+							</tr>
+							<tr class="sub">
+								<th class="menu1" colspan="2"><b>总成本</b></th>
+								<td>3,321,519</td>
+								<td>225,302</td>
+								<td>225,368</td>
+								<td>225,434</td>
+								<td>225,500</td>
+								<td>225,567</td>
+								<td>225,633</td>
+								<td>235,565</td>
+								<td>235,632</td>
+								<td>235,698</td>
+								<td>789,764</td>
+								<td>235,995</td>
+								<td>236,061</td>
+								<td style=" background-color: #c8d8ef;">6,643,038</td>
+							</tr>
+							<tr class="">
+								<th class="menu1" colspan="2"><b>边际利润</b></th>
+								<td>368,614</td>
+								<td>25,034</td>
+								<td>25,041</td>
+								<td>25,048</td>
+								<td>25,056</td>
+								<td>25,063</td>
+								<td>25,070</td>
+								<td>26,174</td>
+								<td>26,181</td>
+								<td>26,189</td>
+								<td>87,307</td>
+								<td>26,222</td>
+								<td>26,229</td>
+								<td style=" background-color: #c8d8ef;">737,228</td>
+							</tr>
+							<tr class="">
+								<th class="menu1"></th>
+								<th class="menu2">边际利润率</th>
+								<td>10%</td>
+								<td>10%</td>
+								<td>10%</td>
+								<td>10%</td>
+								<td>10%</td>
+								<td>10%</td>
+								<td>10%</td>
+								<td>10%</td>
+								<td>10%</td>
+								<td>10%</td>
+								<td>10%</td>
+								<td>10%</td>
+								<td>10%</td>
+								<td style=" background-color: #c8d8ef;">10%</td>
+							</tr>
+							<tr class="">
+								<th class="menu1" colspan="2"><b>安全额</b></th>
+								<td>0</td>
+								<td></td>
+								<td></td>
+								<td></td>
+								<td></td>
+								<td></td>
+								<td></td>
+								<td></td>
+								<td></td>
+								<td></td>
+								<td></td>
+								<td></td>
+								<td></td>
+								<td style=" background-color: #c8d8ef;">0</td>
+							</tr>
+							<tr style="background-color: #4f612b; color: white;">
+								<th colspan="2">报价</th>
+								<td>3,686,132</td>
+								<td></td>
+								<td></td>
+								<td></td>
+								<td></td>
+								<td></td>
+								<td></td>
+								<td></td>
+								<td></td>
+								<td></td>
+								<td></td>
+								<td></td>
+								<td></td>
+								<td>7,372,264</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+				<!--成本明细-->
+				<div id="CostDetail">
+					<div class="title" style="margin: 40px auto 0;">
+						<span>成本明细</span>
+					</div>
+					<table style="text-align: left; width: 1500px ;">
+						<tbody>
+							<tr>
+								<th style="background-color: #1b4082;; border-bottom:none; color:white" colspan="22"
+									class="headtr"><span style="float: right;">元</span></td>
+							</tr>
+							<tr class="">
+								<th style="border-top:none; background-color: #1b4082;" colspan="3" rowspan="2"></th>
+								<th style="text-align: center; color: white; background-color: #827c85;" colspan="6">
+									Actual</th>
+								<th style="text-align: center; color: white; background-color: #41589b;" colspan="12">
+									Forecast</th>
+								<th style="background-color: #1b4082;"></th>
+							</tr>
+							<tr class="">
+								<td class="actualTh">Oct-2019</td>
+								<td class="actualTh">Nov-2019</td>
+								<td class="actualTh">Dec-2019</td>
+								<td class="actualTh">Jan-2020</td>
+								<td class="actualTh">Feb-2020</td>
+								<td class="actualTh">Mar-2020</td>
+								<td class="forecasrTh">Apr-2020</td>
+								<td class="forecasrTh">May-2020</td>
+								<td class="forecasrTh">Jun-2020</td>
+								<td class="forecasrTh">Jul-2020</td>
+								<td class="forecasrTh">Aug-2020</td>
+								<td class="forecasrTh">Sep-2020</td>
+								<td class="forecasrTh">Oct-2020</td>
+								<td class="forecasrTh">Nov-2020</td>
+								<td class="forecasrTh">Dec-2020</td>
+								<td class="forecasrTh">Jan-2021</td>
+								<td class="forecasrTh">Feb-2021</td>
+								<td class="forecasrTh">Mar-2021</td>
+								<th style="background-color: #c8d8ef; text-align: center; ">小计</th>
+							</tr>
+							<tr class="sub">
+								<th class="menu1" colspan="3"><b>固定类</b></th>
+								<td>68,066</td>
+								<td>68,066</td>
+								<td>68,066</td>
+								<td>68,066</td>
+								<td>68,066</td>
+								<td>68,066</td>
+								<td>68,066</td>
+								<td>68,066</td>
+								<td>68,066</td>
+								<td>68,066</td>
+								<td>68,066</td>
+								<td>68,066</td>
+								<td>68,066</td>
+								<td>68,066</td>
+								<td>68,066</td>
+								<td>68,066</td>
+								<td>68,066</td>
+								<td>68,066</td>
+								<td style=" background-color: #c8d8ef;"> 1,225,188 </td>
+							</tr>
+							<tr class="">
+								<th class="menu1"></th>
+								<th class="menu2" colspan="2">信息系统使用费</th>
+								<td>8,333</td>
+								<td>8,333</td>
+								<td>8,333</td>
+								<td>8,333</td>
+								<td>8,333</td>
+								<td>8,333</td>
+								<td>8,333</td>
+								<td>8,333</td>
+								<td>8,333</td>
+								<td>8,333</td>
+								<td>8,333</td>
+								<td>8,333</td>
+								<td>8,333</td>
+								<td>8,333</td>
+								<td>8,333</td>
+								<td>8,333</td>
+								<td>8,333</td>
+								<td>8,333</td>
+								<td style=" background-color: #c8d8ef;"> 149,994 </td>
+							</tr>
+							<tr class="">
+								<th class="menu1"></th>
+								<th class="menu2" colspan="2">人工费</th>
+								<td>33,333</td>
+								<td>33,333</td>
+								<td>33,333</td>
+								<td>33,333</td>
+								<td>33,333</td>
+								<td>33,333</td>
+								<td>33,333</td>
+								<td>33,333</td>
+								<td>33,333</td>
+								<td>33,333</td>
+								<td>33,333</td>
+								<td>33,333</td>
+								<td>33,333</td>
+								<td>33,333</td>
+								<td>33,333</td>
+								<td>33,333</td>
+								<td>33,333</td>
+								<td>33,333</td>
+								<td style=" background-color: #c8d8ef;"> 599,994 </td>
+							</tr>
+							<tr class="">
+								<th class="menu1"></th>
+								<th class="menu2" colspan="2">维保费</th>
+								<td>26,400</td>
+								<td>26,400</td>
+								<td>26,400</td>
+								<td>26,400</td>
+								<td>26,400</td>
+								<td>26,400</td>
+								<td>26,400</td>
+								<td>26,400</td>
+								<td>26,400</td>
+								<td>26,400</td>
+								<td>26,400</td>
+								<td>26,400</td>
+								<td>26,400</td>
+								<td>26,400</td>
+								<td>26,400</td>
+								<td>26,400</td>
+								<td>26,400</td>
+								<td>26,400</td>
+								<td style=" background-color: #c8d8ef;"> 475,200 </td>
+							</tr>
+							<tr class="">
+								<th class="menu1"></th>
+								<th class="menu2" colspan="2">备用机成本</th>
+								<td>0</td>
+								<td>0</td>
+								<td>0</td>
+								<td>0</td>
+								<td>0</td>
+								<td>0</td>
+								<td>0</td>
+								<td>0</td>
+								<td>0</td>
+								<td>0</td>
+								<td>0</td>
+								<td>0</td>
+								<td>0</td>
+								<td>0</td>
+								<td>0</td>
+								<td>0</td>
+								<td>0</td>
+								<td>0</td>
+								<td style=" background-color: #c8d8ef;">0</td>
+							</tr>
+							<tr class="sub">
+								<th class="menu1" colspan="3"><b>变动类-保养</b></th>
+								<td>38,237</td>
+								<td>38,237</td>
+								<td>38,237</td>
+								<td>38,237</td>
+								<td>38,237</td>
+								<td>38,237</td>
+								<td>38,237</td>
+								<td>38,237</td>
+								<td>38,237</td>
+								<td>38,237</td>
+								<td>38,237</td>
+								<td>38,237</td>
+								<td>38,237</td>
+								<td>38,237</td>
+								<td>38,237</td>
+								<td>38,237</td>
+								<td>38,237</td>
+								<td>38,237</td>
+								<td style=" background-color: #c8d8ef;"> 688,266 </td>
+							</tr>
+							<tr class="">
+								<th class="menu1"><b></b></th>
+								<th class="menu2" colspan="2">耗材费</th>
+								<td>38,237</td>
+								<td>38,237</td>
+								<td>38,237</td>
+								<td>38,237</td>
+								<td>38,237</td>
+								<td>38,237</td>
+								<td>38,237</td>
+								<td>38,237</td>
+								<td>38,237</td>
+								<td>38,237</td>
+								<td>38,237</td>
+								<td>38,237</td>
+								<td>38,237</td>
+								<td>38,237</td>
+								<td>38,237</td>
+								<td>38,237</td>
+								<td>38,237</td>
+								<td>38,237</td>
+								<td style=" background-color: #c8d8ef;"> 688,266 </td>
+							</tr>
+							<tr class="">
+								<th class="menu1"></th>
+								<th class="menu2"></th>
+								<th class="menu3">定期类</th>
+								<td>17,320</td>
+								<td>17,320</td>
+								<td>17,320</td>
+								<td>17,320</td>
+								<td>17,320</td>
+								<td>17,320</td>
+								<td>17,320</td>
+								<td>17,320</td>
+								<td>17,320</td>
+								<td>17,320</td>
+								<td>17,320</td>
+								<td>17,320</td>
+								<td>17,320</td>
+								<td>17,320</td>
+								<td>17,320</td>
+								<td>17,320</td>
+								<td>17,320</td>
+								<td>17,320</td>
+								<td style=" background-color: #c8d8ef;"> 311,760 </td>
+							</tr>
+							<tr class="">
+								<th class="menu1"></th>
+								<th class="menu2"></th>
+								<th class="menu3">定量类</th>
+								<td>19,250</td>
+								<td>19,250</td>
+								<td>19,250</td>
+								<td>19,250</td>
+								<td>19,250</td>
+								<td>19,250</td>
+								<td>19,250</td>
+								<td>19,250</td>
+								<td>19,250</td>
+								<td>19,250</td>
+								<td>19,250</td>
+								<td>19,250</td>
+								<td>19,250</td>
+								<td>19,250</td>
+								<td>19,250</td>
+								<td>19,250</td>
+								<td>19,250</td>
+								<td>19,250</td>
+								<td style=" background-color: #c8d8ef;"> 346,500 </td>
+							</tr>
+							<tr class="">
+								<th class="menu1"></th>
+								<th class="menu2"></th>
+								<th class="menu3">小额汇总成本</th>
+								<td>1,667</td>
+								<td>1,667</td>
+								<td>1,667</td>
+								<td>1,667</td>
+								<td>1,667</td>
+								<td>1,667</td>
+								<td>1,667</td>
+								<td>1,667</td>
+								<td>1,667</td>
+								<td>1,667</td>
+								<td>1,667</td>
+								<td>1,667</td>
+								<td>1,667</td>
+								<td>1,667</td>
+								<td>1,667</td>
+								<td>1,667</td>
+								<td>1,667</td>
+								<td>1,667</td>
+								<td style=" background-color: #c8d8ef;"> 30,006 </td>
+							</tr>
+							<tr class="sub">
+								<th class="menu1" colspan="3"><b>变动类-维修</b></th>
+								<td>112,595</td>
+								<td>112,662</td>
+								<td>112,728</td>
+								<td>662,794</td>
+								<td>113,025</td>
+								<td>113,091</td>
+								<td>243,077</td>
+								<td>148,151</td>
+								<td>148,217</td>
+								<td>148,283</td>
+								<td>155,504</td>
+								<td>155,571</td>
+								<td>155,637</td>
+								<td>155,868</td>
+								<td>156,559</td>
+								<td>156,790</td>
+								<td>156,856</td>
+								<td>157,014</td>
+								<td style=" background-color: #c8d8ef;"> 3,164,420 </td>
+							</tr>
+							<tr class="">
+								<th class="menu1"></th>
+								<th class="menu2" colspan="2">故障零件成本</th>
+								<td>106,675</td>
+								<td>106,737</td>
+								<td>106,800</td>
+								<td>656,863</td>
+								<td>107,035</td>
+								<td>107,098</td>
+								<td>231,651</td>
+								<td>136,722</td>
+								<td>136,785</td>
+								<td>136,847</td>
+								<td>143,916</td>
+								<td>143,978</td>
+								<td>144,041</td>
+								<td>144,213</td>
+								<td>144,865</td>
+								<td>145,038</td>
+								<td>145,100</td>
+								<td>145,249</td>
+								<td style=" background-color: #c8d8ef;"> 2,989,614 </td>
+							</tr>
+							<tr class="">
+								<th class="menu1"></th>
+								<th class="menu2"></th>
+								<th class="menu3">重点设备</th>
+								<td>37,898</td>
+								<td>37,898</td>
+								<td>37,898</td>
+								<td>587,898</dh>
+								<td>37,898</td>
+								<td>37,898</td>
+								<td>75,313</td>
+								<td>75,313</td>
+								<td>75,313</td>
+								<td>75,313</td>
+								<td>82,319</td>
+								<td>82,319</td>
+								<td>82,319</td>
+								<td>82,319</td>
+								<td>82,319</td>
+								<td>82,319</td>
+								<td>82,319</td>
+								<td>82,319</td>
+								<td style=" background-color: #c8d8ef;"> 1,737,192 </td>
+							</tr>
+							<tr class="">
+								<th class="menu1"></th>
+								<th class="menu2"></th>
+								<th class="menu3">一般设备</th>
+								<td>68,777</td>
+								<td>68,840</td>
+								<td>68,902</td>
+								<td>68,965</td>
+								<td>69,137</td>
+								<td>69,200</td>
+								<td>156,338</td>
+								<td>61,409</td>
+								<td>61,472</td>
+								<td>61,534</td>
+								<td>61,597</td>
+								<td>61,659</td>
+								<td>61,722</td>
+								<td>61,894</td>
+								<td>62,546</td>
+								<td>62,719</td>
+								<td>62,781</td>
+								<td>62,930</td>
+								<td style=" background-color: #c8d8ef;"> 1,252,422 </td>
+							</tr>
+							<tr class="">
+								<th class="menu1"></th>
+								<th class="menu2" colspan="2">外来服务费</th>
+								<td>5,921</td>
+								<td>5,924</td>
+								<td>5,928</td>
+								<td>5,932</td>
+								<td>5,990</td>
+								<td>5,994</td>
+								<td>11,425</td>
+								<td>11,429</td>
+								<td>11,432</td>
+								<td>11,436</td>
+								<td>11,589</td>
+								<td>11,592</td>
+								<td>11,596</td>
+								<td>11,654</td>
+								<td>11,693</td>
+								<td>11,752</td>
+								<td>11,755</td>
+								<td>11,764</td>
+								<td style=" background-color: #c8d8ef;"> 174,806 </td>
+							</tr>
+							<tr class="">
+								<th class="menu1"></th>
+								<th class="menu2"></th>
+								<th class="menu3">重点设备</th>
+								<td>1,289</td>
+								<td>1,289</td>
+								<td>1,289</td>
+								<td>1,289</td>
+								<td>1,289</td>
+								<td>1,289</td>
+								<td>6,717</td>
+								<td>6,717</td>
+								<td>6,717</td>
+								<td>6,717</td>
+								<td>6,866</td>
+								<td>6,866</td>
+								<td>6,866</td>
+								<td>6,866</td>
+								<td>6,866</td>
+								<td>6,866</td>
+								<td>6,866</td>
+								<td>6,866</td>
+								<td style=" background-color: #c8d8ef;"> 89,530 </td>
+							</tr>
+							<tr class="">
+								<th class="menu1"></th>
+								<th class="menu2"></th>
+								<th class="menu3">一般设备</th>
+								<td>4,632</td>
+								<td>4,635</td>
+								<td>4,639</td>
+								<td>4,643</td>
+								<td>4,701</td>
+								<td>4,705</td>
+								<td>4,708</td>
+								<td>4,712</td>
+								<td>4,715</td>
+								<td>4,719</td>
+								<td>4,723</td>
+								<td>4,726</td>
+								<td>4,730</td>
+								<td>4,788</td>
+								<td>4,827</td>
+								<td>4,886</td>
+								<td>4,889</td>
+								<td>4,898</td>
+								<td style=" background-color: #c8d8ef;"> 85,276 </td>
+							</tr>
+							<tr style="background-color: #4f612b; color: white;">
+								<th colspan="3">总计</th>
+								<td>218,899</td>
+								<td>218,965</td>
+								<td>219,031</td>
+								<td>769,098</td>
+								<td>219,328</td>
+								<td>219,395</td>
+								<td>349,379</td>
+								<td>254,454</td>
+								<td>254,520</td>
+								<td>254,586</td>
+								<td>261,808</td>
+								<td>261,873</td>
+								<td>261,940</td>
+								<td>262,170</td>
+								<td>262,861</td>
+								<td>263,093</td>
+								<td>263,158</td>
+								<td>263,316</td>
+								<td> 5,077,874 </td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+				<!--决策辅助工具-->
+				<div id="Accessibility">
+					<div class="title" style="margin: 40px auto 0;">
+						<span>维保购买决策结果</span>
+					</div>
+					<table style="text-align: left; width: 1400px; " border="1">
+						<tbody>
+							<tr style="background-color: #1b4082; color:white; text-align: center;">
+								<th rowspan="2" style="border: none;"></th>
+								<th rowspan="2" style="border: none; min-width: 150px;">资产编号</th>
+								<th rowspan="2" style="border: none; min-width: 150px;">资产名称</th>
+								<th rowspan="2" style="border: none; min-width: 100px; text-align: left;">FMTS自定义分类II
+								</th>
+								<th rowspan="2" style="border: none; min-width: 100px; text-align: left;">维保分类</th>
+								<th rowspan="2" style="border: none; min-width: 100px; text-align: left;">故障设备分类</th>
+								<th rowspan="2" style="border: none; min-width: 95px; text-align: left;">故障分类（重要/一般）
+								</th>
+								<th rowspan="2" style="border: none; min-width: 80px;">未来1年内故障成本</th>
+								<th rowspan="2" style="border: none; min-width: 105px;">未来1年内故障外购维修成本</th>
+								<th rowspan="2" style="border: none; min-width: 75px;">未来1年内总故障成本</th>
+								<th rowspan="2" style="border: none; min-width: 75px;">未来1年全保成本</th>
+								<th rowspan="2" style="border: none; min-width: 80px;">未来1年技术保成本</th>
+								<th colspan="2" style="background-color: #4f6328; border: none;">
+									未来1年期故障成本-维保成本差异</th>
+							</tr>
+							<tr style="background-color: #4f6328; color:white; text-align: center;">
+								<th width="150" style="border: none;">购买全保判断</th>
+								<th width="150" style="border: none;">购买技术保判断</th>
+							</tr>
+							<tr class="">
+								<th style="text-align: center;">1</th>
+								<th>LSRM002020900002</th>
+								<th>医用磁共振成像系统</th>
+								<td>NRI</td>
+								<td>MRI</td>
+								<td>MRI</td>
+								<td>重要设备</td>
+								<td class="number">438,762</td>
+								<td class="number">6,695</td>
+								<td class="number">445,457</td>
+								<td class="number">868,000</td>
+								<td class="number">162,750</td>
+								<th><img src="../img/no.png"><span><img src="../img/asc.png"> 422,543</span></th>
+								<th><img src="../img/no.png"><span><img src="../img/asc.png"> 156,055</span></th>
+							</tr>
+							<tr class="">
+								<th style="text-align: center;">2</th>
+								<th>LSRM000000003</th>
+								<th>CT机</th>
+								<td>CT</td>
+								<td>CT</td>
+								<td>CT</td>
+								<td>重要设备</td>
+								<td class="number">637,624</td>
+								<td class="number">4,111</td>
+								<td class="number">641,735</td>
+								<td class="number">429,600</td>
+								<td class="number">53,700</td>
+								<th><img src="../img/yes.png"><span>212,135</span></th>
+								<th><img src="../img/no.png"><span><img src="../img/asc.png"> 49,589</span></th>
+							</tr>
+							<tr class="">
+								<th style="text-align: center;">3</th>
+								<th>LSRM002021000004</th>
+								<th>数字X射线摄影系统</th>
+								<td>普放</td>
+								<td>普放</td>
+								<td>普放</td>
+								<td>一般设备</td>
+								<td class="number">-</td>
+								<td class="number">-</td>
+								<td class="number">-</td>
+								<td class="number">276,000</td>
+								<td class="number">41,400</td>
+								<th><span>-</span></th>
+								<th><span>-</span></th>
+							</tr>
+							<tr class="">
+								<th style="text-align: center;">4</th>
+								<th>LSRM000000296</th>
+								<th>高频电刀</th>
+								<td>医用刀类</td>
+								<td>医用刀类</td>
+								<td>医用刀类</td>
+								<td>一般设备</td>
+								<td class="number">3,960</td>
+								<td class="number">1,980</td>
+								<td class="number">5,940</td>
+								<td class="number">15,130</td>
+								<td class="number">2,270</td>
+								<th><img src="../img/unKnow.png"><span><img src="../img/asc.png"> 9/190</span></th>
+								<th><img src="../img/unKnow.png"><span><img src="../img/asc.png"> 290</span></th>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+				<br />
+				<footer>
+					<div><button class="btn btn-outline-info btn-sm pricing">最终定价表</button></div>
+					<div><button class="btn btn-outline-info btn-sm costDetail">成本明细</button></div>
+					<div><button class="btn btn-outline-info btn-sm ">分析</button></div>
+					<div><button class="btn btn-outline-info btn-sm accessibility">决策辅助工具</button></div>
+					<div><button class="btn btn-outline-info btn-sm ">var</button></div>
+				</footer>
+			</div>
+		</div>
+	</div>
+</body>
+<script>
+	$(function () {
+		InitConditionsHide();
+		InitResultHide();
+		InitBtn();
+		$("#Premise").show();
+		$("#Pricing").show();
+		var options = {};
+		$(".GoToPremise").click(function () {
+			InitConditionsHide();
+			$("#Premise").show();
+		})
+		$(".GoToEquipmentList").click(function () {
+			$("#EquipmentList").modal(options);
+		})
+		$(".GoToInvSpareList").click(function () {
+			$("#InvSpareList").modal(options);
+		})
+		$(".GoToCoverSupplies").click(function () {
+			$("#CoverSupplies").modal(options);
+		})
+		$(".GoToCTList").click(function () {
+			$("#CTList").modal(options);
+		})
+		$(".GoToImportantEqpt").click(function () {
+			$("#ImportantEqpt").modal(options);
+		})
+		$(".GoToGeneralEqpt").click(function () {
+			$("#GeneralEqpt").modal(options);
+		})
+		$(".GoToLabourCost").click(function () {
+			$("#LabourCost").modal(options);
+		})
+		$(".btn").click(function () {
+			InitBtn();
+			$(this).addClass('activeBtn');
+		})
+
+		$(".pricing").click(function () {
+			InitResultHide();
+			$("#Pricing").show();
+
+		})
+		$(".costDetail").click(function () {
+			InitResultHide();
+			$("#CostDetail").show();
+		})
+		$(".accessibility").click(function () {
+			InitResultHide();
+			$("#Accessibility").show();
+		})
+	})
+
+	function InitBtn() {
+		$('.btn').removeClass('activeBtn');
+	}
+	function InitConditionsHide() {
+		$("#Premise").hide();
+		$("#LabourCost").hide();
+		$("#EquipmentList").hide();
+		$("#InvSpareList").hide();
+		$("#CoverSupplies").hide();
+		$("#CTList").hide();
+		$("#ImportantEqpt").hide();
+		$("#GeneralEqpt").hide();
+	}
+	function InitResultHide() {
+		$("#Pricing").hide();
+		$("#CostDetail").hide();
+		$("#Accessibility").hide();
+	}
+</script>
+<!--成本明细style-->
+<style>
+	.actualTh {
+		background-color: #c0bec0;
+		color: white;
+	}
+
+	.forecasrTh {
+		background-color: #4985bf;
+		color: white;
+	}
+
+	#CostDetail th {
+		min-width: 10px;
+	}
+
+	#CostDetail td {
+		text-align: right;
+	}
+
+	#Pricing td {
+		text-align: right;
+	}
+
+	.menu1 {
+		background-color: #94cf4b;
+		min-width: 20px;
+	}
+
+	.menu2 {
+		background-color: #c2e29a;
+	}
+
+	.menu3 {
+		background-color: #e3f2d1;
+	}
+
+	.sub td {
+		border-top: solid 1px;
+		border-bottom: solid 1px;
+		text-align: right;
+	}
+</style>
+<!--决策辅助工具style-->
+<style>
+	#Accessibility th {
+		min-width: 10px;
+	}
+
+	#Accessibility td {
+		border: none;
+		background-color: #dceff3;
+	}
+
+	.number {
+		text-align: right;
+	}
+
+	#Accessibility th span {
+		float: right;
+	}
+
+	#Accessibility img {
+		width: 16px;
+		height: 16px;
+	}
+</style>
+<style>
+	a {
+		color: #17a2b8;
+	}
+
+	.bton tr {
+		display: flex;
+	}
+
+	.bton tr td {
+		flex: 1;
+	}
+
+	#btns {
+		display: flex;
+	}
+
+	footer {
+		display: flex;
+		width: 800px;
+	}
+
+	#btns div {
+		flex: 1;
+		text-align: center;
+	}
+
+	footer div {
+		flex: 1;
+		text-align: center;
+	}
+
+	footer div button {
+		width: 100px;
+	}
+
+	.activeBtn {
+		color: #fff;
+		background-color: #17a2b8;
+		border-color: #17a2b8;
+	}
+
+
+	.headtd {
+		max-width: 50%;
+	}
+
+	#Premise input {
+		max-width: 80%;
+	}
+
+	li {
+		display: block;
+		margin-top: 10px;
+	}
+	
+	.modal-body {
+		overflow: auto;
+	}
+</style>
+
+</html>

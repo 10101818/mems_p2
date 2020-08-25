@@ -1,0 +1,27 @@
+delete from jctRequestEqpt                  	                      
+delete from tblDispatch	                      
+delete from tblDispatchHistory	              
+delete from tblDispatchJournal	              
+delete from tblDispatchJournalHistory	      
+delete from tblDispatchReport	              
+delete from tblDispatchReportFile	          
+delete from tblDispatchReportHistory	      	                                    	                  
+delete from tblReportAccessory	              
+delete from tblReportAccessoryFile	          
+delete from tblRequest	                      
+delete from tblRequestFile	                  
+delete from tblRequestHistory	              
+delete from tblServiceHis	 
+     
+dbcc checkident ("tblDispatch",reseed,0)   
+dbcc checkident ("tblDispatchHistory",reseed,0)   
+dbcc checkident ("tblDispatchJournal",reseed,0)   
+dbcc checkident ("tblDispatchReport",reseed,0)   
+dbcc checkident ("tblDispatchReportFile",reseed,0)   
+dbcc checkident ("tblDispatchReportHistory",reseed,0)   
+dbcc checkident ("tblReportAccessory",reseed,0)   
+dbcc checkident ("tblReportAccessoryFile",reseed,0)   
+dbcc checkident ("tblRequest",reseed,0)   
+dbcc checkident ("tblRequestFile",reseed,0)    
+dbcc checkident ("tblRequestHistory",reseed,0)   
+dbcc checkident ("tblServiceHis",reseed,0)                 	                  

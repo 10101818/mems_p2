@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>设备报修申请</title>
+		<link rel="stylesheet" type="text/css" href="../css/bootstrap.min.css" />
+		<link rel="stylesheet" type="text/css" href="../style.css"/>
+		<script src="https://cdn.staticfile.org/jquery/1.10.2/jquery.min.js"></script>
+		<!-- <script src="js/jquery-2.1.3.js" type="text/javascript" charset="utf-8"></script> -->
+		<style type="text/css">
+			.NoLeftSection{
+				width: 100%;
+				text-align: center;
+				margin-top: 5%;
+			}
+			.routeTable{
+				width: 800px;
+				text-align: left;
+				display: none;
+			}
+		</style>
+	</head>
+	<body>
+
+		<div class="NoLeftSection">
+			<h3 align="center">新增保养请求</h3>	
+			<p>请输入设备资产编号：<input type="" class="inputText" id="" value="" />&nbsp;&nbsp;<button class="btn btn-info ShowRouteTable">确定</button></p>
+			<table class="routeTable" border="1px" align="center" cellpadding="6px" cellspacing="0" >
+				<tr class="headtr">
+					<td colspan="4">设备基本信息</td>
+				</tr>
+				<tr>
+					<td class="headtd">设备系统编号</td>
+					<td>ZC00000001</td>
+					<td class="headtd">资产等级</td>
+					<td>重要</td>					
+				</tr>
+				<tr>
+					<td class="headtd">设备名称</td>
+					<td>医用磁共振设备</td>
+					<td class="headtd">设备型号</td>
+					<td>HA 710 二郎神</td>
+				</tr>
+				<tr>
+					<td class="headtd">使用科室</td>
+					<td>磁共振</td>
+					<td class="headtd">安装地点</td>
+					<td>磁共振1室</td>
+				</tr>
+				<tr>
+					<td class="headtd">设备厂商</td>
+					<td>飞利浦</td>
+					<td class="headtd">保修状况</td>
+					<td>保内</td>
+				</tr>
+			</table>
+			</br>
+			<table class="routeTable" border="1px" align="center" cellpadding="6px" cellspacing="0">
+				<tr class="headtr">
+					<td colspan="4">报修详细信息</td>
+				</tr>
+				<tr>
+					<td  class="headtd">客户请求编号</td>
+					<td><label>001222(系统自动生成)</label></td>
+					<td  class="headtd">请求人</td>
+					<td><input type="text" value="" /></td>
+				</tr>
+				<tr>
+					<td class="headtd">类型</td>
+					<td>客户请求-保养</td>
+					<td class="headtd">故障分类</td>
+					<td>
+						<select>
+							<option>未知</option>
+						</select>
+					</td>
+				</tr>
+				<tr>
+					<td  class="headtd">主题</td>
+					<td colspan="3"><input type="text" value="" /></td>
+				</tr>
+				<tr>
+					<td  class="headtd">故障描述</td>
+					<td colspan="3"><textarea name="" rows="3" cols="60"></textarea></td>
+				</tr>
+				<tr>
+					<td  class="headtd">上传附件</td>
+					<td colspan="3">  <img src="img/Upload.png" alt="" /></td>
+				</tr>
+			</table>
+			<br />
+			<table class="routeTable" border="0" align="center" style="text-align: center;">
+				<tr>
+					<td>
+						<button class="btn btn-info">提交保养申请</button>
+					</td>
+				</tr>
+			</table>
+		</div>
+	</body>
+	<script type="text/javascript">
+	$(".ShowRouteTable").click(function(){
+		
+			$(".routeTable").show();
+		
+  })
+	</script>
+</html>

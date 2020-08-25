@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>app html demo</title>
+	<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+	<link type="text/css" rel="stylesheet" href="css/materialize.css"  media="screen,projection"/>
+	<link type="text/css" rel="stylesheet" href="css/style.css"  media="screen,projection"/>
+    <!--Let browser know website is optimized for mobile-->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <script src="js/lib.js" type="text/javascript" charset="utf-8" async defer></script>
+</head>
+<body>
+	<div class="container">
+		<div class="row top-row">
+			<div class="header">
+				<div class="row">
+					<div class="col s9">
+						<span>设备管理系统</span>
+					</div>
+					<div class="col s3">
+						<span>
+							<i class="material-icons icon-header">face</i>
+						</span>
+						<span>Jin</span>
+					</div>
+				</div>
+			</div>
+			<div class="sub-menu" style="height: 100%;">
+				<div style="height: 1px;"></div>
+				<div class="card-container">
+					<div class="card">
+				        <div class="card-content">
+				        	<div class="row">
+							    <div class="input-field">
+							        <input disabled value="No.001" id="disabled" type="text" class="validate">
+							        <label for="disabled">任务编号</label>
+							    </div>
+							</div>
+							<div class="row">
+							    <div class="input-field">
+							        <input disabled value="已解决" id="disabled" type="text" class="validate">
+							        <label for="disabled">任务状态</label>
+							    </div>
+							</div>
+							<div class="row">
+							    <div class="input-field">
+							        <input disabled value="MRI 001" id="disabled" type="text" class="validate">
+							        <label for="disabled">设备型号</label>
+							    </div>
+							</div>
+							<div class="row">
+							    <div class="input-field">
+							        <input disabled value="放射科" id="disabled" type="text" class="validate">
+							        <label for="disabled">设备地点</label>
+							    </div>
+							</div>
+							<div class="row">
+							    <div class="input-field">
+							        <input disabled value="2019年4月20日10时10分" id="disabled" type="text" class="validate">
+							        <label for="disabled">报修时间</label>
+							    </div>
+							</div>
+							<div class="row">
+							    <div class="input-field">
+							        <input disabled value="无法开机" id="disabled" type="text" class="validate">
+							        <label for="describe">故障描述</label>
+							    </div>
+							</div>
+							<div class="row">
+							  <div class="take-photos">故障照片</div>
+							  <div class="photos">
+							  	<span>
+							  		<img src="img/mri.jpg" style="width: 100px; height: 100px;">
+							  	</span>
+							  	<span>
+							  		<img src="img/mri.jpg" style="width: 100px; height: 100px;">
+							  	</span>
+							  </div>
+							</div>
+							<div class="row">
+							    <div class="input-field">
+							        <input disabled value="吴工" id="disabled" type="text" class="validate">
+							        <label for="describe">维修工程师</label>
+							    </div>
+							</div>
+							<div class="row">
+							    <div class="input-field">
+							        <textarea id="textarea1" class="materialize-textarea">主板烧坏了</textarea>
+							        <label for="describe">设备问题</label>
+							    </div>
+							</div>
+							<div class="row">
+							    <div class="input-field">
+							        <textarea id="textarea1" class="materialize-textarea">更换主板</textarea>
+							        <label for="describe">解决方案</label>
+							    </div>
+							</div>
+							<div class="row">
+								<div class="take-photos">报修人签字</div>
+								<div class="sign-area">
+									<img src="img/sign.jpeg" style="width: 100%">
+								</div>
+							</div>
+							<div class="row">
+							    <div class="input-field">
+							        <textarea id="textarea1" class="materialize-textarea"></textarea>
+							        <label for="describe">审核意见</label>
+							    </div>
+							</div>
+
+				        </div>
+				        <div class="card-action" style="text-align: center;">
+				        	<a class="waves-effect waves-light btn" style="border-radius: 25px;background:#2c5c85; width: 45%;" onclick="M.toast({html: '任务未完成！'})">拒绝</a>
+				            <a class="waves-effect waves-light btn" style="border-radius: 25px;background:#2c5c85; width: 45%;" onclick="M.toast({html: '完成任务！'})">通过</a>
+				        </div>
+				    </div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!--JavaScript at end of body for optimized loading-->
+    <script type="text/javascript" src="js/materialize.min.js"></script>
+
+</body>
+</html>

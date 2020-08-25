@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1" />
+		<title></title>
+		<link rel="stylesheet" type="text/css" href="../css/bootstrap.min.css" />
+		<link rel="stylesheet" type="text/css" href="../style.css" />
+		<script src="../js/jquery-1.11.0.js"></script>
+		<script src="../js/bootstrap.min.js"></script>
+
+	</head>
+
+	<body>
+		<div class="iframeBody">
+			<table class="filterTable">
+				<tr>
+					<td style="width:200px;">
+						<table class="toolsTable" cellspacing="0">
+							<tr>
+								<td>
+									<h3 align="left">用户列表</h3>
+								</td>
+							</tr>
+						</table>
+					</td>
+					<td>
+						<table cellspacing="0px" cellpadding="9px" class="hiddenTable">
+							<tr>
+								<td>
+									<button class="btn btn-sm btn-danger "><span class="btnContent">隐藏信息</span><span class="btnBadge">01</span></button>
+								</td>
+								<td>
+									<button class="btn btn-sm btn-warning "><span class="btnContent">隐藏信息</span><span class="btnBadge">02</span></button>
+								</td>
+							</tr>
+						</table>
+					</td>
+					<td width="1%">
+						<table style="width: 200px;" cellspacing="0" cellpadding="5px">
+							<tr>
+								<td>
+									<button class="btn btn-secondary  btn-sm">打印</button>
+								</td>
+								<td>
+									<button class="btn btn-secondary  btn-sm">导出</button>
+								</td>
+								<td>
+									<button class="btn btn-secondary btn-sm">刷新</button>
+								</td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+			</table>
+			<table class="operationTable">
+				<tr>
+					<td>
+						<table>
+							<tr>
+								<td>
+									状态：
+									<select>
+										<option>全部</option>
+										<option>启用</option>
+										<option>停用</option>
+									</select>&nbsp;&nbsp;
+								</td>
+								<td>角色：
+									<select>
+										<option>全部</option>
+										<option>超级用户</option>
+										<option>普通用户</option>
+										<option>超级管理员</option>
+										<option>管理员</option>
+									</select>&nbsp;&nbsp;
+								</td>
+								<td>
+									搜索：
+									<select>
+										<option>姓名</option>
+										<option>电话</option>
+									</select>&nbsp;&nbsp;
+									<input type="text" /><img src="../img/icons8-search-48.png" class="update">
+								</td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+			</table>
+			<table class="table" cellspacing="0px" cellpadding="5px">
+				<thead class="thead-light">
+					<tr>
+						<th scope="col" style="color:#17A2B8;">账号<span class="sortIcon">▼</span></th>
+						<th scope="col" style="color:#17A2B8;">角色</th>
+						<th scope="col">姓名</th>
+						<th scope="col">电话</th>
+						<th scope="col">地址</th>
+						<th scope="col" style="color:#17A2B8;">添加日期</th>
+						<th scope="col" style="color:#17A2B8;">状态</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td>zhangheng@163.com</td>
+						<td>超级用户</td>
+						<td>张恒</td>
+						<td>15022223334</td>
+						<td>上海浦东</td>
+						<td>2019-04-01</td>
+						<td>启用</td>
+					</tr>
+					<tr>
+						<td>alice@163.com</td>
+						<td>普通用户</td>
+						<td>alice</td>
+						<td>13265986254</td>
+						<td>上海浦东</td>
+						<td>2019-04-02</td>
+						<td>启用</td>
+					</tr>
+					<tr>
+						<td>lisheng@163.com</td>
+						<td>超级管理员</td>
+						<td>李生</td>
+						<td>18635556969</td>
+						<td>上海浦东</td>
+						<td>2019-04-03</td>
+						<td>停用</td>
+					</tr>
+					<tr>
+						<td>Leo@163.com</td>
+						<td>管理员</td>
+						<td>Leo</td>
+						<td>13366333399</td>
+						<td>上海浦东</td>
+						<td>2019-04-04</td>
+						<td>启用</td>
+					</tr>
+					<tr>
+						<td>hanlei@163.com</td>
+						<td>管理员</td>
+						<td>韩磊</td>
+						<td>15666994523</td>
+						<td>上海徐家汇</td>
+						<td>2019-04-04</td>
+						<td>启用</td>
+					</tr>
+					<tr>
+						<td>liuyu@163.com</td>
+						<td>管理员</td>
+						<td>刘宇</td>
+						<td>17756966885</td>
+						<td>上海黄浦</td>
+						<td>2019-04-04</td>
+						<td>启用</td>
+					</tr>
+
+					<tr>
+						<td>
+							</td>
+						<td colspan="8">
+							<div class="pagenationDiv">
+								<nav aria-lable="Page navigation example">
+									<ul class="pagination">
+										<li class="page-item">
+											<a class="page-link" href="#">首页</a>
+										</li>
+										<li class="page-item">
+											<a class="page-link" href="#">上一页</a>
+										</li>
+										<li class="page-item">
+											<a class="page-link" href="#">1</a>
+										</li>
+										<li class="page-item">
+											<a class="page-link" href="#">2</a>
+										</li>
+										<li class="page-item">
+											<a class="page-link" href="#">3</a>
+										</li>
+										<li class="page-item">
+											<a class="page-link" href="#">下一页</a>
+										</li>
+										<li class="page-item">
+											<a class="page-link" href="#">末页</a>
+										</li>
+									</ul>
+								</nav>
+							</div>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+
+	</body>
+	<script>
+		$(document).ready(function() {
+			var x = $("#id1").css("display")
+			$("#show").click(function() {
+				$("#id1").show();
+				$("#show").hide();
+				$("#hide").show();
+			});
+			$("#hide").click(function() {
+				$("#id1").hide();
+				$("#show").show();
+				$("#hide").hide();
+			});
+		});
+		$(document).ready(function() {
+			$("#15452").click(function() {
+				$("#showslow").animate({
+					right: '250px',
+				});
+			});
+		});
+		var options={};
+		$(function(){
+			$(".btn-newUser").click(function(){
+				$("#userModalCenter").modal(options);
+			})
+		})
+	</script>
+
+</html>

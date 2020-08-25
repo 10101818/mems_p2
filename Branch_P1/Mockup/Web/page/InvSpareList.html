@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width,initial-scale=1" />
+	<title></title>
+	<link rel="stylesheet" type="text/css" href="../css/bootstrap.min.css" />
+	<link rel="stylesheet" type="text/css" href="../style.css" />
+	<script src="../js/jquery-1.11.0.js"></script>
+	<script src="../js/bootstrap.min.js"></script>
+
+</head>
+
+<body>
+	<div class="iframeBody">
+		<table class="filterTable">
+			<tr>
+				<td style="width:200px;">
+					<table class="toolsTable" cellspacing="0">
+						<tr>
+							<td>
+								<h3 align="left">备用机库</h3>
+							</td>
+						</tr>
+					</table>
+				</td>
+				<td>
+					<table cellspacing="0px" cellpadding="9px" class="hiddenTable">
+						<tr>
+							<td>
+								<button class="btn btn-sm btn-danger "><span class="btnContent">隐藏信息</span><span
+										class="btnBadge">01</span></button>
+							</td>
+							<td>
+								<button class="btn btn-sm btn-warning "><span class="btnContent">隐藏信息</span><span
+										class="btnBadge">02</span></button>
+							</td>
+						</tr>
+					</table>
+				</td>
+				<td width="1%">
+					<table style="width: 200px;" cellspacing="0" cellpadding="5px">
+						<tr>
+							<td>
+								<button class="btn btn-secondary  btn-sm">打印</button>
+							</td>
+							<td>
+								<button class="btn btn-secondary  btn-sm">导出</button>
+							</td>
+							<td>
+								<button class="btn btn-secondary btn-sm">刷新</button>
+							</td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+		</table>
+		<table class="operationTable">
+			<tr>
+				<td>
+					<table>
+						<tr>
+							<td>
+								状态：
+								<select>
+									<option>全部</option>
+									<option>未使用</option>
+									<option>当前在用</option>
+									<option>已经过期</option>
+								</select>&nbsp;&nbsp;
+							</td>
+							<td>
+								搜索：
+								<select>
+									<option>简称</option>
+									<option>描述</option>
+								</select>&nbsp;&nbsp;
+								<input type="text" /><img src="../img/icons8-search-48.png" class="update">
+							</td>
+						</tr>
+					</table>
+				</td>
+
+			</tr>
+		</table>
+		<table class="table" cellspacing="0px" cellpadding="5px">
+			<thead class="thead-light">
+				<tr>
+					<th scope="col" style="color:#17A2B8;min-width:100px;">系统编号</th>
+					<th scope="col">富士II类</th>
+					<th scope="col">序列号</th>
+					<th scope="col">月租（元）</th>
+					<th scope="col">开始日期</th>
+					<th scope="col">结束日期</th>
+					<th scope="col">编辑</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td>BYJ000001</td>
+					<td>医用刀类</td>
+					<td>LSRM002020500001</td>
+					<td>150000</td>
+					<td>2020-04-15</td>
+					<td>2020-05-15</td>
+					<td><img src="../img/edit.png" class="update btn-editSpare"></td>
+				</tr>
+				<tr>
+					<td>BYJ000002</td>
+					<td>急救</td>
+					<td>LSRM002020500002</td>
+					<td>60000</td>
+					<td>2020-04-15</td>
+					<td>2020-04-20</td>
+					<td><img src="../img/edit.png" class="update btn-editSpare"></td>
+				</tr>
+				<tr>
+					<td>BYJ000003</td>
+					<td>医用刀类</td>
+					<td>LSRM002020500003</td>
+					<td>150000</td>
+					<td>2020-04-15</td>
+					<td>2020-05-15</td>
+					<td><img src="../img/edit.png" class="update btn-editSpare"></td>
+				</tr>
+				<tr>
+					<td>BYJ000004</td>
+					<td>监护仪</td>
+					<td>LSRM002020500004</td>
+					<td>50000</td>
+					<td>2020-04-15</td>
+					<td>2020-05-15</td>
+					<td><img src="../img/edit.png" class="update btn-editSpare"></td>
+				</tr>
+				<tr>
+					<td>BYJ000005</td>
+					<td>监护仪</td>
+					<td>LSRM002020500005</td>
+					<td>50000</td>
+					<td>2020-04-15</td>
+					<td>2020-05-15</td>
+					<td><img src="../img/edit.png" class="update btn-editSpare"></td>
+				</tr>
+				<tr>
+					<td>
+						<div>
+							<button class="btn btn-info btn-sm btn-newSpare" data-toggle="modal"
+								style="float: left;">新增备用机</button>
+						</div>
+					</td>
+					<td colspan="10">
+						<div class="pagenationDiv">
+							<nav aria-lable="Page navigation example">
+								<ul class="pagination">
+									<li class="page-item">
+										<a class="page-link" href="#">首页</a>
+									</li>
+									<li class="page-item">
+										<a class="page-link" href="#">上一页</a>
+									</li>
+									<li class="page-item">
+										<a class="page-link" href="#">1</a>
+									</li>
+									<li class="page-item">
+										<a class="page-link" href="#">2</a>
+									</li>
+									<li class="page-item">
+										<a class="page-link" href="#">3</a>
+									</li>
+									<li class="page-item">
+										<a class="page-link" href="#">下一页</a>
+									</li>
+									<li class="page-item">
+										<a class="page-link" href="#">末页</a>
+									</li>
+								</ul>
+							</nav>
+						</div>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+
+		<!-- 新增耗材 -->
+		<div class="modal fade" id="SpareModalCenter" tabindex="-1" role="dialog"
+			aria-lableledby="SpareModalCenterTitle" aria-hidden="true">
+			<div class="modal-dialog  modal-dialog-centered" role="document">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h6 class="modal-title" id="SpareModalLongTitle">新增备用机</h6>
+						<button type="button" class="close" data-dismiss="modal" aria-lable="Close"><span
+								class="modal-icon" aria-hidden="true">&times;</span></button>
+					</div>
+					<div class="modal-body">
+						<table class="table table-sm  modal-table" style="text-align: left;">
+							<tbody>
+								<tr>
+									<td><span class="requiredItem"></span>富士II类 :</td>
+									<td><select>
+											<option>医用刀类</option>
+											<option>急救</option>
+											<option>监护仪</option>
+										</select></td>
+								</tr>
+								<tr>
+									<td width="25%"><span class="requiredItem"></span>序列号:</td>
+									<td width="75%"><input type="text" class="input" value="" /></td>
+								</tr>
+								<tr>
+									<td><span class="requiredItem"></span>月租（元）:</td>
+									<td><input type="text" class="input" value="" /></td>
+								</tr>
+								<tr>
+									<td><span class="requiredItem"></span>开始日期:</td>
+									<td><input type="date" class="input" /></td>
+								</tr>
+								<tr>
+									<td><span class="requiredItem"></span>结束日期:</td>
+									<td><input type="date" class="input" /></td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-info ">保存</button>
+						<button type="button" class="btn btn-secondary " data-dismiss="modal">关闭</button>
+					</div>
+				</div>
+			</div>
+		</div>
+		<!-- 编辑耗材 -->
+		<div class="modal fade" id="SpareModal" tabindex="-1" role="dialog"
+			aria-lableledby="SpareModalCenterTitle" aria-hidden="true">
+			<div class="modal-dialog  modal-dialog-centered" role="document">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h6 class="modal-title" id="userModalLongTitle">编辑备用机</h6>
+						<button type="button" class="close" data-dismiss="modal" aria-lable="Close"><span
+								class="modal-icon" aria-hidden="true">&times;</span></button>
+					</div>
+					<div class="modal-body">
+						<table class="table table-sm  modal-table" style="text-align: left;">
+							<tbody>
+								<tr>
+									<td width="25%">
+										<span class="unrequiredItem"></span>系统编号:</td>
+									<td width="75%"><input type="text" class="input" value="BYJ000001" disabled /></td>
+								</tr>
+								<tr>
+									<td><span class="requiredItem"></span>富士II类 :</td>
+									<td><select>
+											<option>医用刀类</option>
+											<option>急救</option>
+											<option>监护仪</option>
+										</select></td>
+								</tr>
+								<tr>
+									<td><span class="requiredItem"></span>序列号:</td>
+									<td><input type="text" class="input" value="LSRM002020500001" /></td>
+								</tr>
+								<tr>
+									<td><span class="requiredItem"></span>月租（元）:</td>
+									<td><input type="text" class="input" value="15000" /></td>
+								</tr>
+								<tr>
+									<td><span class="requiredItem"></span>开始日期:</td>
+									<td><input type="date" class="input" value="2020-04-15" /></td>
+								</tr>
+								<tr>
+									<td><span class="requiredItem"></span>结束日期:</td>
+									<td><input type="date" class="input" value="2020-05-15" /></td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-info ">保存</button>
+						<button type="button" class="btn btn-secondary " data-dismiss="modal">关闭</button>
+					</div>
+				</div>
+			</div>
+		</div>
+</body>
+<script>
+	$(function () {
+		$(".requiredItem").html("*");
+		$(".unrequiredItem").html("&nbsp;&nbsp;");
+		$(".requiredItem").css("color", "red");
+	});
+	$(".btn-newSpare").click(function() {
+				$("#SpareModalCenter").modal(options);
+			})
+	var options = {};
+	$(function () {
+		$(".btn-editSpare").click(function () {
+			$("#SpareModal").modal(options);
+		})
+	})
+</script>
+
+</html>

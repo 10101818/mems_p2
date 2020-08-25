@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width,initial-scale=1" />
+	<title></title>
+	<link rel="stylesheet" type="text/css" href="../css/bootstrap.min.css" />
+	<link rel="stylesheet" type="text/css" href="../style.css" />
+	<script src="../js/jquery-1.11.0.js"></script>
+	<script src="../js/bootstrap.min.js"></script>
+
+</head>
+
+<body>
+	<div class="iframeBody">
+		<table class="filterTable">
+			<tr>
+				<td style="width:200px;">
+					<table class="toolsTable" cellspacing="0">
+						<tr>
+							<td>
+								<h3 align="left">耗材库</h3>
+							</td>
+						</tr>
+					</table>
+				</td>
+				<td>
+					<table cellspacing="0px" cellpadding="9px" class="hiddenTable">
+						<tr>
+							<td>
+								<button class="btn btn-sm btn-danger "><span class="btnContent">隐藏信息</span><span
+										class="btnBadge">01</span></button>
+							</td>
+							<td>
+								<button class="btn btn-sm btn-warning "><span class="btnContent">隐藏信息</span><span
+										class="btnBadge">02</span></button>
+							</td>
+						</tr>
+					</table>
+				</td>
+				<td width="1%">
+					<table style="width: 200px;" cellspacing="0" cellpadding="5px">
+						<tr>
+							<td>
+								<button class="btn btn-secondary  btn-sm">打印</button>
+							</td>
+							<td>
+								<button class="btn btn-secondary  btn-sm">导出</button>
+							</td>
+							<td>
+								<button class="btn btn-secondary btn-sm">刷新</button>
+							</td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+		</table>
+		<table class="operationTable">
+			<tr>
+				<td>
+					<table>
+						<tr>
+							<td>
+								搜索：
+								<select>
+									<option>简称</option>
+									<option>描述</option>
+								</select>&nbsp;&nbsp;
+								<input type="text" /><img src="../img/icons8-search-48.png" class="update">
+							</td>
+						</tr>
+					</table>
+				</td>
+
+			</tr>
+		</table>
+		<table class="table" cellspacing="0px" cellpadding="5px">
+			<thead class="thead-light">
+				<tr>
+					<th scope="col" style="min-width:120px;color:#17A2B8;">系统编号<span class="sortIcon">▼</span></th>
+					<th scope="col" style="min-width:120px;color:#17A2B8;">批次号</th>
+					<th scope="col" style="min-width:120px;color:#17A2B8;">简称</th>
+					<th scope="col" style="min-width:100px;">描述</th>
+					<th scope="col" style="min-width:100px;">供应商</th>
+					<th scope="col" style="min-width:120px;">富士II类</th>
+					<th scope="col" style="min-width:100px;">单价（元）</th>
+					<th scope="col" style="min-width:120px;">购入日期</th>
+					<th scope="col" style="min-width:100px;">采购单号</th>
+					<th scope="col" style="min-width:100px;">数量</th>
+					<th scope="col" style="min-width:80px;">编辑</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td>HC000001</td>
+					<td>LSMR0000101</td>
+					<td>云母片</td>
+					<td>呼吸机</td>
+					<td>飞利浦</td>
+					<td>医用刀类</td>
+					<td>1200</td>
+					<td>2020-04-15</td>
+					<td>CG00000001</td>
+					<td>100</td>
+					<td><img src="../img/edit.png" class="update btn-editSupplies"></td>
+				</tr>
+				<tr>
+					<td>HC000002</td>
+					<td>LSMR0000102</td>
+					<td>密封圈</td>
+					<td>呼吸机</td>
+					<td>飞利浦</td>
+					<td>医用激光类</td>
+					<td>600</td>
+					<td>2020-04-15</td>
+					<td>CG00000001</td>
+					<td>100</td>
+					<td><img src="../img/edit.png" class="update btn-editSupplies"></td>
+				</tr>
+				<tr>
+					<td>HC000003</td>
+					<td>LSMR0000103</td>
+					<td>氧电池</td>
+					<td>呼吸机</td>
+					<td>飞利浦</td>
+					<td>医用刀类</td>
+					<td>2000</td>
+					<td>2020-04-17</td>
+					<td>CG00000002</td>
+					<td>100</td>
+					<td><img src="../img/edit.png" class="update btn-editSupplies"></td>
+				</tr>
+				<tr>
+					<td>HC000004</td>
+					<td>LSMR0000104</td>
+					<td>反渗膜（血透）</td>
+					<td>水处理（血透）</td>
+					<td>飞利浦</td>
+					<td>医用刀类</td>
+					<td>30000</td>
+					<td>2020-04-17</td>
+					<td>CG00000002</td>
+					<td>100</td>
+					<td><img src="../img/edit.png" class="update btn-editSupplies"></td>
+				</tr>
+				<tr>
+					<td>HC000005</td>
+					<td>LSMR0000105</td>
+					<td>反渗膜（一般）</td>
+					<td>水处理（一般）</td>
+					<td>飞利浦</td>
+					<td>医用刀类</td>
+					<td>4000</td>
+					<td>2020-04-17</td>
+					<td>CG00000002</td>
+					<td>100</td>
+					<td><img src="../img/edit.png" class="update btn-editSupplies"></td>
+				</tr>
+				<tr>
+					<td>
+						<div><button class="btn-newFujiClassI btn btn-info btn-sm"
+								onclick="$('#AddSuppliesModal').modal(options);">新增耗材</button></div>
+					</td>
+					<td colspan="18">
+						<div class="pagenationDiv">
+							<nav aria-lable="Page navigation example">
+								<ul class="pagination">
+									<li class="page-item">
+										<a class="page-link" href="#">首页</a>
+									</li>
+									<li class="page-item">
+										<a class="page-link" href="#">上一页</a>
+									</li>
+									<li class="page-item">
+										<a class="page-link" href="#">1</a>
+									</li>
+									<li class="page-item">
+										<a class="page-link" href="#">2</a>
+									</li>
+									<li class="page-item">
+										<a class="page-link" href="#">3</a>
+									</li>
+									<li class="page-item">
+										<a class="page-link" href="#">下一页</a>
+									</li>
+									<li class="page-item">
+										<a class="page-link" href="#">末页</a>
+									</li>
+								</ul>
+							</nav>
+						</div>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+	<!-- 新增耗材 -->
+	<div class="modal fade" id="AddSuppliesModal" tabindex="-1" role="dialog" aria-lableledby="SuppliesModalCenterTitle"
+		aria-hidden="true">
+		<div class="modal-dialog  modal-dialog-centered" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h6 class="modal-title" id="userModalLongTitle">新增耗材</h6>
+					<button type="button" class="close" data-dismiss="modal" aria-lable="Close"><span class="modal-icon"
+							aria-hidden="true">&times;</span></button>
+				</div>
+				<div class="modal-body">
+					<table class="table table-sm  modal-table" style="text-align: left;">
+						<tbody>
+							<tr>
+								<td width="25%"><span class="requiredItem"></span>富士II类:</td>
+								<td width="75%">
+									<select class="deviceType">
+										<option value="1">医用刀类</option>
+										<option value="6801">医用激光类</option>
+										<option value="6802">灯床塔</option>
+									</select>
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<span class="requiredItem"></span>选择耗材:</td>
+								<td>
+									<select>
+										<option>过滤器</option>
+										<option>导联线</option>
+										<option>氧电池</option>
+									</select>
+								</td>
+							</tr>
+							<tr>
+								<td width="25%"><span class="requiredItem"></span>批次号:</td>
+								<td width="75%"><input type="text" class="input" value="" /></td>
+							</tr>
+							<tr>
+								<td width="25%">
+									<span class="requiredItem"></span>规格:</td>
+								<td width="75%"><input type="text" class="input" value="" /></td>
+							</tr>
+							<tr>
+								<td width="25%">
+									<span class="requiredItem"></span>型号:</td>
+								<td width="75%"><input type="text" class="input" value="" /></td>
+							</tr>
+							<tr>
+								<td class=""><span class="requiredItem"></span>供应商:</td>
+								<td><input type="text" class="input" value="" /><img src="../img/find.png"
+										class="update"></td>
+							</tr>
+							<tr>
+								<td><span class="requiredItem"></span>单价（元）:</td>
+								<td><input type="text" class="input" value="" /></td>
+							</tr>
+							<tr>
+								<td><span class="requiredItem"></span>数量:</td>
+								<td><input type="text" class="input" value="" /></td>
+							</tr>
+							<tr>
+								<td class=""><span class="requiredItem"></span>购入日期:</td>
+								<td><input type="date" value="" /></td>
+							</tr>
+							<tr>
+								<td class=""><span class="unrequiredItem"></span>采购单号:</td>
+								<td><input type="text" class="input" value="" /></td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-info ">保存</button>
+					<button type="button" class="btn btn-secondary " data-dismiss="modal">关闭</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- 编辑耗材 -->
+	<div class="modal fade" id="SuppliesModal" tabindex="-1" role="dialog" aria-lableledby="SuppliesModalCenterTitle"
+		aria-hidden="true">
+		<div class="modal-dialog  modal-dialog-centered" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h6 class="modal-title" id="userModalLongTitle">编辑耗材</h6>
+					<button type="button" class="close" data-dismiss="modal" aria-lable="Close"><span class="modal-icon"
+							aria-hidden="true">&times;</span></button>
+				</div>
+				<div class="modal-body">
+					<table class="table table-sm  modal-table" style="text-align: left;">
+						<tbody>
+							<tr>
+								<td width="25%">
+									<span class="unrequiredItem"></span>系统编号:</td>
+								<td width="75%"><input type="text" class="input" value="HC000001" disabled /></td>
+							</tr>
+							<tr>
+								<td><span class="requiredItem"></span>富士II类:</td>
+								<td>
+									<select class="deviceType">
+										<option value="1">医用刀类</option>
+										<option value="6801">医用激光类</option>
+										<option value="6802">灯床塔</option>
+									</select>
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<span class="unrequiredItem"></span>选择耗材:</td>
+								<td>
+									<select disabled>
+										<option>过滤器</option>
+										<option>导联线</option>
+										<option>氧电池</option>
+									</select>
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<span class="requiredItem"></span>批次号:</td>
+								<td><input type="text" class="input" value="LSMR0000101" /></td>
+							</tr>
+							<tr>
+								<td width="25%">
+									<span class="requiredItem"></span>规格:</td>
+								<td width="75%"><input type="text" class="input" value="0.5mm" /></td>
+							</tr>
+							<tr>
+								<td width="25%">
+									<span class="requiredItem"></span>型号:</td>
+								<td width="75%"><input type="text" class="input" value="0503" /></td>
+							</tr>
+							<tr>
+								<td class=""><span class="requiredItem"></span>供应商:</td>
+								<td><input type="text" class="input" value="飞利浦" /><img src="../img/find.png"
+										class="update"></td>
+							</tr>
+							<tr>
+								<td><span class="requiredItem">*</span>单价（元）:</td>
+								<td><input type="text" disabled class="input" value="1200" /></td>
+							</tr>
+							<tr>
+								<td><span class="requiredItem">*</span>数量:</td>
+								<td><input type="text" disabled class="input" value="100" /></td>
+							</tr>
+							<tr>
+								<td class=""><span class="requiredItem">*</span>购入日期:</td>
+								<td><input type="date" disabled value="2020-04-15" /></td>
+							</tr>
+							<tr>
+								<td class=""><span class="unrequiredItem"></span>采购单号:</td>
+								<td><input type="text" disabled class="input" value="CG00000001" /></td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-info ">保存</button>
+					<button type="button" class="btn btn-secondary " data-dismiss="modal">关闭</button>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+<script>
+	$(function () {
+		$(".requiredItem").html("*");
+		$(".unrequiredItem").html("&nbsp;&nbsp;");
+		$(".requiredItem").css("color", "red");
+	});
+	var options = {};
+	$(function () {
+		$(".btn-editSupplies").click(function () {
+			$("#SuppliesModal").modal(options);
+		})
+	})
+</script>
+</html>

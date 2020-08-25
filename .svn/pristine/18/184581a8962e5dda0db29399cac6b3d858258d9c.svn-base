@@ -1,0 +1,124 @@
+﻿using BusinessObjects.Manager;
+using BusinessObjects.Util;
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks; 
+
+namespace BusinessObjects.Domain
+{
+    /// <summary>
+    /// 采购单info
+    /// </summary>
+    public class PurchaseOrderInfo : EntityInfo
+    {
+        /// <summary>
+        /// 请求者
+        /// </summary>
+        public UserInfo User { get; set; }
+        /// <summary>
+        /// 供应商
+        /// </summary>
+        public SupplierInfo Supplier { get; set; }
+        /// <summary>
+        /// 采购日期
+        /// </summary>
+        public DateTime OrderDate { get; set; }
+        /// <summary>
+        /// 到货日期
+        /// </summary>
+        public DateTime DueDate { get; set; }
+        /// <summary>
+        /// 备注
+        /// </summary>
+        public string Comments { get; set; }
+        /// <summary>
+        /// 采购单状态
+        /// </summary>
+        public KeyValueInfo Status { get; set; }
+        /// <summary>
+        /// 添加日期
+        /// </summary>
+        public DateTime AddDate { get; set; }
+        /// <summary>
+        /// 修改日期
+        /// </summary>
+        public DateTime UpdateDate { get; set; }
+        /// <summary>
+        /// OID
+        /// </summary>
+        public string OID { get { return LookupManager.GetObjectOID(ObjectTypes.PurchaseOrder, this.ID); } }
+        /// <summary>
+        /// 零件
+        /// </summary>
+        public List<InvComponentInfo> Components { get; set; }
+        /// <summary>
+        /// 耗材
+        /// </summary>
+        public List<InvConsumableInfo> Consumables { get; set; }
+        /// <summary>
+        /// 服务
+        /// </summary>
+        public List<InvServiceInfo> Services { get; set; }
+
+        /// <summary>
+        /// 采购单info
+        /// </summary>
+        public PurchaseOrderInfo() 
+        {
+            this.User = new UserInfo();
+            this.Supplier = new SupplierInfo();
+            this.Status = new KeyValueInfo();
+        }
+        /// <summary>
+        /// 采购单info
+        /// </summary>
+        /// <param name="dr">dr</param>
+        public PurchaseOrderInfo(DataRow dr)
+            : this()
+        {
+            this.ID = SQLUtil.ConvertInt(dr["ID"]);
+            this.User.ID = SQLUtil.ConvertInt(dr["UserID"]);
+            if (dr.Table.Columns.Contains("UserName"))
+                this.User.Name = SQLUtil.TrimNull(dr["UserName"]);
+            this.Supplier.ID = SQLUtil.ConvertInt(dr["SupplierID"]);
+            if (dr.Table.Columns.Contains("SupplierName"))
+                this.Supplier.Name = SQLUtil.TrimNull(dr["SupplierName"]);
+            this.OrderDate = SQLUtil.ConvertDateTime(dr["OrderDate"]);
+            this.DueDate = SQLUtil.ConvertDateTime(dr["DueDate"]);
+            this.Comments = SQLUtil.TrimNull(dr["Comments"]);
+            this.Status.ID = SQLUtil.ConvertInt(dr["StatusID"]);
+            this.Status.Name = LookupManager.GetPurchaseOrderStatusDesc(this.Status.ID);
+            this.AddDate = SQLUtil.ConvertDateTime(dr["AddDate"]);
+            this.UpdateDate = SQLUtil.ConvertDateTime(dr["UpdateDate"]);
+        }
+        /// <summary>
+        /// 采购单状态
+        /// </summary>
+        public static class PurchaseOrderStatus
+        {
+            /// <summary>
+            /// 已终止
+            /// </summary>
+            public const int Cancelled = -1;
+            /// <summary>
+            /// 新建
+            /// </summary>
+            public const int New = 1;
+            /// <summary>
+            /// 待审批
+            /// </summary>
+            public const int Pending = 2;
+            /// <summary>
+            /// 待入库
+            /// </summary>
+            public const int Stocking = 3;
+            /// <summary>
+            /// 已完成
+            /// </summary>
+            public const int Ended = 9;
+        }
+    }
+}

@@ -1,0 +1,188 @@
+﻿
+@{
+    Layout = null;
+}
+<!--韦伯计算-->
+<div id="Webb" title="韦伯计算" class="ui-dialog-content ui-widget-content" tabindex="-1" style="display:none;">
+    <button class="btn btn-outline-info btn-sm" onclick="GetWebData()">韦伯计算</button>
+    <table class="table" cellspacing="0" cellpadding="5">
+        <thead>
+            <tr>
+                <th class="tdDetailHead" style="min-width: 110px;">月份</th>
+                <th class="tdDetailHead" style="min-width: 80px;">同步1月</th>
+                <th class="tdDetailHead">1月</th>
+                <th class="tdDetailHead">2月</th>
+                <th class="tdDetailHead">3月</th>
+                <th class="tdDetailHead">4月</th>
+                <th class="tdDetailHead">5月</th>
+                <th class="tdDetailHead">6月</th>
+                <th class="tdDetailHead">7月</th>
+                <th class="tdDetailHead">8月</th>
+                <th class="tdDetailHead">9月</th>
+                <th class="tdDetailHead">10月</th>
+                <th class="tdDetailHead">11月</th>
+                <th class="tdDetailHead">12月</th>
+            </tr>
+        </thead>
+        <tbody id="WebContent"></tbody>
+    </table>
+</div>
+<div id="WebChart" class="ui-dialog-content ui-widget-content" tabindex="-1" style="display:none;">
+    <div style="width:850px;">
+        <div id="chartDiv" style="width:850px;"></div>
+        <div id="sliderDiv" style="width:850px;display:inline;bottom:10px;"></div>
+    </div>
+</div>
+<script>
+    var WebVue = new Vue({
+        el: "#Webb",
+        data: {
+            WebList: [],
+            WebData: {},
+            obj: {},
+        }
+    })
+</script>
+<script>
+    $().ready(function () {
+        InitWebDialog();
+    })
+
+    function InitWebDialog() {
+        $("#Webb").dialog({
+            autoOpen: false,
+            height: 700,
+            width: "80%",
+            modal: true,
+            resizable: false,
+            buttons: {
+                "导入": function () { ImportFromWeb(); },
+                "关闭": function () { $("#Webb").dialog("close"); }
+            }
+        });
+        $("#WebChart").dialog({
+            autoOpen: false,
+            height: 700,
+            width: "80%",
+            modal: true,
+            resizable: false,
+            buttons: {
+                "应用": function () { },
+                "关闭": function () { $("#WebChart").dialog("close"); }
+            }
+        })
+    }
+
+    function ShowWeb(obj) {
+        WebVue.Obj = obj;
+        WebVue.WebList = obj.Repairs;
+        WebHTML();
+        $("#Webb").dialog("open");
+    }
+
+    function WebHTML() {
+        $("#WebContent").html("");
+        var str = "";
+        $.each(WebVue.WebList, function (index, item) {
+            if (item.Month == 1) {
+                if (str != "") {
+                    str += '</tr>';
+                }
+                str += '<tr>';
+                str += '<th>第' + item.Year + '年故障概率</th>';
+                str += '<td><button class="btn btn-outline-info btn-sm" onclick="SyncRate(' + item.Year + ')">同步</button></td>';
+            }
+            str += '<td><input type="text" value="' + item.Rate + '" onchange="CellWebData(' + item.Year + ',' + item.Month + ',this.value)" /></td>';
+        })
+        $("#WebContent").html(str);
+    }
+
+    function GetWebData() {
+        $.post('@Url.Action("GetWebData", "FujiClass2")', { 
+            fujiClass2ID: WebVue.Obj.ID,
+            months: 60
+        }, function (result) {
+            if (result.ResultCode != "00") {
+                processResponseError(result.ResultCode, result.ResultMessage)
+            } else {
+                WebVue.WebData = result.Data;
+                $("#WebChart").dialog("open");
+                barChart();
+            }
+        })
+    }
+
+    function CellWebData(year, month, rate) {
+        $.each(WebVue.WebList, function (index, item) {
+            if (item.Year == year && item.Month == month) {
+                item.Rate = Number(rate)
+            }
+        })
+    }
+
+    function ImportFromWeb() {
+        $.each(repairVue.Objects, function (index, item) {
+            if (item.ID == repairVue.Obj.ID) {
+                item.Repairs = repairVue.WebList;
+                repairVue.ChangeAVG(item);
+                jAlert("导入成功", "提示", function () {
+                    $("#Webb").dialog("close");
+                });
+            }
+        })
+    }
+
+    function SyncRate(year) {
+        var rate = 0;
+        $.each(repairVue.WebList, function (index, item) {
+            if (item.Year == year) {
+                if (item.Month == 1)
+                    rate = item.Rate;
+                else
+                    item.Rate = rate;
+            }
+        })
+        WebHTML();
+    }
+</script>
+
+<script>
+    function barChart() {
+        var chart = new G2.Chart({
+            container:'chartDiv',
+            width:600,
+            height:500,
+        });
+        //var data = new DataSet().createView().source(WebVue.WebData.forecastRate);
+        chart.source(WebVue.WebData.forecast1Rate);
+
+        chart.tooltip({
+            showTitle: true,
+            showMarkers: false,
+            showCrosshairs: true,
+            crosshairs: {
+                type:'xy',
+            },
+            itemTpl: '<li>'
+              + '{Key}<br/>'
+              + '{Value}'
+              + '</li>'
+        });
+        //chart.interaction('active-region');
+        //chart.line().position('Month*ForecastRate').color('#fdae6b');
+        chart.point().position('Month*ForecastRate').color('#fdae6b').size(2).shape('circle').tooltip('Month*ForecastRate', function (Month, ForecastRate) {
+            return {
+                Key: '月：' + Month,
+                Value: '预测故障率：' + ForecastRate + '(%)'
+            };
+        });
+        chart.point().position('Month*Rate').size(2).shape('circle').tooltip('Month*Rate', function (Month, Rate) {
+            return {
+                Key: '月：' + Month,
+                Value: '实际故障率：' + Rate + '(%)'
+            };
+        });
+
+        chart.render();
+    }
+</script>

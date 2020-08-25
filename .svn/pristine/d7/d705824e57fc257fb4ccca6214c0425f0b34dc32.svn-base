@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<title>预测成本</title>
+	<link rel="stylesheet" href="../css/bootstrap.min.css" />
+	<link rel="stylesheet" href="../style.css" />
+	<script src="../js/jquery-1.11.0.js"></script>
+	<script src="../js/bootstrap.min.js"></script>
+</head>
+
+<body>
+	<div style="margin-left: 100px;">
+        <div class="title" style="margin: 40px auto;">
+            <span>维保购买决策结果</span>
+        </div>
+		<table style="text-align: left; width: 1850px;" border="1">
+			<tbody>
+				<tr style="background-color: #1b4082; color:white; text-align: center;">
+					<th rowspan="2" style="border: none;"></th>
+					<th rowspan="2" style="border: none; width: 150px;">资产编号</th>
+					<th rowspan="2" style="border: none; width: 150px;">资产名称</th>
+					<th rowspan="2" style="border: none; width: 130px; text-align: left;">FMTS自定义分类II</th>
+					<th rowspan="2" style="border: none; width: 130px; text-align: left;">维保分类</th>
+					<th rowspan="2" style="border: none; width: 130px; text-align: left;">故障设备分类</th>
+					<th rowspan="2" style="border: none; width: 150px; text-align: left;">故障分类（重要/一般）</th>
+					<th rowspan="2" style="border: none; width: 125px;">未来1年内故障成本</th>
+					<th rowspan="2" style="border: none; width: 180px;">未来1年内故障外购维修成本</th>
+					<th rowspan="2" style="border: none; width: 140px;">未来1年内总故障成本</th>
+					<th rowspan="2" style="border: none; width: 120px;">未来1年全保成本</th>
+                    <th rowspan="2" style="border: none; width: 125px;">未来1年技术保成本</th>
+                    <th colspan="2" style="background-color: #4f6328; width: 300px;border: none;">未来1年期故障成本-维保成本差异</th>
+                </tr>
+                <tr style="background-color: #4f6328; color:white; text-align: center;">
+                    <th width="150" style="border: none;">购买全保判断</th>
+                    <th width="150" style="border: none;">购买技术保判断</th>
+                </tr>
+                <tr class="">
+                    <th style="text-align: center;">1</th>
+                    <th>LSRM002020900002</th>
+                    <th>医用磁共振成像系统</th>
+                    <td>NRI</td>
+                    <td>MRI</td>
+                    <td>MRI</td>
+                    <td>重要设备</td>
+                    <td class="number">438,762</td>
+                    <td class="number">6,695</td>
+                    <td class="number">445,457</td>
+                    <td class="number">868,000</td>
+                    <td class="number">162,750</td>
+                    <th><img src="../img/no.png"><span><img src="../img/asc.png" > 422,543</span></th>
+                    <th><img src="../img/no.png"><span><img src="../img/asc.png" > 156,055</span></th>
+				</tr>
+                <tr class="">
+                    <th style="text-align: center;">2</th>
+                    <th>LSRM000000003</th>
+                    <th>CT机</th>
+                    <td>CT</td>
+                    <td>CT</td>
+                    <td>CT</td>
+                    <td>重要设备</td>
+                    <td class="number">637,624</td>
+                    <td class="number">4,111</td>
+                    <td class="number">641,735</td>
+                    <td class="number">429,600</td>
+                    <td class="number">53,700</td>
+                    <th><img src="../img/yes.png"><span>212,135</span></th>
+                    <th><img src="../img/no.png"><span><img src="../img/asc.png" > 49,589</span></th>
+				</tr>
+                <tr class="">
+                    <th style="text-align: center;">3</th>
+                    <th>LSRM002021000004</th>
+                    <th>数字X射线摄影系统</th>
+                    <td>普放</td>
+                    <td>普放</td>
+                    <td>普放</td>
+                    <td>一般设备</td>
+                    <td class="number">-</td>
+                    <td class="number">-</td>
+                    <td class="number">-</td>
+                    <td class="number">276,000</td>
+                    <td class="number">41,400</td>
+                    <th><span>-</span></th>
+                    <th><span>-</span></th>
+				</tr>
+                <tr class="">
+                    <th style="text-align: center;">4</th>
+                    <th>LSRM000000296</th>
+                    <th>高频电刀</th>
+                    <td>医用刀类</td>
+                    <td>医用刀类</td>
+                    <td>医用刀类</td>
+                    <td>一般设备</td>
+                    <td class="number">3,960</td>
+                    <td class="number">1,980</td>
+                    <td class="number">5,940</td>
+                    <td class="number">15,130</td>
+                    <td class="number">2,270</td>
+                    <th><img src="../img/unKnow.png"><span><img src="../img/asc.png" > 9/190</span></th>
+                    <th><img src="../img/unKnow.png"><span><img src="../img/asc.png" > 290</span></th>
+				</tr>       
+			</tbody>
+		</table>
+	</div>
+</body>
+<script>
+	var options = {};
+	$(function () {
+		$(".requiredItem").html("*");
+		$(".unrequiredItem").html("&nbsp;&nbsp;");
+		$(".requiredItem").css("color", "red");
+
+		$("#s1").change(function () {
+			if ($(this).val() != 3) {
+				$("#t1").hide();
+				$("#t2").show();
+			} else {
+				$("#t1").show();
+				$("#t2").hide();
+
+			}
+		})
+		$(".addComponent").click(function () {
+			$("#AddComponent").modal(options);
+		})
+		$(".addConsumables").click(function () {
+			$("#AddConsumables").modal(options);
+		})
+	})
+</script>
+<style>
+    th {min-width: 10px;}
+    td { border: none; background-color: #dceff3;}
+    .number {text-align: right;}
+    th span {float: right;}
+    img {width: 16px; height: 16px;}
+</style>
+
+</html>

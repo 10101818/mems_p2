@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title>填写服务凭证</title>
+		<link rel="stylesheet" type="text/css" href="../css/bootstrap.min.css" />
+		<link rel="stylesheet" type="text/css" href="../style.css" />
+		<script src="../js/jquery-1.11.0.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/signature_pad@2.3.2/dist/signature_pad.min.js "> </script>
+		<meta content="yes" name="apple-mobile-web-app-capable">
+		<meta content="yes" name="apple-touch-fullscreen">
+	</head>
+	<style>
+
+		.sign{
+			display: flex;
+			align-items: center;
+			}
+		.signature-pad--body{
+			border:1px #000000 solid;
+			margin-right: 20px;
+		}
+		
+	</style>
+	<body>
+		<div class="serverDetail">
+			<div style="font-size:18px;margin-top:3%;"><a class="linkFile" href="#" onclick="window.history.back()">
+					<<返回 </a> </div> <p class="tblTitle">填写服务凭证</p>
+						<table class="routeTable" border="1" align="center" cellpadding="6" cellspacing="0">
+							<tr class="headtr">
+								<td colspan="4">设备基本信息</td>
+							</tr>
+							<tr>
+								<td class="headtd" width="20%">设备系统编号</td>
+								<td width="30%">
+									<label class="disableContent">ZC00000001</label>
+								</td>
+								<td class="headtd" width="20%">资产等级</td>
+								<td width="30%">
+									<label class="disableContent">重要</label>
+								</td>
+							</tr>
+							<tr>
+								<td class="headtd">设备名称</td>
+								<td>
+									<label class="disableContent">彩超</label>
+								</td>
+								<td class="headtd">使用科室</td>
+								<td>
+									<label class="disableContent">磁共振</label>
+								</td>
+							</tr>
+							<tr>
+								<td class="headtd">设备型号</td>
+								<td>
+									<label class="disableContent">HA 710 二郎神</label>
+								</td>
+								<td class="headtd">安装地点</td>
+								<td>
+									<label class="disableContent">磁共振1室</label>
+								</td>
+							</tr>
+							<tr>
+								<td class="headtd">序列号</td>
+								<td>
+									<label class="disableContent">458652552</label>
+								</td>
+								<td class="headtd">保修状况</td>
+								<td>
+									<label class="disableContent">保内</label>
+								</td>
+							</tr>
+							<tr>
+								<td class="headtd">设备厂商</td>
+								<td>
+									<label class="disableContent">飞利浦</label>
+								</td>
+								<td class="headtd">保修范围</td>
+								<td>
+									<label class="disableContent">全保</label>
+								</td>
+							</tr>
+						</table>
+						</br>
+						<!-- <p class="bodyCompoment">请求信息</p> -->
+						<table class="routeTable" border="1px" align="center" cellpadding="6px" cellspacing="0">
+							<tbody>
+								<tr class="headtr">
+									<td colspan="4">请求详情信息</td>
+								</tr>
+								<tr class="tblList">
+									<td class="tdDetailHead"width="20%">服务申请编号</td>
+									<td colspan="3">
+										<label id="SystemID" class="disableContent">0125632</label>
+									</td>
+								</tr>
+								<tr class="tblList">
+									<td class="tdDetailHead">类型</td>
+									<td>
+										<label class="disableContent">客户请求-维修</label>
+									</td>
+									<td class="tdDetailHead">请求人</td>
+									<td>
+										<label class="disableContent">宋XX</label>
+									</td>
+								</tr>
+								<tr class="tblList">
+									<td class="tdDetailHead">请求状态</td>
+									<td>
+										<label class="disableContent">已分配</label>
+									</td>
+									<td class="tdDetailHead">请求日期</td>
+									<td>
+										<label class="disableContent">2019-03-01 12:03</label>
+									</td>
+								</tr>
+								<tr>
+									<td class="tdDetailHead" width="20%">主题</td>
+									<td width="30%">
+										<label class="disableContent">彩超--维修</label>
+									</td>
+									<td class="tdDetailHead">机器状态</td>
+									<td>
+										<label class="disableContent">正常</label>
+									</td>
+								</tr>
+								<tr class="tblList">
+									<td class="tdDetailHead">请求来源</td>
+									<td colspan="3">
+										<label class="disableContent">客户报修</label>
+									</td>
+								</tr>
+								<tr>
+									<td class="tdDetailHead">故障描述</td>
+									<td colspan="3">
+										<label class="disableContent">系统报错，设备无法启动</label>
+									</td>
+								</tr>
+								<tr class="tblList">
+
+									<td class="tdDetailHead">处理方式</td>
+									<td colspan="3">
+										<label class="disableContent">上门服务</label>
+									</td>
+								</tr>
+							</tbody>
+						</table>
+						</br>
+						<!-- <p class="bodyCompoment">派工单信息</p> -->
+						<table class="tblDetail" width="800" border="1" bordercolor="000000" cellpadding="0" cellspacing="0">
+							<tbody>
+								<tr class="headtr">
+									<td colspan="6">派工单信息</td>
+								</tr>
+								<tr>
+									<td class="tdDetailHead" width="20%">派工单编号</td>
+									<td width="30%"><a href="uploadServerInfo.html" class="linkFile">PGD00000001</a></td>
+									<td class="tdDetailHead" width="20%">紧急程度</td>
+										<td width="30%">
+											<label class="disableContent">紧急</label>
+										</td>
+									</tr>
+									<tr>
+										<td class="tdDetailHead">派工类型</td>
+										<td>
+											<label class="disableContent">维修</label>
+										</td>
+										<td class="tdDetailHead">机器状态</td>
+										<td>
+											<label class="disableContent">停机</label>
+										</td>
+									</tr>
+									<tr class="tblList">
+										<td class="tdDetailHead">工程师姓名</td>
+										<td>
+											<label class="disableContent">魏宸园</label>
+										</td>
+										<td class="tdDetailHead">出发时间</td>
+										<td>
+											<label class="disableContent">2019/01/01</label>
+										</td>
+									</tr>
+									<tr class="tblList">
+										<td class="tdDetailHead">备注</td>
+										<td colspan="3">
+											<label class="disableContent"></label>
+										</td>
+									</tr>
+							</tbody>
+						</table>
+						</br>
+						<!-- <p class="bodyCompoment">服务详情信息</p> -->
+						<table class="tblDetail" width="800" border="1" bordercolor="000000" cellpadding="0" cellspacing="0">
+							<tbody>
+
+								<tr class="headtr">
+									<td colspan="4">服务详情信息</td>
+								</tr>
+								<tr>
+									<td class="headtd" width="20%">服务凭证编号</td>
+									<td>
+										<label class="disableContent">FWPZ00000001</label>
+									</td>
+									<td class="tdDetailHead" width="20%">服务结果</td>
+									<td width="30%">
+										<select>
+											<option>完成</option>
+											<option>待跟进</option>
+										</select>
+									</td>
+								</tr>
+								<tr class="tblList">
+									<td class="tdDetailHead" width="20%">客户姓名</td>
+									<td width="30%">
+										<label style="color:gray">沈老师</label>
+									</td>
+									<td class="tdDetailHead" width="20%">客户电话</td>
+									<td width="30%">
+										<label style="color:gray">18521110011</label>
+									</td>
+								</tr>
+								<tr class="tblList">
+									<td class="tdDetailHead">故障现象/错误代码/事由</td>
+									<td width="30%" colspan="3">
+										<textarea id="Reason" rows="2" style="width: 600px;" maxlength="500"></textarea>
+
+									</td>
+									
+								</tr>
+								<tr class="tblList">
+									<td class="tdDetailHead" width="20%">工作内容</td>
+									<td colspan="3">
+										<textarea id="Reason" rows="2" style="width: 600px;" maxlength="500"></textarea>	
+
+									</td>
+								</tr>
+								<tr>
+									<td class="tdDetailHead" width="20%">待跟进问题</td>
+									<td colspan="3"><textarea id="Reason" rows="2" style="width: 600px;" maxlength="500"></textarea>
+									</td>
+								</tr>
+								<tr class="tblList">
+									<td class="tdDetailHead">待确认问题</td>
+									<td colspan="3"><textarea id="Reason" rows="2" style="width: 600px;" maxlength="500"></textarea>
+									</td>
+								</tr>
+								<tr>
+									<td class="tdDetailHead">建议留言</td>
+									<td colspan="3"><textarea id="Reason" rows="2" style="width: 600px;" maxlength="500"></textarea>
+								</td>
+								</tr>
+								<tr class="tblList" id="signature-pad" class="signature-pad">
+									<td class="tdDetailHead" width="20%">客户签名</td>
+									<td colspan="3">
+										<div class="sign">
+											<div class="signature-pad--body">
+												<canvas id="signature-canvas"></canvas>
+												<i class="leftup lefta"></i>
+												<i class="leftup rightup"></i>
+												<i class="leftup leftdown"></i>
+												<i class="leftup rightdown"></i>
+											</div>
+											<div class="signature-pad--footer">
+												<button type="button" class="btn btn-outline-info btn-sm" id="clear" data-action="clear">清除</button>
+												<!-- <button type="button" class="buttonclear clear" id="save" data-action="clear">确定</button> -->
+											</div>
+										</div>
+									</td>
+								</tr>
+							</tbody>
+						</table>
+						<table width="600px" style="text-align: center; margin: 20px auto;">
+							<tbody>
+								<tr class="tblList">
+									<td width="30%"><button class="btn btn-info" id="btnReceipt" onclick="backList()">保存并提交</button>
+									</td>
+									<td width="30%"><button class="btn btn-info" onclick="window.history.back()">返回</button></td>
+								</tr>
+							</tbody>
+						</table>
+	</body>
+	<script>
+		function backList() {
+			window.location = "uploadServerInfoLink.html";
+		}
+
+		function back() {
+			window.location = "uploadServerInfoList.html";
+		}
+		//客户签名
+		var canvas = document.getElementById('signature-canvas');
+		var signaturePad = new SignaturePad(canvas, {
+			backgroundColor: 'rgba(255, 255, 255, 0)',
+			penColor: 'rgb(0, 0, 0)'
+		});
+		// var saveButton = document.getElementById('save'); 
+		var cancelButton = document.getElementById('clear');
+		// saveButton.addEventListener('click', function (event) { 
+		//                 var data = signaturePad.toDataURL('image/png'); 
+		//                 // Send data to server instead...
+		//window.open(data); 
+		// }); 
+		cancelButton.addEventListener('click', function(event) {
+			signaturePad.clear();
+		});
+
+		function resizeCanvas() {
+			var ratio = Math.max(window.devicePixelRatio || 1, 1); // 清除画布 
+			canvas.width = canvas.offsetWidth * ratio;
+			canvas.height = canvas.offsetHeight * ratio;
+			canvas.getContext("2d").scale(ratio, ratio);
+			signaturePad.clear();
+		}
+		window.onresize = resizeCanvas;
+		resizeCanvas();
+	</script>
+
+</html>

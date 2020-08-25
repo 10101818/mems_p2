@@ -1,0 +1,167 @@
+﻿using BusinessObjects.Manager;
+using BusinessObjects.Util;
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace BusinessObjects.Domain
+{
+    public class ConsumableInfo : EntityInfo,IComparable<ConsumableInfo>
+    { 
+        public KeyValueInfo FujiClass2 { get; set; }
+        public string Name { get; set; }
+        public string Description { get; set; }
+        public KeyValueInfo Type { get; set; }
+
+        public double ReplaceTimes { get; set; }
+        public double CostPer { get; set; }
+
+        public double StdPrice { get; set; }
+        public bool IsIncluded { get; set; }
+        public bool IncludeContract { get; set; }
+        public bool IsActive { get; set; }
+        public DateTime AddDate { get; set; }
+        public DateTime UpdateDate { get; set; }
+
+        public string OID { get { return LookupManager.GetObjectOID(ObjectTypes.Consumable, this.ID); } }
+
+        public ConsumableInfo() 
+        {
+            this.Type = new KeyValueInfo();
+            this.FujiClass2 = new KeyValueInfo();
+        }
+
+        public ConsumableInfo(DataRow dr)
+            : this()
+        {
+            this.ID = SQLUtil.ConvertInt(dr["ID"]);
+            this.FujiClass2.ID = SQLUtil.ConvertInt(dr["FujiClass2ID"]);
+            this.FujiClass2.Name = SQLUtil.TrimNull(dr["FujiClass2Name"]);
+            this.Name = SQLUtil.TrimNull(dr["Name"]);
+            this.Description = SQLUtil.TrimNull(dr["Description"]);
+            this.Type.ID = SQLUtil.ConvertInt(dr["TypeID"]);
+            this.Type.Name = LookupManager.GetConsumabletypeDesc(this.Type.ID);
+            this.ReplaceTimes = SQLUtil.ConvertDouble(dr["ReplaceTimes"]);
+            this.CostPer = SQLUtil.ConvertDouble(dr["CostPer"]);
+            this.StdPrice = SQLUtil.ConvertDouble(dr["StdPrice"]);
+            this.IsIncluded = SQLUtil.ConvertBoolean(dr["IsIncluded"]);
+            this.IncludeContract = SQLUtil.ConvertBoolean(dr["IncludeContract"]);
+            this.IsActive = SQLUtil.ConvertBoolean(dr["IsActive"]);
+            this.AddDate = SQLUtil.ConvertDateTime(dr["AddDate"]);
+            this.UpdateDate = SQLUtil.ConvertDateTime(dr["UpdateDate"]);
+        }
+
+        public static class ConsumableTypes
+        {
+            public const int RegularConsumable = 1;
+            public const int QuantitativeConsumable = 2;
+            public const int SmallCostConsumable = 3;
+
+            public static string GetTypeDesc(int id)
+            {
+                switch (id)
+                {
+                    case RegularConsumable:
+                        return "定期";
+                    case QuantitativeConsumable:
+                        return "定量";
+                    case SmallCostConsumable:
+                        return "小额成本";
+                    default:
+                        return "";
+                }
+            }
+        }
+
+        public DataTable GetChangedFields(ConsumableInfo newInfo)
+        {
+            DataTable dt = new DataTable();
+            dt.Columns.Add("FieldName");
+            dt.Columns.Add("OldValue");
+            dt.Columns.Add("NewValue");
+
+            if (this.FujiClass2.ID != newInfo.FujiClass2.ID)
+                dt.Rows.Add("ConsumableFujiClass2", SQLUtil.TrimNull(this.FujiClass2.Name), SQLUtil.TrimNull(newInfo.FujiClass2.Name));
+
+            if (this.Name != SQLUtil.TrimNull(newInfo.Name))
+                dt.Rows.Add("ConsumableName", this.Name, newInfo.Name);
+
+            if (this.Description != SQLUtil.TrimNull(newInfo.Description))
+                dt.Rows.Add("ConsumableDescription", this.Description, SQLUtil.TrimNull(newInfo.Description));
+
+            if (this.Type.ID != newInfo.Type.ID)
+                dt.Rows.Add("ConsumableType", this.Type.Name, LookupManager.GetConsumabletypeDesc(newInfo.Type.ID));
+
+            if (this.StdPrice != SQLUtil.ConvertDouble(newInfo.StdPrice))
+                dt.Rows.Add("ConsumableStdPrice", SQLUtil.ConvertDouble(this.StdPrice), SQLUtil.ConvertDouble(newInfo.StdPrice));
+
+            if (this.ReplaceTimes != newInfo.ReplaceTimes)
+                dt.Rows.Add("ConsumableReplaceTimes", SQLUtil.ConvertDouble(this.ReplaceTimes), SQLUtil.ConvertDouble(newInfo.ReplaceTimes));
+
+            if (this.CostPer != newInfo.CostPer)
+                dt.Rows.Add("ConsumableCostPer", SQLUtil.ConvertDouble(this.CostPer), SQLUtil.ConvertDouble(newInfo.CostPer));
+
+            if (this.IsIncluded != newInfo.IsIncluded)
+                dt.Rows.Add("ConsumableIsIncluded", SQLUtil.ConvertBoolean(this.IsIncluded) ? "是" : "否", SQLUtil.ConvertBoolean(newInfo.IsIncluded) ? "是" : "否");
+
+            if (this.IncludeContract != newInfo.IncludeContract)
+                dt.Rows.Add("ConsumableIncludeContract", SQLUtil.ConvertBoolean(this.IncludeContract) ? "是" : "否", SQLUtil.ConvertBoolean(newInfo.IncludeContract) ? "是" : "否");
+
+            if (this.IsActive != newInfo.IsActive)
+                dt.Rows.Add("ConsumableIsActive", SQLUtil.ConvertBoolean(this.IsActive) ? "启用" : "停用", SQLUtil.ConvertBoolean(newInfo.IsActive) ? "启用" : "停用");
+
+            return dt;
+        }
+
+
+        public AuditHdrInfo ConvertAudit(ConsumableInfo newInfo, UserInfo user)
+        {
+            AuditHdrInfo audit = new AuditHdrInfo();
+            audit.ObjectType.ID = ObjectTypes.Consumable;
+            audit.ObjectID = this.ID;
+            audit.Operation.ID = AuditHdrInfo.AuditOperations.Update;
+            audit.TransUser = user;
+            List<AuditDetailInfo> infos = audit.DetailInfo;
+
+            if (this.FujiClass2.ID != newInfo.FujiClass2.ID)
+                infos.Add(new AuditDetailInfo() { FieldName = "ConsumableFujiClass2", OldValue = this.FujiClass2.Name, NewValue = newInfo.FujiClass2.Name });
+
+            if (this.Name != SQLUtil.TrimNull(newInfo.Name))
+                infos.Add(new AuditDetailInfo() { FieldName = "ConsumableName", OldValue = this.Name, NewValue = newInfo.Name });
+
+            if (this.Description != SQLUtil.TrimNull(newInfo.Description))
+                infos.Add(new AuditDetailInfo() { FieldName = "ConsumableDescription", OldValue = this.Description, NewValue = newInfo.Description });
+
+            if (this.Type.ID != newInfo.Type.ID)
+                infos.Add(new AuditDetailInfo() { FieldName = "ConsumableType", OldValue = this.Type.Name, NewValue = newInfo.Type.Name });
+
+            if (this.ReplaceTimes != newInfo.ReplaceTimes)
+                infos.Add(new AuditDetailInfo() { FieldName = "ConsumableReplaceTimes", OldValue = this.ReplaceTimes.ToString(), NewValue = newInfo.ReplaceTimes.ToString() }); 
+
+            if (this.CostPer != newInfo.CostPer)
+                infos.Add(new AuditDetailInfo() { FieldName = "ConsumableCostPer", OldValue = this.CostPer.ToString(), NewValue = newInfo.CostPer.ToString() }); 
+
+            if (this.StdPrice != SQLUtil.ConvertDouble(newInfo.StdPrice))
+                infos.Add(new AuditDetailInfo() { FieldName = "CompomemtStdPrice", OldValue = this.StdPrice.ToString(), NewValue = newInfo.StdPrice.ToString() });
+
+            if (this.IsIncluded != newInfo.IsIncluded)
+                infos.Add(new AuditDetailInfo() { FieldName = "ConsumableIsIncluded", OldValue = this.IsIncluded ? "是" : "否", NewValue = newInfo.IsIncluded ? "是" : "否" });
+
+            if (this.IncludeContract != newInfo.IncludeContract)
+                infos.Add(new AuditDetailInfo() { FieldName = "ConsumableIncludeContract", OldValue = this.IncludeContract ? "是" : "否", NewValue = newInfo.IncludeContract ? "是" : "否", });
+
+            if (this.IsActive != newInfo.IsActive)
+                infos.Add(new AuditDetailInfo() { FieldName = "ConsumableIsActive", OldValue = this.IsActive ? "是" : "否", NewValue = newInfo.IsActive ? "是" : "否" });
+
+            return audit;
+        }
+
+        public int CompareTo(ConsumableInfo other)
+        {
+            return this.ID.CompareTo(other.ID);
+        }
+    }
+}

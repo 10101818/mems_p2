@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<title>ATOI医疗设备管理系统</title>
+		<link href="css/mui.min.css" rel="stylesheet" />
+		<link href="css/style.css" rel="stylesheet" />
+	</head>
+	<body>
+		<header class="mui-bar mui-bar-nav">
+			<h1 class="mui-title">ATOI医疗设备管理系统</h1>
+			<div class="top-login-info mui-clearfix">
+				<img src="img/face.svg" />
+				<h2 class="top-login-name">陈晓辉</h2>
+			</div>
+		</header>
+		<div class="mui-content mui-fullscreen">
+			<img class="cover-img" src="img/first.jpg" />
+			<div class="scan-wrapper" onclick="openBarcode()">
+				<i></i>
+				<i></i>
+				<i></i>
+				<i></i>
+				<div class="scan-cover"></div>
+				<p class="scan-title">扫码报修</p>
+			</div>
+		</div>
+		<footer class="mui-bar-tab mui-table bottom-menu">
+			<div class="mui-table-cell mui-col-sm-6 mui-text-center">
+				<img src="img/eye.svg" />
+				<p>其他服务</p>
+			</div>
+			<div class="mui-table-cell mui-col-sm-6 mui-text-center">
+				<img src="img/history.svg" />
+				<p>服务记录</p>
+			</div>
+		</footer>
+	</body>
+
+	<script src="js/mui.min.js"></script>
+	<script src="js/common.js"></script>
+	<script>
+		mui.init();
+		// 打开二维码扫描界面 
+		function openBarcode() {
+			createWithoutTitle('scan.html', {
+				titleNView: {
+					type: 'float',
+					backgroundColor: 'rgba(59,70,116,0.3)',
+					titleText: '扫一扫',
+					titleColor: '#FFFFFF',
+					autoBackButton: true
+				}
+			});
+		}
+		//扫描成功后
+		function scaned(t, r, f) {
+			//console.log(t);
+			//console.log(r);
+			//console.log(f);
+			mui.openWindow({
+				url: 'detail.html',
+				id: 'detail',
+				styles: {
+					top: "0",
+					bottom: "0",
+					bounce: 'vertical'
+				},
+				extras: {
+					exdata: r
+				}
+			});
+		}
+	</script>
+</html>

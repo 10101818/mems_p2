@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<title>添加新设备</title>
+	<link rel="stylesheet" type="text/css" href="../css/bootstrap.min.css" />
+	<link rel="stylesheet" type="text/css" href="../style.css" />
+	<script src=" ../js/jquery-1.11.0.js"></script>
+	<script type="text/javascript" src="../js/bootstrap.min.js"></script>
+</head>
+
+<body>
+	<div class="body addDeviceDetails">
+		<div>
+			<div style="font-size:18px;margin-top:3%;">
+				<a onclick="window.history.back()" href="#" class="linkFile">
+					<<返回 </a>
+			</div>
+			<p class="tblTitle">添加设备</p>
+			<table class="tblDetail" width="800" border="1" bordercolor="000000" cellpadding="0" cellspacing="0">
+				<tbody>
+					<tr>
+						<td colspan="4" class="headtr">设备信息</td>
+					</tr>
+					<tr>
+						<td class="tdDetailHead" width="20%">系统编号</td>
+						<td width="30%" class="inputContent">
+							<label>ZC00000001</label>
+						</td>
+						<td class="tdDetailHead" width="20%">等级</td>
+						<td class="inputContent" width="30%">
+							<select id="deviceLevel" class="deviceLevel" name="deviceLevel" style="min-width:130px;">
+								<option value="3">3类</option>
+								<option value="2">2类</option>
+								<option value="1">1类</option>
+							</select>
+						</td>
+					</tr>
+					<tr>
+						<td class="tdDetailHead" width="20%">设备名称</td>
+						<td width="30%" class="inputContent">
+							<input type="text" class="deviceName" value="医用磁共振设备" name="deviceName" />
+						</td>
+						<td class="tdDetailHead">设备类别 (I)</td>
+						<td class="inputContent">
+							<select id="typeFirst" class="deviceType" name="typeFirst"
+								style="min-width:130px;width: 100%;">
+								<option value="1">医用成像器械</option>
+								<option value="6801">基础外科手术器械</option>
+								<option value="6802">显微外科手术器械</option>
+								<option value="6807">胸腔心血管外科手术器械</option>
+							</select>
+						</td>
+					</tr>
+					<tr>
+						<td class="tdDetailHead">设备序列号</td>
+						<td class="inputContent">
+							<input class="deviceSerialNum" value="54625464" type="text" name="deviceSerialNum" />
+						</td>
+						<td class="tdDetailHead">设备类别 (II)</td>
+						<td class="inputContent">
+							<select id="typeSecond" class="deviceType" name="typeSecond"
+								style="min-width:130px;width: 100%;">
+								<option value="1">磁共振成像设备(MRI)</option>
+								<option value="6801">基础外科手术器械</option>
+								<option value="6802">显微外科手术器械</option>
+								<option value="6807">胸腔心血管外科手术器械</option>
+							</select>
+						</td>
+					</tr>
+					<tr>
+						<td class="tdDetailHead">设备型号</td>
+						<td class="inputContent">
+							<input type="text" value="HA 710 二郎神" name="deviceClassNum" class="deviceClassNum" />
+						</td>
+
+						<td class="tdDetailHead">设备类别 (III)</td>
+						<td class="inputContent">
+							<select id="typeNext" class="deviceType" name="typeNext"
+								style="min-width:120px;width: 100%;">
+								<option value="1">常导型磁共振成像系统</option>
+								<option value="6801">基础外科手术器械</option>
+								<option value="6802">显微外科手术器械</option>
+								<option value="6807">胸腔心血管外科手术器械</option>
+							</select>
+						</td>
+					</tr>
+					<tr>
+						<td class="tdDetailHead" width="20%">设备厂商</td>
+						<td width="30%" class="inputContent">
+							<select class="input supplier" id="supplier" name="supplier" style="min-width:130px;">
+								<option>飞利浦</option>
+							</select>
+						</td>
+
+						<td class="tdDetailHead">设备分类编码</td>
+						<td class="inputContent">
+							<input class="deviceClassNum" type="text" value="060802" name="deviceClassNum" />
+						</td>
+					</tr>
+					<tr>
+						<td class="tdDetailHead">标准响应时间(分)</td>
+						<td class="inputContent">
+							<input class="deviceSerialNum" value="30" type="number" name="deviceSerialNum" />
+						</td>
+						<td class="tdDetailHead">整包范围</td>
+						<td class="inputContent">
+							<input type="radio" value="true">是&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+							<input type="radio" value="false">否
+						</td>
+					</tr>
+					<tr>
+						<td class="tdDetailHead">品牌</td>
+						<td class="inputContent">
+							<input value="品牌" type="text" />
+						</td>
+						<td class="tdDetailHead">出厂日期</td>
+						<td class="inputContent">
+							<input type="date">
+						</td>
+					</tr>
+					<tr>
+						<td class="tdDetailHead">备注</td>
+						<td class="inputContent" colspan="3">
+							<input value="备注" style="width:570px" type="text" />
+						</td>
+					</tr>
+					<tr>
+						<td class="tdDetailHead">富士I类</td>
+						<td class="inputContent">
+							<input value="内窥镜" disabled type="text" />
+						</td>
+						<td class="tdDetailHead">富士II类</td>
+						<td class="inputContent">
+							<select class="deviceType">
+								<option value="1">硬式内窥镜</option>
+								<option value="6807">软式内窥镜</option>
+							</select>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+			<br />
+			<!--CT球管表-->
+			<table class="tblDetail" width="800" border="1" bordercolor="000000" cellpadding="0" cellspacing="0">
+				<tbody>
+					<tr>
+						<td class="headtr" colspan="6">CT球管信息(所选富士II类中有CT球管时显示)
+							<!--<img src="../img/add.png" style="vertical-align: middle;" class="update addCT" />-->
+						</td>
+					</tr>
+				</tbody>
+			</table>
+			<br />
+			<table class="tblDetail" width="800" border="1" bordercolor="000000" cellpadding="0" cellspacing="0">
+				<tbody>
+					<tr>
+						<td colspan="4" class="headtr">资产信息</td>
+					</tr>
+					<tr>
+						<td class="tdDetailHead">固定资产</td>
+						<td class="inputContent">
+							<input type="radio" checked name="fixedAssets" />是&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+							<input type="radio" name="fixedAssets" />否
+						</td>
+						<td class="tdDetailHead" width="20%">资产编号</td>
+						<td width="30%" class="inputContent">
+							<input type="text" class="assetsNum" value="LSRM002020900002" name="assetsNum" />
+						</td>
+					</tr>
+					<tr>
+						<td class="tdDetailHead">资产等级</td>
+						<td width="30%" class="inputContent">
+							<select class="assetsLevel" id="assetsLevel" name="assetsLevel" style="min-width:130px;">
+								<option value="1">重要</option>
+								<option value="2">一般</option>
+								<option value="3">特殊</option>
+							</select>
+						</td>
+						<td class="tdDetailHead" width="20%">折旧年限(年)</td>
+						<td width="30%" class="inputContent">
+							<input type="number" class="assetsDepreciationTime" value=3 name="assetsDepreciationTime"
+								min="1" max="100" />
+						</td>
+					</tr>
+					<tr>
+						<td class="tdDetailHead" width="20%">注册证有效日期</td>
+						<td width="30%" class="inputContent" colspan="3">
+							<input type="date" class=" assetsRegisterValidityDateStart"
+								name="assetsRegisterValidityDateStart" value="2018-01-02" />
+							— <input type="date" class=" assetsRegisterValidityDateEnd"
+								name="assetsRegisterValidityDateEnd" value="2023-01-01" />
+						</td>
+					</tr>
+				</tbody>
+			</table>
+			<br />
+			<table class="tblDetail" width="800" border="1" bordercolor="000000" cellpadding="0" cellspacing="0">
+				<tbody>
+					<tr>
+						<td colspan="4" class="headtr">采购信息</td>
+					</tr>
+					<tr>
+						<td class="tdDetailHead" width="20%">销售合同名称</td>
+						<td width="30%" class="inputContent">
+							<input type="text" class=" salesAgreement" value="某某合同" name="salesAgreement" />
+						</td>
+						<td class="tdDetailHead" width="20%">经销商</td>
+						<td width="30%" class="inputContent">
+							<select class="input supplier" id="supplier" name="supplier" style="min-width:130px;">
+								<option>飞利浦医疗(上海)有限公司</option>
+							</select>
+						</td>
+					</tr>
+					<tr>
+						<td class="tdDetailHead">购入方式</td>
+						<td>
+							<input type="text" class="" value="直接购入" />
+						</td>
+						<td class="tdDetailHead">采购金额(元)</td>
+						<td><input type="text" value="1080000"></td>
+					</tr>
+					<tr>
+						<td class="tdDetailHead">采购日期</td>
+						<td colspan="3">
+							<input type="date" value="2019-05-01" class="ystime">
+						</td>
+					</tr>
+				</tbody>
+			</table>
+			<br />
+			<table class="tblDetail" width="800" border="1" bordercolor="000000" cellpadding="0" cellspacing="0">
+				<tbody>
+					<tr>
+						<td colspan="4" class="headtr">使用状态</td>
+					</tr>
+					<tr>
+						<td class="tdDetailHead" width="20%">安装科室</td>
+						<td width="30%" class="inputContent">
+							<select class="assetsLevel" id="assetsLevel" name="assetsLevel" style="min-width:130px;">
+								<option value="1">磁共振</option>
+								<option value="2">急诊室</option>
+								<option value="3">口腔科</option>
+							</select>
+						</td>
+						<td class="tdDetailHead" width="20%">安装位置</td>
+						<td width="30%" class=" inputContent">
+							<input type="text" class="" value="磁共振1室" />
+						</td>
+					</tr>
+					<tr>
+						<td class="tdDetailHead" width="20%">安装开始时间</td>
+						<td width="30%" class="inputContent"><input type="date"></td>
+						<td class="tdDetailHead" width="20%">安装结束时间</td>
+						<td width="30%" class="inputContent"><input type="date"></td>
+					</tr>
+					<tr>
+						<td class="tdDetailHead">验收状态</td>
+						<td class="inputContent">
+							<input type="radio" checked name="checkedStatus"
+								id="checkedStatus" />已验收&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+							<input type="radio" name="checkedStatus" id="uncheckedStatus" />未验收
+						</td>
+						<td class="tdDetailHead">验收时间</td>
+						<td class="inputContent">
+							<input type="date" value="2019-05-01" class="ystime">
+						</td>
+					</tr>
+					<tr>
+						<td class="tdDetailHead">使用状态</td>
+						<td class="inputContent">
+							<select class="assetsLevel" id="assetsLevel" name="assetsLevel" style="min-width:130px;">
+								<option value="1">使用</option>
+								<option value="2">停用</option>
+							</select>
+						</td>
+						<td class="tdDetailHead">设备状态</td>
+						<td class="inputContent">
+							<select class="assetsLevel" id="assetsLevel" name="assetsLevel" style="min-width:130px;">
+								<option value="1">正常</option>
+								<option value="2">故障</option>
+							</select>
+						</td>
+
+					</tr>
+					<tr>
+						<td class="tdDetailHead">强检标记</td>
+						<td class="inputContent">
+							<select class="assetsLevel" id="assetsLevel" name="assetsLevel" style="min-width:130px;">
+								<option value="1">无</option>
+								<option value="2">待强检</option>
+								<option value="3">已强检</option>
+							</select>
+						</td>
+						<td class="tdDetailHead">维保状态</td>
+						<td class="inputContent">
+							<input type="text" disabled class="disableContent" value="保内(自动判断)" />
+							<!-- <label class="disableContent">保内(自动判断)</label>-->
+							<!-- <<input type="text"> type="radio" checked name="wbChecked" />保内&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+													<input type="radio" name="wbChecked" />保外 -->
+						</td>
+					</tr>
+					<tr>
+						<td class="tdDetailHead">强检时间</td>
+						<td class="inputContent">
+							<input type="date" value="2019-04-01" />
+							<!-- <input type="text" class="forcibleInspectionDate" name="forcibleInspection" value="yyyy-MM-dd" /> -->
+						</td>
+						<td class="tdDetailHead">巡检周期</td>
+						<td class="inputContent">
+							<input type="number" class="pollingIntervalsNumber" id="pollingIntervalsNumber"
+								name="pollingIntervalsNumber" style="width: 60%;" />
+							<select class="pollingIntervals" id="pollingIntervals" name="pollingIntervals"
+								style="width: 36.22%;margin-left: 0px;">
+								<option value="1">无</option>
+								<option value="2">天/次</option>
+								<option value="3">周/次</option>
+								<option value="4">月/次</option>
+								<option value="5">年/次</option>
+							</select>
+						</td>
+					</tr>
+					<tr>
+						<td class="tdDetailHead" width="20%">召回标记</td>
+						<td class="inputContent">
+							<input type="radio" checked name="zhsign" />是&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+							<input type="radio" name="zhsign" />否
+						</td>
+						<td class="tdDetailHead">保养周期</td>
+						<td class="inputContent"><input type="number" class="pollingIntervalsNumber"
+								id="pollingIntervalsNumber" name="pollingIntervalsNumber" style="width: 60%;" />
+							<select class="maintenanceIntervals" id="maintenanceIntervals" name="maintenanceIntervals"
+								style="width: 36.22%;margin-left: 0px;">
+								<option value="1">无</option>
+								<option value="2">天/次</option>
+								<option value="3">周/次</option>
+								<option value="4">月/次</option>
+								<option value="5">年/次</option>
+							</select>
+						</td>
+					</tr>
+					<tr>
+						<td class="tdDetailHead" width="20%">召回时间</td>
+						<td width="30%" class=" inputContent">
+							<input type="date" class="" value="2019-05-21" />
+						</td>
+						<td class="tdDetailHead">校正周期</td>
+						<td class="inputContent"><input type="number" class="pollingIntervalsNumber"
+								id="pollingIntervalsNumber" name="pollingIntervalsNumber" style="width: 60%;" />
+							<select class="correctionIntervals" id="correctionIntervals" name="correctionIntervals"
+								style="width: 36.22%;margin-left: 0px;">
+								<option value="1">无</option>
+								<option value="2">天/次</option>
+								<option value="3">周/次</option>
+								<option value="4">月/次</option>
+								<option value="5">年/次</option>
+							</select>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+			<br />
+			<table class="tblDetail" width="800" style="text-align: left;" border="1" bordercolor="000000"
+				cellpadding="0" cellspacing="0">
+				<tbody>
+					<tr>
+						<td colspan="4" class="headtr">证件</td>
+					</tr>
+					<tr>
+						<td class="tdDetailHead" width="20%">销售合同文件</td>
+						<td width="30%" class="inputContent">
+							<img src="../img/upload%20.png" class="update" />
+						</td>
+						<td class="tdDetailHead" width="20%">注册证文件</td>
+						<td width="30%" class="inputContent">
+							<img src="../img/upload%20.png" class="update" />
+						</td>
+					</tr>
+					<tr>
+						<td class="tdDetailHead">采购配置清单</td>
+						<td class="inputContent">
+							<img src="../img/upload%20.png" class="update" />
+						</td>
+						<td class="tdDetailHead">配置许可报告</td>
+						<td class="inputContent">
+							<img src="../img/upload%20.png" class="update" />
+						</td>
+					</tr>
+					<tr>
+						<td class="tdDetailHead">设备铭牌</td>
+						<td class="inputContent">
+							<img src="../img/upload%20.png" class="update" />
+						</td>
+						<td class="tdDetailHead">设备标签</td>
+						<td class="inputContent">
+							<img src="../img/upload%20.png" class="update" />
+						</td>
+					</tr>
+					<tr>
+						<td class="tdDetailHead">技术文档</td>
+						<td colspan="3" class="inputContent" align="left">
+							<img src="../img/upload%20.png" class="update" />
+						</td>
+					</tr>
+				</tbody>
+			</table><br />
+			<table class="tblDetail" width="800" border="1" bordercolor="000000" cellpadding="0" cellspacing="0">
+				<tbody>
+					<tr>
+						<td colspan="3" class="headtr" style="border-right:none">附件 </td>
+						<td style="border-left:none"><button class="btn btn-outline-info btn-sm btn-newLpj"
+								style="height:30px;align:right" data-toggle="modal"><span>添加</span></button>
+						</td>
+					</tr>
+					<tr>
+						<td class="tdDetailHead" width="40%">文件名</td>
+						<td class="tdDetailHead" colspan="2" width="50%">备注</td>
+						<td class="tdDetailHead" width="5%">删除</td>
+					</tr>
+					<tr>
+						<td><a href="#" class="linkFile">附件文件1.docx</a></td>
+						<td colspan="2"><label>附件文件1备注内容</label></td>
+						<td><img src="../img/delete.png" /></td>
+					</tr>
+					<tr>
+						<td><a href="#" class="linkFile">附件文件2.docx</a></td>
+						<td colspan="2"><label>附件文件2备注内容</label></td>
+						<td><img src="../img/delete.png" /></td>
+					</tr>
+				</tbody>
+			</table>
+			<br />
+			<table border="0" width="800" class="tblDetail" style="text-align: center;">
+				<tbody>
+					<tr>
+						<td><button class="btn btn-info"><span>保存</span></button></td>
+						<td><button class="btn btn-info" onclick="window.history.back()"><span>返回</span></button></td>
+					</tr>
+				</tbody>
+			</table>
+
+			<!-- 新增附件 -->
+			<div class="modal fade" id="lpjModalCenter" tabindex="-1" role="dialog"
+				aria-lableledby="lpjModalCenterTitle" aria-hidden="true">
+				<div class="modal-dialog  modal-dialog-centered" role="document">
+					<div class="modal-content">
+						<div class="modal-header">
+							<h6 class="modal-title" id="lpjModalLongTitle">新增附件</h6>
+							<button type="button" class="close" data-dismiss="modal" aria-lable="Close"><span
+									class="modal-icon" aria-hidden="true">&times;</span></button>
+						</div>
+						<div class="modal-body">
+							<table class="table table-sm  table-input modal-table" style="text-align: left;">
+								<tbody>
+									<tr>
+										<td width="35%"><span class="requiredItem"></span>备注:</td>
+										<td width="65%"><input type="text" class="input" /></td>
+									</tr>
+									<tr>
+										<td><span class="unrequiredItem"></span>附件:</td>
+										<td><img src="../img/upload%20.png" class="update"></td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+						<div class="modal-footer">
+							<button type="button" class="btn btn-info btn-sm">保存</button>
+							<button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">关闭</button>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- 新增CT球管 -->
+			<div class="modal fade" id="AddCT" tabindex="-1" role="dialog" aria-hidden="true">
+				<div class="modal-dialog  modal-dialog-centered" role="document">
+					<div class="modal-content">
+						<div class="modal-header">
+							<h6 class="modal-title" id="lpjModalLongTitle">新增CT球管</h6>
+							<button type="button" class="close" data-dismiss="modal" aria-lable="Close"><span
+									class="modal-icon" aria-hidden="true">&times;</span></button>
+						</div>
+						<div class="modal-body">
+							<table class="table table-sm table-input modal-table" style="text-align: left;">
+								<tbody>
+									<tr>
+										<td width="25%"><span class="unrequiredItem"></span>序列号:</td>
+										<td width="75%"><input type="text" class="input" /></td>
+									</tr>
+									<tr>
+										<td><span class="requiredItem">*</span>简称:</td>
+										<td>
+											<select>
+												<option>CT机探测器</option>
+												<option>DR探测器</option>
+												<option>CT球管</option>
+											</select>
+										</td>
+									</tr>
+									<tr>
+										<td><span class="requiredItem">*</span>已使用秒次:</td>
+										<td><input type="text" class="input" /></td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+						<div class="modal-footer">
+							<button type="button" class="btn btn-info btn-sm">保存</button>
+							<button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">关闭</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+<script>
+	var options = {};
+	$(function () {
+		$(".btn-newLpj").click(function () {
+			$("#lpjModalCenter").modal(options);
+		})
+		$(".addCT").click(function () {
+			$("#AddCT").modal(options);
+		})
+	})
+
+	$("#checkedStatus").click(function () {
+		var s = $("#checkedStatus").is(":checked");
+		if (s) {
+			$(".ystime").css('display', "block");
+			$("#uncheckedStatus").removeAttr("checked");
+		}
+	})
+
+	$("#uncheckedStatus").click(function () {
+		var s = $("#uncheckedStatus").is(":checked");
+		if (s) {
+			$("#checkedStatus").removeAttr("checked");
+			$(".ystime").css("display", "none");
+		}
+	})
+</script>
+
+</html>

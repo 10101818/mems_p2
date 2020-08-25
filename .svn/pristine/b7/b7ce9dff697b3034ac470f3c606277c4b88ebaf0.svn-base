@@ -1,0 +1,215 @@
+﻿using BusinessObjects.DataAccess;
+using BusinessObjects.Domain;
+using BusinessObjects.Manager;
+using BusinessObjects.Util;
+using MedicalEquipmentHostingSystem.App_Start;
+using MedicalEquipmentHostingSystem.Models;
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.IO;
+using System.Linq;
+using System.Web;
+using System.Web.Mvc;
+
+namespace MedicalEquipmentHostingSystem.Controllers
+{
+    /// <summary>
+    /// 服务controller
+    /// </summary>
+    public class InvServiceController : BaseController
+    {
+        private InvServiceDao invServiceDao = new InvServiceDao();
+
+        private InvServiceManager invServiceManager = new InvServiceManager();
+
+        /// <summary>
+        /// 服务库列表页面
+        /// </summary>
+        /// <returns>服务库列表页面</returns>
+        public ActionResult InvServiceList()
+        {
+            if (CheckSession() == false)
+            {
+                Response.Redirect(Url.Action(ConstDefinition.HOME_ACTION, ConstDefinition.HOME_CONTROLLER), true);
+                return null;
+            }
+
+            return View();
+        }
+
+        /// <summary>
+        /// 获取服务库列表信息
+        /// </summary>
+        /// <param name="statusID">服务状态</param>
+        /// <param name="filterField">搜索字段</param>
+        /// <param name="filterText">搜索内容</param>
+        /// <param name="sortField">排序字段</param>
+        /// <param name="sortDirection">排序方式</param>
+        /// <param name="currentPage">页码</param>
+        /// <param name="pageSize">每页信息条数</param>
+        /// <returns>服务库列表信息</returns>
+        public JsonResult QueryServiceList(int statusID, string filterField, string filterText, string sortField, bool sortDirection, int currentPage = 0, int pageSize = ConstDefinition.PAGE_SIZE)
+        {
+            if (CheckSession() == false)
+            {
+                return Json(ResultModelBase.CreateTimeoutModel(), JsonRequestBehavior.AllowGet);
+            }
+
+            ResultModel<List<InvServiceInfo>> result = new ResultModel<List<InvServiceInfo>>();
+
+            try
+            {
+                List<InvServiceInfo> infos = new List<InvServiceInfo>();
+                if (currentPage > 0)
+                {
+                    int totalRecord = this.invServiceDao.QueryServiceCount(statusID, filterField, filterText);
+                    result.SetTotalPages(totalRecord, pageSize);
+                    if (totalRecord > 0)
+                    {
+                        infos = this.invServiceDao.QueryServices(statusID, filterField, filterText, sortField, sortDirection, result.GetCurRowNum(currentPage, pageSize), pageSize);
+                    }
+                }
+                else
+                {
+                    infos = this.invServiceDao.QueryServices(statusID, filterField, filterText, sortField, sortDirection, 0, 0);
+                }
+
+                result.Data = infos;
+            }
+            catch (Exception ex)
+            {
+                NLog.LogManager.GetCurrentClassLogger().Error(ex, ex.Message);
+                result.SetFailed(ResultCodes.SystemError, ControlManager.GetSettingInfo().ErrorMessage);
+            }
+            return JsonResult(result);
+        }
+
+        /// <summary>
+        /// 根据服务id获取服务信息
+        /// </summary>
+        /// <param name="ServiceID">服务id</param>
+        /// <returns>服务信息</returns>
+        public JsonResult GetServiceByID(int ServiceID)
+        {
+            if (CheckSession() == false)
+            {
+                return Json(ResultModelBase.CreateTimeoutModel(), JsonRequestBehavior.AllowGet);
+            }
+            ResultModel<InvServiceInfo> result = new ResultModel<InvServiceInfo>();
+            try
+            {
+                result.Data = this.invServiceDao.GetServiceByID(ServiceID);
+            }
+            catch (Exception ex)
+            {
+                NLog.LogManager.GetCurrentClassLogger().Error(ex, ex.Message);
+                result.SetFailed(ResultCodes.SystemError, ControlManager.GetSettingInfo().ErrorMessage);
+            }
+            return JsonResult(result);
+        }
+
+        /// <summary>
+        /// 保存服务信息
+        /// </summary>
+        /// <param name="info">服务信息</param>
+        /// <returns>服务id</returns>
+        [HttpPost]
+        public JsonResult SaveService(InvServiceInfo info)
+        {
+            ResultModel<int> result = new ResultModel<int>(); ;
+            if (CheckSession(false) == false)
+            {
+                return Json(ResultModelBase.CreateTimeoutModel(), JsonRequestBehavior.AllowGet);
+            }
+            try
+            {
+                result.Data = this.invServiceManager.SaveService(info, GetLoginUser());
+            }
+            catch (Exception ex)
+            {
+                NLog.LogManager.GetCurrentClassLogger().Error(ex, ex.Message);
+                result.SetFailed(ResultCodes.SystemError, ControlManager.GetSettingInfo().ErrorMessage);
+            }
+            return JsonResult(result);
+        }
+
+        /// <summary>
+        /// 判断服务序列号是否重复
+        /// </summary>
+        /// <param name="id">服务id</param>
+        /// <param name="fujiClass2ID">服务富士II类id</param>
+        /// <param name="name">服务名称</param>
+        /// <param name="startDate">服务开始日期</param>
+        /// <returns>服务序列号是否重复</returns>
+        public JsonResult CheckServiceName(int id, int fujiClass2ID, string name)
+        {
+            if (CheckSession(false) == false)
+            {
+                return Json(ResultModelBase.CreateTimeoutModel(), JsonRequestBehavior.AllowGet);
+            }
+            ResultModel<bool> result = new ResultModel<bool>();
+            try
+            {
+                result.Data = this.invServiceDao.CheckServiceName(id, fujiClass2ID, name);
+            }
+            catch (Exception ex)
+            {
+                NLog.LogManager.GetCurrentClassLogger().Error(ex, ex.Message);
+                result.SetFailed(ResultCodes.SystemError, ControlManager.GetSettingInfo().ErrorMessage);
+            }
+            return JsonResult(result);
+        }
+
+        /// <summary>
+        /// 导出服务信息
+        /// </summary>
+        /// <param name="statusID">状态</param>
+        /// <param name="filterField">搜索字段</param>
+        /// <param name="filterText">搜索内容</param>
+        /// <param name="sortField">排序字段</param>
+        /// <param name="sortDirection">排序方式</param>
+        /// <returns>服务列表excel</returns>
+        public ActionResult ExportServices(int statusID, string filterField, string filterText, string sortField, bool sortDirection)
+        {
+            if (CheckSession() == false)
+            {
+                return Json(ResultModelBase.CreateTimeoutModel(), JsonRequestBehavior.AllowGet);
+            }
+            ResultModelBase result = new ResultModelBase();
+            try
+            {
+                List<InvServiceInfo> invServices = this.invServiceDao.QueryServices(statusID, filterField, filterText, sortField, sortDirection, 0, 0);
+                DataTable dt = new DataTable("Sheet1");
+                dt.Columns.Add("系统编号");
+                dt.Columns.Add("服务名称");
+                dt.Columns.Add("关联富士II类");
+                dt.Columns.Add("供应商");
+                dt.Columns.Add("服务次数");
+                dt.Columns.Add("服务开始日期");
+                dt.Columns.Add("服务结束日期");
+                dt.Columns.Add("金额");
+                dt.Columns.Add("剩余服务次数");
+                dt.Columns.Add("状态");
+
+                foreach (InvServiceInfo invService in invServices)
+                {
+                    dt.Rows.Add(invService.OID, invService.Name, invService.FujiClass2.Name, invService.Supplier.Name, invService.TotalTimes, 
+                        invService.AddDate.ToString("yyyy-MM-dd"), invService.EndDate.ToString("yyyy-MM-dd"), invService.Price, invService.AvaibleTimes, invService.Status);
+                }
+
+                MemoryStream ms = ExportUtil.ToExcel(dt);
+                Response.AddHeader("Set-Cookie", "fileDownload=true; path=/");
+                return File(ms, "application/excel", "服务库列表.xlsx");
+            }
+            catch (Exception ex)
+            {
+                NLog.LogManager.GetCurrentClassLogger().Error(ex, ex.Message);
+                result.SetFailed(ResultCodes.SystemError, ControlManager.GetSettingInfo().ErrorMessage);
+            }
+
+            return Json(result, JsonRequestBehavior.AllowGet);
+        }
+
+    }
+}

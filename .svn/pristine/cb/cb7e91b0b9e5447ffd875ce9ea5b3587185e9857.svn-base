@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html style="height: 100%;">
+
+<head>
+	<base target="middleiframe" />
+	<meta charset="UTF-8">
+	<title></title>
+	<link rel="stylesheet" href="../../css/bootstrap.min.css" />
+	<link rel="stylesheet" href="../../style.css" />
+	<link rel="stylesheet" href="../../css/iconfont.css" />
+	<script type="text/javascript" src="../../js/jquery-1.11.0.js"></script>
+</head>
+
+<body>
+	<div class="bodyDiv">
+		<div class="leftBody">
+			<div class="leftDiv">
+				<div class="list-group list-group-flush leftList">
+					<a href="../homePage-FujiManager.html" class="listItemOne list-group-item "><span
+							class="iconfont icon-shouye"></span> 首页 </a>
+					<a href="../DeviceManagement.html" class="listItem list-group-item list-group-item-action "><span
+							class="iconfont icon-zichanguanli"></span> 资产管理<span class="badge">></span></a>
+					<ul class="list-group list-group-flush menuList">
+						<a class="listItemOne list-group-item list-group-item-action "
+							href="../DeviceManagement.html"><span class="iconfont icon-shebeiguanli"></span> 设备</a>
+						<a class="listItemOne list-group-item list-group-item-action "
+							href="../contractManagementList.html"><span class="iconfont icon-hetong"></span> 合同</a>
+						<a class="listItemOne list-group-item list-group-item-action" href="../supplier.html"><span
+								class="iconfont icon-supplier"></span> 供应商</a>
+					</ul>
+					<a href="../clientRequest.html" class="listItem list-group-item list-group-item-action "><span
+							class="iconfont icon--yunweifuwujilu"></span> 运维管理<span class="badge">></span></a>
+					<ul class="list-group list-group-flush menuList">
+						<a class="listItemOne list-group-item list-group-item-action" href="../clientRequest.html"><span
+								class="iconfont icon-baoxiu"></span> 客户请求</a>
+						<a class="listItemOne list-group-item list-group-item-action" href="../dispatchList.html"><span
+								class="iconfont icon-gongdanliebiao"></span> 派工单</a>
+						<a class="listItemOne list-group-item list-group-item-action" href="../serviceList.html"><span
+								class="iconfont icon-pingzheng"></span> 服务凭证</a>
+						<a class="listItemOne list-group-item list-group-item-action" href="../jobReportList.html"><span
+								class="iconfont icon-zuoyebaogao"></span> 作业报告</a>
+					</ul>
+					<a href="../ReportManager.html" class="listItem list-group-item list-group-item-action "><span
+							class="iconfont icon-report"></span> 报表管理<span class="badge">></span></a>
+					<ul class="list-group list-group-flush menuList">
+						<a class="listItemOne list-group-item list-group-item-action" href="../ReportManager.html"><span
+								class="iconfont icon-report"></span> 报表</a>
+					</ul>
+					<a href="../InvComponentList.html" class="listItem list-group-item list-group-item-action "><span
+							class="iconfont icon-kucunguanli"></span> 库存管理<span class="badge">></span></a>
+					<ul class="list-group list-group-flush menuList">
+						<a class="listItemOne list-group-item list-group-item-action"
+							href="../InvComponentList.html"><span class="iconfont icon-lingjiankucun"></span> 零件库</a>
+						<a class="listItemOne list-group-item list-group-item-action"
+							href="../InvConsumablesList.html"><span class="iconfont icon-kucun"></span> 耗材库</a>
+						<a class="listItemOne list-group-item list-group-item-action" href="../InvSpareList.html"><span
+								class="iconfont icon-beiyongjikucun"></span> 备用机库</a>
+						<a class="listItemOne list-group-item list-group-item-action" href="../RepairServiceLibrary.html"><span class="iconfont icon-xiuli1"></span> 服务库</a>
+						<a class="listItemOne list-group-item list-group-item-action"
+							href="../InvStocktakingList.html"><span class="iconfont icon-kucunpandian"></span> 库存盘点</a>
+						<a class="listItemOne list-group-item list-group-item-action" href="../PurchaseList.html"><span
+								class="iconfont icon-caigou"></span> 采购单</a>
+					</ul>
+					<a href="../ValuationParameter.html" class="listItem list-group-item list-group-item-action "><span
+							class="iconfont icon-gujia"></span> 估价模块<span class="badge">></span></a>
+					<ul class="list-group list-group-flush menuList">
+						<a class="listItemOne list-group-item list-group-item-action"
+							href="../ValuationParameter.html"><span class="iconfont icon-gujiacanshu"></span> 估价参数</a>
+							<a href="../ComponentList.html" class="listItem list-group-item list-group-item-action  "><span
+								class="iconfont icon-shujuzidingyishezhi"></span> 数据定义<span class="badge">></span></a>
+						<ul class="list-group list-group-flush menuList">
+							<a class="listItemOne list-group-item list-group-item-action "
+								href="../ComponentList.html"><span class="iconfont icon-lingjian"></span> 零件定义</a>
+							<a class="listItemOne list-group-item list-group-item-action "
+								href="../ConsumablesList.html"><span class="iconfont icon-haocaidingyi"></span> 耗材定义</a>
+							<a class="listItemOne list-group-item list-group-item-action"
+								href="../equipmentClass2.html"><span class="iconfont icon-FFI"></span> 富士类别</a>
+							<a class="listItemOne list-group-item list-group-item-action" href="../fujiClass2.html"><span
+									class="iconfont icon-FF2lei"></span> 富士II类</a>
+						</ul>
+						<a class="listItemOne list-group-item list-group-item-action"
+							href="../ValuationExecute.html"><span class="iconfont icon-gujiazhixing"></span> 估价执行</a>
+						<a class="listItemOne list-group-item list-group-item-action" href="../AuxiliaryTool.html"><span
+								class="iconfont icon-weibaofuzhugongju"></span> 辅助工具</a>
+						<a class="listItemOne list-group-item list-group-item-action" href="../actual.html"><span class="iconfont icon-fenlei2"></span> 运营实绩</a>
+					</ul>
+					
+					<a href="../user.html" class="listItem list-group-item list-group-item-action "><span
+							class="iconfont icon-yonghuguanli"></span> 用户管理<span class="badge">></span></a>
+					<ul class="list-group list-group-flush menuList">
+						<a class="listItemOne list-group-item list-group-item-action" href="../user.html"><span
+								class="iconfont icon-yonghu"></span> 用户</a>
+					</ul>
+					<a href="../message.html" class="listItem list-group-item list-group-item-action  "><span
+							class="iconfont icon-shezhi"></span> 系统设置<span class="badge">></span></a>
+					<ul class="list-group list-group-flush menuList">
+						<a class="listItemOne list-group-item list-group-item-action" href="../message.html"><span
+								class="iconfont icon-duanxin"></span> 短信</a>
+						<a class="listItemOne list-group-item list-group-item-action" href="../email.html"><span
+								class="iconfont icon-youxiang"></span> 邮件</a>
+						<a class="listItemOne list-group-item list-group-item-action" href="../yujing.html"><span
+								class="iconfont icon-early-warn"></span> 预警时间</a>
+						<a class="listItemOne list-group-item list-group-item-action" href="../app.html"><span
+								class="iconfont icon-app3"></span> App最低版本</a>
+						<a class="listItemOne list-group-item list-group-item-action" href="../broadCast.html"><span
+								class="iconfont icon-guangbogonggao"></span> 广播</a>
+					</ul>
+					<a class="list-group-item"></a>
+					<a class="list-group-item"></a>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+<script>
+	$(function () {
+		$(".listItemOne").first().css("color", "#17A2B8");
+		$(".listItem").click(function () {
+			var temp = $(this);
+			$(".listItem,.listItemOne").css("color", "#495057");
+			$(".listItem,.listItemOne").hover(
+				function () {
+					$(this).css("color", "#17A2B8");
+				},
+				function () {
+					$(this).css("color", "#495057");
+				});
+			temp.css("color", "#17A2B8");
+			temp.hover(
+				function () {
+					$(this).css("color", "#17A2B8");
+				},
+				function () {
+					$(this).css("color", "#17A2B8");
+				});
+			temp.next().children().first().css("color", "#17A2B8");
+			temp.next().children().first().hover(
+				function () {
+					$(this).css("color", "#17A2B8");
+				},
+				function () {
+					$(this).css("color", "#17A2B8");
+				});
+			temp.next().slideToggle("normal", function () {
+				temp.children(".badge").html((temp.children(".badge").html() == "∨") ? ">" : "∨");
+			});
+		})
+		$(".listItemOne").click(function () {
+			var tempOne = $(this);
+			$(".listItem,.listItemOne").css("color", "#495057");
+			$(".listItem,.listItemOne").hover(
+				function () {
+					$(this).css("color", "#17A2B8");
+				},
+				function () {
+					$(this).css("color", "#495057");
+				});
+			tempOne.css("color", "#17A2B8");
+			tempOne.hover(
+				function () {
+					$(this).css("color", "#17A2B8");
+				},
+				function () {
+					$(this).css("color", "#17A2B8");
+				});
+			tempOne.parent("ul").prev().css("color", "#17A2B8");
+			tempOne.parent("ul").prev().hover(
+				function () {
+					$(this).css("color", "#17A2B8");
+				},
+				function () {
+					$(this).css("color", "#17A2B8");
+				});
+		})
+	})
+</script>
+
+</html>

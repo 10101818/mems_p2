@@ -1,0 +1,4174 @@
+
+----------------------------------------------------------------------complete_info.dart----------------------------------------------------------------------------------------
+import 'package:flutter/material.dart';
+import 'package:atoi/widgets/build_widget.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
+import 'package:atoi/utils/http_request.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
+
+class CompleteInfo extends StatefulWidget {
+  _CompleteInfoState createState() => new _CompleteInfoState();
+}
+
+class _CompleteInfoState extends State<CompleteInfo> {
+
+  Map userInfo = {};
+  Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
+  TextEditingController _name = new TextEditingController();
+  TextEditingController _mobile = new TextEditingController();
+  TextEditingController _email = new TextEditingController();
+  TextEditingController _addr = new TextEditingController();
+  TextEditingController _newPass = new TextEditingController();
+  List<String> departmentNames = [];
+  List<dynamic> departments = [];
+  var currentDepart;
+  var dropdownItems;
+  var emailReg = RegExp(r"[w!#$%&'*+/=?^_`{|}~-]+(?:.[w!#$%&'*+/=?^_`{|}~-]+)*@(?:[w](?:[w-]*[w])?.)+[w](?:[w-]*[w])?");
+  var emailValid = RegExp(r"^[a-zA-Z0-9.]+@[a-zA-Z0-9]+\.[a-zA-Z]+");
+
+
+  Future<Null> getUserInfo() async {
+    var prefs = await _prefs;
+    var _userInfo = prefs.getString('userInfo');
+    print(_userInfo);
+    var decoded = jsonDecode(_userInfo);
+    setState(() {
+      userInfo = decoded;
+      _name.text = decoded['Name'];
+      _mobile.text = decoded['Mobile'];
+      _email.text = decoded['Email'];
+      _addr.text = decoded['Address'];
+      currentDepart = decoded['Department']['Name']??'';
+    });
+  }
+  void initState() {
+    super.initState();
+    getUserInfo();
+    getDepartments();
+  }
+
+  Future<Null> getDepartments() async {
+    var resp = await HttpRequest.request(
+      '/User/GetDepartments',
+      method: HttpRequest.GET
+    );
+    if (resp['ResultCode'] == '00') {
+      for(var depart in resp['Data']) {
+        departmentNames.add(depart['Name']);
+      }
+      setState(() {
+        departments = resp['Data'];
+        departmentNames = departmentNames;
+      });
+      dropdownItems = getDropDownMenuItems(departmentNames);
+    }
+  }
+
+  List<DropdownMenuItem<String>> getDropDownMenuItems(List list) {
+    List<DropdownMenuItem<String>> items = new List();
+    for (String method in list) {
+      items.add(new DropdownMenuItem(
+          value: method,
+          child: new Text(method,
+            style: new TextStyle(
+                fontSize: 20.0
+            ),
+          )
+      ));
+    }
+    return items;
+  }
+
+  void changedDropDownMethod(String selectedMethod) {
+    setState(() {
+      currentDepart = selectedMethod;
+    });
+  }
+
+  Row buildDropdown(String title, String currentItem, List dropdownItems, Function changeDropdown) {
+    return new Row(
+      children: <Widget>[
+        new Expanded(
+          flex: 2,
+          child: new Wrap(
+            alignment: WrapAlignment.start,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: <Widget>[
+              new Text(
+                title,
+                style: new TextStyle(
+                    fontSize: 20.0,
+                    fontWeight: FontWeight.w600
+                ),
+              )
+            ],
+          ),
+        ),
+        new Expanded(
+          flex: 1,
+          child: new Text(
+            '：',
+            style: new TextStyle(
+              fontSize: 20.0,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+        new Expanded(
+          flex: 8,
+          child: new DropdownButton(
+            value: currentItem,
+            items: dropdownItems,
+            onChanged: changeDropdown,
+            isDense: true,
+            isExpanded: true,
+          ),
+        )
+      ],
+    );
+  }
+
+  Future<Null> submit() async {
+    var _depart = departments.firstWhere((depart) => depart['Name']==currentDepart, orElse: () => null);
+    var _data = {
+      'info': {
+        'ID': userInfo['ID'],
+        'Name': _name.text,
+        'Mobile': _mobile.text,
+        'Email': _email.text,
+        'Address': _addr.text,
+      }
+    };
+    var prefs = await _prefs;
+    userInfo['Email'] = _email.text;
+    userInfo['Address'] = _addr.text;
+    userInfo['Department'] = _depart;
+    prefs.setString('userInfo', jsonEncode(userInfo));
+    if (_email.text.isNotEmpty&&!emailValid.hasMatch(_email.text)) {
+      showDialog(context: context,
+          builder: (context) => AlertDialog(
+            title: new Text('请输入正确的邮箱格式'),
+          )
+      );
+      return;
+    }
+    if (_newPass.text.isNotEmpty) {
+      _data['info']['LoginPwd'] = _newPass.text;
+    }
+    if (userInfo['Role']['ID'] == 4) {
+      _data['info']['Department'] = _depart;
+    }
+    var resp = await HttpRequest.request(
+      '/User/UpdateUserInfo',
+      method: HttpRequest.POST,
+      data: _data
+    );
+    if (resp['ResultCode'] == '00') {
+      showDialog(context: context,
+        builder: (context) => AlertDialog(
+          title: new Text('更新信息成功'),
+        )
+      ).then((result) {
+        Navigator.of(context, rootNavigator: true).pop();
+      });
+    }
+  }
+
+  List<Widget> buildInfo() {
+    List<Widget> _list = [
+      new SizedBox(height: 20.0,),
+      BuildWidget.buildRow('用户名/手机号', userInfo['LoginID']),
+      new Divider(),
+      BuildWidget.buildInput('姓名', _name),
+      BuildWidget.buildInput('电话', _mobile),
+      BuildWidget.buildInput('邮箱', _email),
+      BuildWidget.buildInput('地址', _addr),
+      BuildWidget.buildInput('新密码', _newPass),
+      new Divider(),
+      userInfo['Role']['ID']==4?buildDropdown('科室', currentDepart, dropdownItems, changedDropDownMethod):new Container(),
+      new SizedBox(height: 20.0,),
+      new Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        mainAxisSize: MainAxisSize.max,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: <Widget>[
+          new RaisedButton(
+            onPressed: () {
+              submit();
+            },
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(24),
+            ),
+            padding: EdgeInsets.all(12.0),
+            color: new Color(0xff2E94B9),
+            child: Text(
+                '提交信息',
+                style: TextStyle(
+                    color: Colors.white
+                )
+            ),
+          )
+        ],
+      )
+    ];
+    return _list;
+  }
+  
+  Widget build(BuildContext context) {
+    return new Scaffold(
+      appBar: new AppBar(
+        title: new Text('个人信息'),
+        elevation: 0.7,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.centerLeft,
+              end: Alignment.centerRight,
+              colors: [
+                Theme.of(context).primaryColor,
+                Theme.of(context).accentColor
+              ],
+            ),
+          ),
+        ),
+      ),
+      body: userInfo.isEmpty?new Center(child: new SpinKitRotatingPlain(color: Colors.blue),):Center(
+        child: ListView(
+            shrinkWrap: false,
+            padding: EdgeInsets.only(left: 24.0, right: 24.0),
+            children: buildInfo()
+        ),
+      ),
+    );
+  }
+}
+
+--------------------------------------------------------------------------------END----------------------------------------------------------------------------------------
+
+
+----------------------------------------------------------------------engineer_home_page.dart----------------------------------------------------------------------------------------
+import 'package:flutter/material.dart';
+import 'package:atoi/pages/engineer/engineer_menu.dart';
+import 'package:atoi/pages/engineer/engineer_to_report.dart';
+import 'package:badges/badges.dart';
+import 'package:atoi/pages/engineer/engineer_to_start.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:atoi/models/models.dart';
+import 'package:scoped_model/scoped_model.dart';
+import 'package:atoi/login_page.dart';
+import 'dart:async';
+import 'package:atoi/complete_info.dart';
+
+
+class EngineerHomePage extends StatefulWidget {
+  static String tag = 'engineer-home-page';
+  @override
+  _EngineerHomePageState createState() => new _EngineerHomePageState();
+}
+
+class _EngineerHomePageState extends State<EngineerHomePage>
+    with SingleTickerProviderStateMixin{
+  TabController _tabController;
+  GlobalKey<ScaffoldState> _scaffoldKeyManager = new GlobalKey();
+
+  Future<SharedPreferences> prefs = SharedPreferences.getInstance();
+  String _userName = '';
+  String _mobile = '';
+  Timer _timer;
+
+  Future<Null> getRole() async {
+    var _prefs = await prefs;
+    var userName = _prefs.getString('userName');
+    var mobile = _prefs.getString('mobile');
+    setState(() {
+      _userName = userName;
+      _mobile = mobile;
+    });
+  }
+
+  void startTimer() {
+  }
+
+  @override
+  void initState() {
+    getRole();
+    super.initState();
+    _tabController = new TabController(length: 3, vsync: this, initialIndex: 0);
+    EngineerModel model = MainModel.of(context);
+    model.getTasksToStart();
+    model.getTasksToReport();
+    model.getCountEngineer();
+    _timer = new Timer.periodic(new Duration(seconds: 10), (timer) {
+      model.getCountEngineer();
+    });
+  }
+
+  void deactivate() {
+    super.deactivate();
+  }
+
+  void dispose() {
+    _timer.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ScopedModelDescendant<MainModel>(
+      builder: (context, child, model) {
+        return new WillPopScope(
+            child: new Scaffold(
+                appBar: new AppBar(
+                  leading: new Container(),
+                  title: new Align(
+                    alignment: Alignment(-2.0, 0),
+                    child: new Text('ATOI医疗设备管理系统'),
+                  ),
+                  elevation: 0.7,
+                  flexibleSpace: Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.centerLeft,
+                        end: Alignment.centerRight,
+                        colors: [
+                          Theme.of(context).primaryColor,
+                          Theme.of(context).accentColor
+                        ],
+                      ),
+                    ),
+                  ),
+                  bottom: new TabBar(
+                    indicatorColor: Colors.white,
+                    controller: _tabController,
+                    tabs: <Widget>[
+                      new Tab(
+                          icon: new Badge(
+                            badgeContent: Text(
+                              model.badgeEA,
+                              style: new TextStyle(
+                                  color: Colors.white
+                              ),
+                            ),
+                            child: new Icon(Icons.assignment_late),
+                          ),
+                          text: '待开始工单'
+                      ),
+                      new Tab(
+                        icon: new Badge(
+                          badgeContent: Text(
+                            model.badgeEB,
+                            style: new TextStyle(
+                                color: Colors.white
+                            ),
+                          ),
+                          child: new Icon(Icons.hourglass_full),
+                        ),
+                        text: '作业中工单',
+                      ),
+                      new Tab(
+                          icon: new Icon(Icons.add_to_photos),
+                          text: '新增服务'
+                      ),
+                    ],
+                  ),
+                  actions: <Widget>[
+                    new Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 19.0),
+                      child: Text(_userName),
+                    ),
+                    new SizedBox(width: 10.0,)
+                  ],
+                ),
+                body: new TabBarView(
+                  controller: _tabController,
+                  children: <Widget>[
+                    new EngineerToStart(),
+                    new EngineerToReport(),
+                    new EngineerMenu(),
+                  ],
+                ),
+              endDrawer: Drawer(
+                child: ListView(
+                  // Important: Remove any padding from the ListView.
+                  padding: EdgeInsets.zero,
+                  children: <Widget>[
+                    DrawerHeader(
+                      child: CircleAvatar(
+                        backgroundColor: Colors.transparent,
+                        radius: 48.0,
+                        child: new Container(),
+                      ),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).accentColor,
+                      ),
+                    ),
+                    ListTile(
+                      title: Text('个人信息',
+                        style: new TextStyle(
+                            color: Colors.blue
+                        ),
+                      ),
+                      onTap: () {
+                        Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
+                          return new CompleteInfo();
+                        }));
+                      },
+                    ),
+                    ListTile(
+                      title: Text('登出'),
+                      onTap: () async {
+                        var _prefs = await prefs;
+                        await _prefs.clear();
+                        Navigator.of(context).pushNamed(LoginPage.tag);
+                      },
+                    )
+                  ],
+                ),
+              ),
+            ),
+            onWillPop: () async {
+              return false;
+            }
+        );
+      },
+    );
+  }
+}
+
+--------------------------------------------------------------------------------END----------------------------------------------------------------------------------------
+
+
+----------------------------------------------------------------------MomemtDao.cs----------------------------------------------------------------------------------------
+using BCWS.BusinessObjects.Aspect;
+using BCWS.BusinessObjects.Domain.Momemts;
+using BCWS.BusinessObjects.Util;
+using PostSharp.Extensibility;
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Data.SqlClient;
+using System.Linq;
+using System.Text;
+
+namespace BCWS.BusinessObjects.DataAccess
+{
+    [LoggingAspect(AspectPriority = 1)]
+    [ConnectionAspect(AspectPriority = 2, AttributeTargetTypeAttributes = MulticastAttributes.Public)]
+    public class MomemtDao : BaseDao
+    {
+        #region "Momemt"
+        public List<MomemtInfo> GetMomemts(bool calculatedOnly = false)
+        {
+            List<MomemtInfo> momemts = new List<MomemtInfo>();
+
+            sqlStr = "SELECT m.*, up.Name as ProcessUserName, ul.Name as CalculateUserName, uc.Name as CreateUserName FROM tblMomemtsEvaluate as m " +
+                     " LEFT JOIN tblUser as uc on m.CreateUser = uc.ID" +
+                     " LEFT JOIN tblUser as ul on m.CalculateUser = ul.ID" +
+                     " LEFT JOIN tblUser as up on m.ProcessUser = up.ID";
+
+            if (calculatedOnly) sqlStr += " WHERE Calculated = 1 ";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                foreach (DataRow dr in GetDataTable(command).Rows)
+                {
+                    momemts.Add(new MomemtInfo(dr));
+                }
+
+                return momemts;
+            }
+        }
+
+        public void AddMomemt(MomemtInfo momemtInfo)
+        {
+            sqlStr = "INSERT INTO tblMomemtsEvaluate (BridgeAreaID, FromDate, ToDate, Purpose, Comments, CreateDate, CreateUser) " +
+                    " VALUES (@BridgeAreaID, @FromDate, @ToDate, @Purpose, @Comments, @CreateDate, @CreateUser)";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.Parameters.Add("@BridgeAreaID", SqlDbType.Int).Value = momemtInfo.BridgeAreaID;
+                command.Parameters.Add("@FromDate", SqlDbType.DateTime).Value = momemtInfo.FromDate;
+                command.Parameters.Add("@ToDate", SqlDbType.DateTime).Value = momemtInfo.ToDate;
+                command.Parameters.Add("@Purpose", SqlDbType.NVarChar).Value = momemtInfo.Purpose;
+                command.Parameters.Add("@Comments", SqlDbType.NVarChar).Value = momemtInfo.Comments;
+                command.Parameters.Add("@CreateDate", SqlDbType.DateTime).Value = DateTime.Now;
+                command.Parameters.Add("@CreateUser", SqlDbType.Int).Value = momemtInfo.CreateUser.ID;
+
+                command.ExecuteNonQuery();
+            }
+        }
+
+        public void UpdateMomemt(MomemtInfo momemtInfo)
+        {
+            sqlStr = "UPDATE tblMomemtsEvaluate SET FromDate = @FromDate, ToDate = @ToDate , Purpose = @Purpose, Comments = @Comments " +
+                     " WHERE ID = @ID";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.Parameters.Add("@ID", SqlDbType.Int).Value = momemtInfo.ID;
+                command.Parameters.Add("@FromDate", SqlDbType.DateTime).Value = momemtInfo.FromDate;
+                command.Parameters.Add("@ToDate", SqlDbType.DateTime).Value = momemtInfo.ToDate;
+                command.Parameters.Add("@Purpose", SqlDbType.NVarChar).Value = momemtInfo.Purpose;
+                command.Parameters.Add("@Comments", SqlDbType.NVarChar).Value = momemtInfo.Comments;
+                command.ExecuteNonQuery();
+            }
+        }
+
+        public void UpdateMomemtCalculated(int momemtId, int calculateUser)
+        {
+            sqlStr = "UPDATE tblMomemtsEvaluate SET Calculated = 1, CalculateUser = @CalculateUser, CalculateDate = @CalculateDate WHERE ID = @ID";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.Parameters.Add("@ID", SqlDbType.Int).Value = momemtId;
+                command.Parameters.Add("@CalculateUser", SqlDbType.Int).Value = calculateUser;
+                command.Parameters.Add("@CalculateDate", SqlDbType.DateTime).Value = DateTime.Now;
+
+                command.ExecuteNonQuery();
+            }
+        }
+
+        public void UpdateMomemtProcessed(MomemtInfo momemtInfo)
+        {
+            sqlStr = "UPDATE tblMomemtsEvaluate SET Conclusion = @Conclusion , Processed = 1, ProcessUser = @ProcessUser, ProcessedDate = @ProcessedDate WHERE ID = @ID";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.Parameters.Add("@ID", SqlDbType.Int).Value = momemtInfo.ID;
+                command.Parameters.Add("@Conclusion", SqlDbType.NVarChar).Value = momemtInfo.Conclusion;
+                command.Parameters.Add("@ProcessUser", SqlDbType.Int).Value = momemtInfo.ProcessUser.ID;
+                command.Parameters.Add("@ProcessedDate", SqlDbType.DateTime).Value = DateTime.Now;
+
+                command.ExecuteNonQuery();
+            }
+        }
+        #endregion
+
+        #region "Collision"
+        public void ImportCollisionProbabilitys(DataTable dt)
+        {
+            sqlStr = "INSERT INTO tblCollisionProbability (MomemtID,BridgeAreaID,CapNumID,Type,Probability) " +
+                    " VALUES(@MomemtID,@BridgeAreaID,@CapNumID,@Type,@Probability)";
+
+            SqlParameter parameter = null;
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                parameter = command.Parameters.Add("@MomemtID", SqlDbType.Int);
+                parameter.SourceColumn = "MomemtID";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@BridgeAreaID", SqlDbType.Int);
+                parameter.SourceColumn = "BridgeAreaID";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@CapNumID", SqlDbType.Int);
+                parameter.SourceColumn = "CapNumID";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@Type", SqlDbType.Int);
+                parameter.SourceColumn = "Type";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@Probability", SqlDbType.Decimal);
+                parameter.SourceColumn = "Probability";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                using (SqlDataAdapter da = new SqlDataAdapter())
+                {
+                    da.InsertCommand = command;
+
+                    da.Update(dt);
+                }
+            }
+        }
+
+        public void DeleteCollisionProbabilitys(int bridgeAreaID, int momemtID)
+        {
+            sqlStr = "DELETE FROM tblCollisionProbability WHERE MomemtID=@MomemtID AND BridgeAreaID = @BridgeAreaID";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.Parameters.Add("@MomemtID", SqlDbType.Int).Value = momemtID;
+                command.Parameters.Add("@BridgeAreaID", SqlDbType.Int).Value = bridgeAreaID;
+
+                command.ExecuteNonQuery();
+            }
+        }
+
+        public List<int> GetCapNum4Collision(int momemtID, int bridgeAreaID)
+        {
+            List<int> capNums = new List<int>();
+
+            sqlStr = "SELECT DISTINCT CapNumID FROM tblCollisionProbability " +
+                     " WHERE MomemtID = @MomemtID AND BridgeAreaID = @BridgeAreaID " +
+                     " ORDER BY CapNumID";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.Parameters.Add("@MomemtID", SqlDbType.Int).Value = momemtID;
+                command.Parameters.Add("@BridgeAreaID", SqlDbType.Int).Value = bridgeAreaID;
+                foreach (DataRow dr in GetDataTable(command).Rows)
+                {
+                    capNums.Add(SQLUtil.ConvertInt(dr[0]));
+                }
+
+                return capNums;
+            }
+        }
+
+        public List<CollisionProbabilityInfo> GetCollisionProbabilitys(int momemtID, int bridgeAreaID)
+        {
+            List<CollisionProbabilityInfo> infos = new List<CollisionProbabilityInfo>();
+
+            sqlStr = "SELECT * FROM tblCollisionProbability " +
+                     " WHERE MomemtID = @MomemtID AND BridgeAreaID = @BridgeAreaID " +
+                     " ORDER BY CapNumID";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.Parameters.Add("@MomemtID", SqlDbType.Int).Value = momemtID;
+                command.Parameters.Add("@BridgeAreaID", SqlDbType.Int).Value = bridgeAreaID;
+                foreach (DataRow dr in GetDataTable(command).Rows)
+                {
+                    infos.Add(new CollisionProbabilityInfo(dr));
+                }
+
+                return infos;
+            }
+        }
+        #endregion
+
+        #region "Collapse"
+        public void ImportCollapseProbabilitys(DataTable dt)
+        {
+            sqlStr = "INSERT INTO tblCollapseProbability (MomemtID,BridgeAreaID,CapNumID,Type,Probability) " +
+                    " VALUES(@MomemtID,@BridgeAreaID,@CapNumID,@Type,@Probability)";
+
+            SqlParameter parameter = null;
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                parameter = command.Parameters.Add("@MomemtID", SqlDbType.Int);
+                parameter.SourceColumn = "MomemtID";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@BridgeAreaID", SqlDbType.Int);
+                parameter.SourceColumn = "BridgeAreaID";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@CapNumID", SqlDbType.Int);
+                parameter.SourceColumn = "CapNumID";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@Type", SqlDbType.Int);
+                parameter.SourceColumn = "Type";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@Probability", SqlDbType.Decimal);
+                parameter.SourceColumn = "Probability";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                using (SqlDataAdapter da = new SqlDataAdapter())
+                {
+                    da.InsertCommand = command;
+
+                    da.Update(dt);
+                }
+            }
+        }
+
+        public void DeleteCollapseProbabilitys(int bridgeAreaID, int momemtID)
+        {
+            sqlStr = "DELETE FROM tblCollapseProbability WHERE MomemtID=@MomemtID AND BridgeAreaID = @BridgeAreaID";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.Parameters.Add("@MomemtID", SqlDbType.Int).Value = momemtID;
+                command.Parameters.Add("@BridgeAreaID", SqlDbType.Int).Value = bridgeAreaID;
+
+                command.ExecuteNonQuery();
+            }
+        }
+
+        public List<int> GetCapNum4Collapse(int momemtID, int bridgeAreaID)
+        {
+            List<int> capNums = new List<int>();
+
+            sqlStr = "SELECT DISTINCT CapNumID FROM tblCollapseProbability " +
+                     " WHERE MomemtID = @MomemtID AND BridgeAreaID = @BridgeAreaID " +
+                     " ORDER BY CapNumID";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.Parameters.Add("@MomemtID", SqlDbType.Int).Value = momemtID;
+                command.Parameters.Add("@BridgeAreaID", SqlDbType.Int).Value = bridgeAreaID;
+                foreach (DataRow dr in GetDataTable(command).Rows)
+                {
+                    capNums.Add(SQLUtil.ConvertInt(dr[0]));
+                }
+
+                return capNums;
+            }
+        }
+
+        public List<CollapseProbabilityInfo> GetCollapseProbabilitys(int momemtID, int bridgeAreaID)
+        {
+            List<CollapseProbabilityInfo> infos = new List<CollapseProbabilityInfo>();
+
+            sqlStr = "SELECT * FROM tblCollapseProbability " +
+                     " WHERE MomemtID = @MomemtID AND BridgeAreaID = @BridgeAreaID " +
+                     " ORDER BY CapNumID";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.Parameters.Add("@MomemtID", SqlDbType.Int).Value = momemtID;
+                command.Parameters.Add("@BridgeAreaID", SqlDbType.Int).Value = bridgeAreaID;
+                foreach (DataRow dr in GetDataTable(command).Rows)
+                {
+                    infos.Add(new CollapseProbabilityInfo(dr));
+                }
+
+                return infos;
+            }
+        }
+        #endregion
+
+        #region "tblMomemtRptElement"
+        public List<MomemtRptElementInfo> GetMomemtRptElements(int bridgeAreaID, int momemtID)
+        {
+            List<MomemtRptElementInfo> infos = new List<MomemtRptElementInfo>();
+
+            sqlStr = "SELECT * FROM tblMomemtRptElement WHERE BridgeAreaID = @BridgeAreaID AND MomemtID = @MomemtID";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.Parameters.Add("@BridgeAreaID", SqlDbType.Int).Value = bridgeAreaID;
+                command.Parameters.Add("@MomemtID", SqlDbType.Int).Value = momemtID;
+
+                using (DataTable dt = GetDataTable(command))
+                {
+                    foreach (DataRow dr in dt.Rows)
+                    {
+                        infos.Add(new MomemtRptElementInfo(dr));
+                    }
+                }
+            }
+
+            return infos;
+        }
+
+        public MomemtRptElementInfo AddMomemtRptElement(MomemtRptElementInfo info)
+        {
+            sqlStr = "INSERT INTO tblMomemtRptElement (MomemtID, BridgeAreaID, Seq, ElementTypeID, ParentID, Title, Content, ReportTypeID, IsBrief)" +
+                    " VALUES (@MomemtID, @BridgeAreaID, @Seq, @ElementTypeID, @ParentID, @Title, @Content, @ReportTypeID, @IsBrief);" +
+                    " SELECT @@IDENTITY";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.Parameters.Add("@Seq", SqlDbType.Int).Value = info.Seq;
+                command.Parameters.Add("@MomemtID", SqlDbType.Int).Value = info.Momemt.ID;
+                command.Parameters.Add("@BridgeAreaID", SqlDbType.Int).Value = info.Momemt.BridgeAreaID;
+                command.Parameters.Add("@ElementTypeID", SqlDbType.Int).Value = info.ElementTypeID;
+                command.Parameters.Add("@ParentID", SqlDbType.Int).Value = SQLUtil.ZeroToNull(info.ParentID);
+                command.Parameters.Add("@Title", SqlDbType.NVarChar).Value = SQLUtil.EmptyStringToNull(info.Title);
+                command.Parameters.Add("@Content", SqlDbType.NVarChar).Value = SQLUtil.EmptyStringToNull(info.Content);
+                command.Parameters.Add("@ReportTypeID", SqlDbType.Int).Value = SQLUtil.ZeroToNull(info.ReportTypeID);
+                command.Parameters.Add("@IsBrief", SqlDbType.Bit).Value = info.IsBrief;
+
+                info.ID = SQLUtil.ConvertInt(command.ExecuteScalar());
+
+                return info;
+            }
+        }
+
+        public void UpdateMomemtRptElement(MomemtRptElementInfo info)
+        {
+            sqlStr = "Update tblMomemtRptElement SET Seq = @Seq, ElementTypeID= @ElementTypeID, ParentID = @ParentID, Title = @Title, " +
+                    " Content = @Content, ReportTypeID = @ReportTypeID " +
+                    " WHERE ID = @ID";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.Parameters.Add("@Seq", SqlDbType.Int).Value = info.Seq;
+                command.Parameters.Add("@ElementTypeID", SqlDbType.Int).Value = info.ElementTypeID;
+                command.Parameters.Add("@ParentID", SqlDbType.Int).Value = SQLUtil.ZeroToNull(info.ParentID);
+                command.Parameters.Add("@Title", SqlDbType.NVarChar).Value = SQLUtil.EmptyStringToNull(info.Title);
+                command.Parameters.Add("@Content", SqlDbType.NVarChar).Value = SQLUtil.EmptyStringToNull(info.Content);
+                command.Parameters.Add("@ReportTypeID", SqlDbType.Int).Value = SQLUtil.ZeroToNull(info.ReportTypeID);
+                command.Parameters.Add("@ID", SqlDbType.Int).Value = info.ID;
+
+                command.ExecuteNonQuery();
+            }
+        }
+
+        public void UpdateMomemtRptElementSeq(int parentId, int seqFrom, int increaseSeq)
+        {
+            sqlStr = "Update tblMomemtRptElement SET Seq = Seq + @Increased " +
+                    " WHERE Seq >= @SeqFrom And";
+
+            if (parentId == 0)
+                sqlStr += " ParentID IS NULL ";
+            else
+                sqlStr += " ParentID = " + parentId;
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.Parameters.Add("@Increased", SqlDbType.Int).Value = increaseSeq;
+                command.Parameters.Add("@SeqFrom", SqlDbType.Int).Value = seqFrom;
+
+                command.ExecuteNonQuery();
+            }
+        }
+
+        public void UpdateMomemtRptElementSeq4Move(int id, int increaseSeq)
+        {
+            sqlStr = "Update tblMomemtRptElement SET Seq = Seq + @Increased " +
+                    " WHERE ID = @ID";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.Parameters.Add("@Increased", SqlDbType.Int).Value = increaseSeq;
+                command.Parameters.Add("@ID", SqlDbType.Int).Value = id;
+
+                command.ExecuteNonQuery();
+            }
+        }
+
+        public void DeleteMomemtRptElement(int id)
+        {
+            sqlStr = "DELETE FROM tblMomemtRptElement WHERE ID=@ID";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.Parameters.Add("@ID", SqlDbType.Int).Value = id;
+
+                command.ExecuteNonQuery();
+            }
+        }
+
+        public void DeleteMomemtRptElementByParent(int parentId)
+        {
+            sqlStr = "DELETE FROM tblMomemtRptElement WHERE ParentID=@ParentID";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.Parameters.Add("@ParentID", SqlDbType.Int).Value = parentId;
+
+                command.ExecuteNonQuery();
+            }
+        }
+        #endregion
+    }
+}
+
+
+
+--------------------------------------------------------------------------------END----------------------------------------------------------------------------------------
+
+
+----------------------------------------------------------------------ShipDao.cs----------------------------------------------------------------------------------------
+using BCWS.BusinessObjects.Aspect;
+using BCWS.BusinessObjects.Domain.Ship;
+using BCWS.BusinessObjects.Domain.Report;
+using BCWS.BusinessObjects.Util;
+using PostSharp.Extensibility;
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Data.SqlClient;
+using System.Linq;
+using System.Text;
+
+namespace BCWS.BusinessObjects.DataAccess
+{
+    [LoggingAspect(AspectPriority = 1)]
+    [ConnectionAspect(AspectPriority = 2, AttributeTargetTypeAttributes = MulticastAttributes.Public)]
+    public class ShipDao : BaseDao
+    {
+        #region "tblShip"
+        public List<ShipInfo> GetShips(int bridgeAreaID, long shipID, int shipType, DateTime entertimeFrom, DateTime entertimeTo, DateTime lefttimeFrom, DateTime lefttimeTo)
+        {
+            List<ShipInfo> ships = new List<ShipInfo>();
+
+            sqlStr = "SELECT * FROM tblShip WHERE BridgeAreaID = @BridgeAreaID And StatusID = 0 ";
+            if (entertimeFrom != DateTime.MinValue) sqlStr += " AND Entertime >= @EntertimeFrom ";
+            if (entertimeTo != DateTime.MaxValue) sqlStr += " AND Entertime <= @EntertimeTo ";
+            if (lefttimeFrom != DateTime.MinValue) sqlStr += " AND (Lefttime >= @LefttimeFrom or Entertime >= @LefttimeFrom) ";
+            if (lefttimeTo != DateTime.MaxValue) sqlStr += " AND Lefttime <= @LefttimeTo ";
+            if (shipID >= 0) sqlStr += " AND ShipID = " + shipID + " ";
+            if (shipType >= 0) sqlStr += " And ShipType = " + shipType + "";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.Parameters.Add("@BridgeAreaID", SqlDbType.Int).Value = bridgeAreaID;
+                if (entertimeFrom != DateTime.MinValue) command.Parameters.Add("@EntertimeFrom", SqlDbType.DateTime).Value = entertimeFrom;
+                if (entertimeTo != DateTime.MaxValue)  command.Parameters.Add("@EntertimeTo", SqlDbType.DateTime).Value = entertimeTo;
+                if (lefttimeFrom != DateTime.MinValue) command.Parameters.Add("@LefttimeFrom", SqlDbType.DateTime).Value = lefttimeFrom;
+                if (lefttimeTo != DateTime.MaxValue)  command.Parameters.Add("@LefttimeTo", SqlDbType.DateTime).Value = lefttimeTo;
+                
+                foreach (DataRow dr in GetDataTable(command).Rows)
+                {
+                    ships.Add(new ShipInfo(dr));
+                }
+
+                return ships;
+            }
+        }
+
+        public List<ShipStatByTimeTypeInfo> GetShipStatistics(int bridgeAreaID, DateTime entertimeFrom, DateTime entertimeTo, int minutes)
+        {
+            List<ShipStatByTimeTypeInfo> data = new List<ShipStatByTimeTypeInfo>();
+
+            sqlStr = "SELECT DateAdd(minute, @Minutes * (DateDiff(minute, @EntertimeFrom, Entertime) / @Minutes), @EntertimeFrom) As Time, ShipType, COUNT(ShipID) as Count " + 
+                     " FROM tblShip " + 
+                     " WHERE BridgeAreaID = @BridgeAreaID And StatusID = 0 AND Entertime BETWEEN @EntertimeFrom AND @EntertimeTo " +
+                     " GROUP BY DateAdd(minute, @Minutes * (DateDiff(minute, @EntertimeFrom, Entertime) / @Minutes), @EntertimeFrom), ShipType" +
+                     " ORDER BY DateAdd(minute, @Minutes * (DateDiff(minute, @EntertimeFrom, Entertime) / @Minutes), @EntertimeFrom), ShipType";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.Parameters.Add("@BridgeAreaID", SqlDbType.Int).Value = bridgeAreaID;
+                command.Parameters.Add("@EntertimeFrom", SqlDbType.DateTime).Value = entertimeFrom;
+                command.Parameters.Add("@EntertimeTo", SqlDbType.DateTime).Value = entertimeTo;
+                command.Parameters.Add("@Minutes", SqlDbType.Int).Value = minutes;
+
+                ShipStatByTimeTypeInfo info = null;
+                foreach (DataRow dr in GetDataTable(command).Rows)
+                {
+                    info = new ShipStatByTimeTypeInfo();
+                    info.Time = SQLUtil.ConvertDateTime(dr["Time"]);
+                    info.ShipType = SQLUtil.ConvertInt(dr["ShipType"]);
+                    info.Count = SQLUtil.ConvertInt(dr["Count"]);
+
+                    data.Add(info);
+                }
+
+                return data;
+            }
+        }
+
+        public ShipInfo GetShip(int bridgeAreaID, long shipID)
+        {
+            sqlStr = "SELECT * FROM tblShip WHERE BridgeAreaID = @BridgeAreaID AND ShipID = @ShipID";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.Parameters.Add("@BridgeAreaID", SqlDbType.Int).Value = bridgeAreaID;
+                command.Parameters.Add("@ShipID", SqlDbType.BigInt).Value = shipID;
+
+                DataRow dr = GetDataRow(command);
+                if (dr != null)
+                    return new ShipInfo(dr);
+                else
+                    return null;
+            }
+        }
+
+        public void AddShip(ShipInfo shipInfo)
+        {
+            sqlStr = "INSERT INTO tblShip (BridgeAreaID, ShipID, Entertime, ShipType, ShipDWT, ForeshipHight, Draft, MastHeight, ShipLenth, ShipWidth, DirectionX, StatusID) " +
+            "VALUES (@BridgeAreaID, @ShipID, @Entertime, @ShipType, @ShipDWT, @ForeshipHight, @Draft, @MastHeight, @ShipLenth, @ShipWidth, @DirectionX, @StatusID)";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.Parameters.Add("@BridgeAreaID", SqlDbType.Int).Value = shipInfo.BridgeAreaID;
+                command.Parameters.Add("@ShipID", SqlDbType.BigInt).Value = shipInfo.ShipID;
+                command.Parameters.Add("@Entertime", SqlDbType.DateTime).Value = shipInfo.Entertime;
+                command.Parameters.Add("@ShipType", SqlDbType.Int).Value = shipInfo.ShipType.ID;
+                command.Parameters.Add("@ShipDWT", SqlDbType.Float).Value = shipInfo.ShipDWT;
+                command.Parameters.Add("@ForeshipHight", SqlDbType.Float).Value = shipInfo.ForeshipHight;
+                command.Parameters.Add("@Draft", SqlDbType.Float).Value = shipInfo.Draft;
+                command.Parameters.Add("@MastHeight", SqlDbType.Float).Value = shipInfo.MastHeight;
+                command.Parameters.Add("@ShipLenth", SqlDbType.Float).Value = shipInfo.ShipLenth;
+                command.Parameters.Add("@ShipWidth", SqlDbType.Float).Value = shipInfo.ShipWidth;
+                command.Parameters.Add("@DirectionX", SqlDbType.Bit).Value = shipInfo.DirectionX;
+                command.Parameters.Add("@StatusID", SqlDbType.Int).Value = shipInfo.StatusID;
+
+                command.ExecuteNonQuery();
+            }
+        }
+
+        public void UpdateShip4LeftTime(int bridgeAreaID, long shipID, DateTime lefttime, int statusID)
+        {
+            sqlStr = "UPDATE tblShip SET Lefttime = @Lefttime, StatusID = @StatusID WHERE ShipID = @ShipID And BridgeAreaID = @BridgeAreaID";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.Parameters.Add("@BridgeAreaID", SqlDbType.Int).Value = bridgeAreaID;
+                command.Parameters.Add("@ShipID", SqlDbType.BigInt).Value = shipID;
+                command.Parameters.Add("@Lefttime", SqlDbType.DateTime).Value = lefttime;
+                command.Parameters.Add("@StatusID", SqlDbType.Int).Value = statusID;
+
+                command.ExecuteNonQuery();
+            }
+        }
+        #endregion
+
+        #region "tblShipTrack"
+        public List<TrackInfo> GetTracks(int bridgeAreaID, long shipID, DateTime transactionTimeFrom, DateTime transactionTimeTo)
+        {
+            List<TrackInfo> tracks = new List<TrackInfo>();
+
+            sqlStr = "SELECT * FROM tblShipTrack WHERE TrackTime <= @TransactionTimeTo AND BridgeAreaID = @BridgeAreaID ";
+            if (transactionTimeFrom != DateTime.MinValue) sqlStr += " AND TrackTime >= @TransactionTimeFrom ";
+            if (shipID >= 0) sqlStr += " AND ShipID = " + shipID;
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.Parameters.Add("@BridgeAreaID", SqlDbType.Int).Value = bridgeAreaID;
+                if (transactionTimeFrom != DateTime.MinValue)
+                {
+                    command.Parameters.Add("@TransactionTimeFrom", SqlDbType.DateTime).Value = transactionTimeFrom;
+                }
+                command.Parameters.Add("@TransactionTimeTo", SqlDbType.DateTime).Value = transactionTimeTo;
+
+                foreach (DataRow dr in GetDataTable(command).Rows)
+                {
+                    tracks.Add(new TrackInfo(dr));
+                }
+
+                return tracks;
+            }
+        }
+
+        public TrackInfo GetLastTrackByShipID(int bridgeAreaID, long shipID)
+        {
+            sqlStr = "SELECT top(1) * FROM tblShipTrack WHERE BridgeAreaID = @BridgeAreaID AND ShipID = @ShipID Order By TrackTime desc";
+            
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.Parameters.Add("@BridgeAreaID", SqlDbType.Int).Value = bridgeAreaID;
+                command.Parameters.Add("@ShipID", SqlDbType.BigInt).Value = shipID;
+
+                DataRow dr = GetDataRow(command);
+                if (dr != null)
+                    return new TrackInfo(dr);
+                else
+                    return null;
+            }
+        }
+
+        public void ImportTracks(DataTable dt)
+        {
+            sqlStr = "INSERT INTO tblShipTrack (BridgeAreaID, ShipID, TrackTime, ShipCoorX, ShipCoorY, ShipVectorX, ShipVectorY, Theta) " +
+            "VALUES (@BridgeAreaID, @ShipID, @TrackTime, @ShipCoorX, @ShipCoorY, @ShipVectorX, @ShipVectorY, @Theta)";
+
+            SqlParameter parameter = null;
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                parameter = command.Parameters.Add("@BridgeAreaID", SqlDbType.Int);
+                parameter.SourceColumn = "BridgeAreaID";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@ShipID", SqlDbType.BigInt);
+                parameter.SourceColumn = "ShipID";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@TrackTime", SqlDbType.DateTime);
+                parameter.SourceColumn = "TrackTime";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@ShipCoorX", SqlDbType.Decimal);
+                parameter.SourceColumn = "ShipCoorX";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@ShipCoorY", SqlDbType.Decimal);
+                parameter.SourceColumn = "ShipCoorY";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@ShipVectorX", SqlDbType.Float);
+                parameter.SourceColumn = "ShipVectorX";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@ShipVectorY", SqlDbType.Float);
+                parameter.SourceColumn = "ShipVectorY";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@Theta", SqlDbType.Decimal);
+                parameter.SourceColumn = "Theta";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                using (SqlDataAdapter da = new SqlDataAdapter())
+                {
+                    da.InsertCommand = command;
+
+                    da.Update(dt);
+                }
+            }
+        }
+        #endregion
+    }
+}
+
+
+--------------------------------------------------------------------------------END----------------------------------------------------------------------------------------
+
+
+----------------------------------------------------------------------XceedUtil.cs----------------------------------------------------------------------------------------
+using BCWS.BusinessObjects.DataAccess;
+using BCWS.BusinessObjects.Domain.Accident;
+using BCWS.BusinessObjects.Domain.Finite;
+using BCWS.BusinessObjects.Domain.Momemts;
+using BCWS.BusinessObjects.Manager;
+using BCWS.BusinessObjects.Util;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Windows.Forms;
+using Xceed.Words.NET;
+
+namespace BCWSDesktop.Util
+{
+    public static class XceedUtil
+    {
+        public static FiniteDao finiteDao = new FiniteDao();
+        public static ShipDao shipDao = new ShipDao();
+        public static BridgeDao bridgeDao = new BridgeDao();
+        public static MomemtDao momemtDao = new MomemtDao();
+
+        private static string AppFolder = System.AppDomain.CurrentDomain.BaseDirectory;
+        private static string StyleBridgeName = "BridgeName";
+        private static string StyleDateAndStation = "DateAndStation";
+        private static string StyleBody = "Body";
+        private static string StyleImgDes = "ImgDes";
+        private static string StyleReportDetail = "ReportDetail";
+        private static string StyleReportFooter = "ReportFooter";
+        private static string SystemName = "桥梁防撞预警系统";
+
+        public static void CreateDoc(string fileName, List<AccidentRptElementInfo> seqInfos, AccidentInfo selectedAccident, string userName)
+        {
+            using (DocX document = DocX.Create(fileName))
+            {
+                // The path to a template document,
+                string templatePath = Path.Combine(AppFolder, "Template.docx");
+                
+                // Apply a template to the document based on a path.
+                document.ApplyTemplate(templatePath, false);
+
+                // Add a title
+                var p1 = document.InsertParagraph();
+                p1.Append((string.Format("{0}{1}年{2}月{3}日船撞事件", SessionInfo.selectedBridge.BridgeAreaName, DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day)));
+                p1.StyleName = StyleBridgeName;
+
+                var p2 = document.InsertParagraph();
+                p2.Append("桥梁状态评估报告");
+                p2.StyleName = "ReportTitle";
+
+                var p3 = document.InsertParagraph();
+                p3.Append(string.Format("{0}管理处", SessionInfo.selectedBridge.BridgeAreaName));
+                p3.StyleName = StyleDateAndStation;
+
+                var p4 = document.InsertParagraph();
+                p4.Append(string.Format("{0}年{1}月{2}日", DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day));
+                p4.StyleName = StyleDateAndStation;
+
+                var p5 = document.InsertParagraph();
+                p5.Append(string.Format("桥 梁 名 称：{0}", SessionInfo.selectedBridge.BridgeAreaName));
+                p5.StyleName = StyleReportDetail;
+
+                var p14 = document.InsertParagraph();
+                p14.Append(string.Format("撞 击 事 件：{0}年{1}月{2}日撞击事件", DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day));
+                p14.StyleName = StyleReportDetail;
+                p14.SpacingAfter(100d);
+
+                var p6 = document.InsertParagraph();
+                p6.Append(string.Format("桥 梁 管 理 单 位：{0}", SessionInfo.selectedBridge.ManagerDepartmentName));
+                p6.StyleName = StyleReportDetail;
+
+                var p7 = document.InsertParagraph();
+                p7.Append(string.Format("报 告 生 成 软 件：{0} {1}", SystemName, System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString()));
+                p7.StyleName = StyleReportDetail;
+
+                var p8 = document.InsertParagraph();
+                p8.Append(string.Format("报 告 修 改 人：{0}", userName));
+                p8.StyleName = StyleReportDetail;
+
+                var p9 = document.InsertParagraph();
+                p9.Append(string.Format("报 告 生 成 时 间：{0}年{1}月{2}日", DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day));
+                p9.StyleName = StyleReportDetail;
+                p9.SpacingAfter(100d);
+
+                var p10 = document.InsertParagraph();
+                p10.Append(string.Format("报 告 推 送："));
+                p10.StyleName = StyleReportDetail;
+                p10.InsertPageBreakAfterSelf();
+
+                document.AddHeaders();
+                document.AddFooters();
+                document.DifferentFirstPage = true;
+
+                var oddFooter = document.Footers.Odd;
+                var p11 = oddFooter.InsertParagraph();
+                p11.Append(string.Format("{0}管理处                                                       ", SessionInfo.selectedBridge.BridgeAreaName));
+                p11.Append("-").AppendPageNumber(PageNumberFormat.normal);
+                p11.Append("-");
+                p11.StyleName = StyleReportFooter;
+                p11.InsertHorizontalLine(HorizontalBorderPosition.top, "single", 6, 1, "auto");
+
+                var oddHeader = document.Headers.Odd;
+                var p13 = oddHeader.InsertParagraph();
+                p13.Append(string.Format("{0}{1}年{2}月{3}日船撞事件                            桥梁状态评估报告", SessionInfo.selectedBridge.BridgeAreaName, DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day));
+                p13.StyleName = StyleReportFooter;
+                p13.InsertHorizontalLine(HorizontalBorderPosition.bottom, "single", 6, 1, "auto");
+
+                document.InsertParagraph("目录").StyleName = StyleBridgeName;
+                document.InsertTableOfContents("", TableOfContentsSwitches.O | TableOfContentsSwitches.U | TableOfContentsSwitches.Z | TableOfContentsSwitches.H, StyleBody);
+
+                document.InsertSection();
+                
+                for (int i = 0; i < seqInfos.Count; i++)
+                {
+                    if (seqInfos[i].ElementTypeID == AccidentRptElementInfo.ElementType.Paragraph || seqInfos[i].ElementTypeID == AccidentRptElementInfo.ElementType.Section || seqInfos[i].ElementTypeID == AccidentRptElementInfo.ElementType.stanzas)
+                    {
+                        AddParagraph(seqInfos[i], document);
+                    }
+                    else if (seqInfos[i].ElementTypeID == AccidentRptElementInfo.ElementType.Chart)
+                    {
+                        AddChart(seqInfos[i], selectedAccident, document);
+                    }
+                    else if (seqInfos[i].ElementTypeID == AccidentRptElementInfo.ElementType.Table)
+                    {
+                        AddTable(seqInfos[i], selectedAccident, document);
+                    }
+                    else if (seqInfos[i].ElementTypeID == AccidentRptElementInfo.ElementType.Picture)
+                    {
+                        AddPicture(seqInfos[i], document);
+                    }
+                }
+
+                // Save this document to disk.
+                document.Save();
+                UIUtil.ShowInfo("导出事故报告成功", "导出");
+            }
+        }
+
+        public static void AddParagraph(AccidentRptElementInfo seqInfo, DocX document)
+        {
+            if (seqInfo.IsBrief == true)
+            {
+                string templateCommonPath = Path.Combine(AppFolder, "BridgeDescription.docx");
+                using (DocX document1 = DocX.Load(templateCommonPath))
+                {
+                    document.InsertDocument(document1);
+                }
+            }
+            else
+            {
+                if (seqInfo.Title != "")
+                {
+                    // Insert a Paragraph into this document.
+                    var p = document.InsertParagraph();
+
+                    // Append some text and add formatting.
+                    p.Append(seqInfo.Title);
+                    if (seqInfo.ElementTypeID == AccidentRptElementInfo.ElementType.Paragraph)
+                        p.StyleName = "Heading1";
+                    else if (seqInfo.ElementTypeID == AccidentRptElementInfo.ElementType.Section)
+                        p.StyleName = "Heading2";
+                    else if (seqInfo.ElementTypeID == AccidentRptElementInfo.ElementType.stanzas)
+                        p.StyleName = "Heading3";
+                }
+                // Insert another Paragraph into this document.
+                if (seqInfo.Content != "" && seqInfo.Content != null)
+                {
+                    var p2 = document.InsertParagraph();
+
+                    // Append some text and add formatting.
+                    p2.Append(seqInfo.Content);
+                    p2.StyleName = StyleBody;
+                }
+            }
+        }
+
+        public static void AddChart(AccidentRptElementInfo seqInfo, AccidentInfo selectedAccident, DocX document)
+        {
+            if (seqInfo.ReportTypeID == 0) return;
+            // Create the data.
+            Dictionary<double, double> nodes = null;
+            Dictionary<string, double> maxNodes = null;
+            string seriesName = null;
+            string direction = null;
+            int elementType = 0;
+            if (seqInfo.FiniteNodeDirection == AccidentRptElementInfo.Direction.X)
+            {
+                direction = AccidentRptElementInfo.Direction.GetDesc(AccidentRptElementInfo.Direction.X);
+                elementType = ElementType.X;
+            }
+            else
+            {
+                direction = AccidentRptElementInfo.Direction.GetDesc(AccidentRptElementInfo.Direction.Y);
+                elementType = ElementType.Y;
+            }
+            if (seqInfo.ReportTypeID == AccidentRptElementInfo.ReportType.MaxDisplace || seqInfo.ReportTypeID == AccidentRptElementInfo.ReportType.MaxInternalMoment)
+            {
+                if (seqInfo.ReportTypeID == AccidentRptElementInfo.ReportType.MaxDisplace)
+                {
+                    maxNodes = finiteDao.GetMaxDisplaceReations(SessionInfo.selectedBridge.BridgeAreaID, selectedAccident.AccidentID, 0, direction);
+                    seriesName = string.Format("{0}方向节点最大位移", direction);
+                }
+                else if (seqInfo.ReportTypeID == AccidentRptElementInfo.ReportType.MaxInternalMoment)
+                {
+                    maxNodes = finiteDao.GetMaxInternalMomentReations(SessionInfo.selectedBridge.BridgeAreaID, selectedAccident.AccidentID, direction, elementType);
+                    seriesName = string.Format("{0}方向单元最大弯矩", direction);
+                }
+                List<string> maxKey = new List<string>();
+                List<double> maxValue = new List<double>();
+
+                if (maxNodes.Count != 0)
+                {
+                    foreach (KeyValuePair<string, double> node in maxNodes)
+                    {
+                        maxKey.Add(node.Key);
+                        maxValue.Add(node.Value);
+                    }
+                    // Create a line chart.
+                    var c = new BarChart();
+                    c.BarDirection = BarDirection.Column;
+                    c.AddLegend(ChartLegendPosition.TopRight, false);
+                    // Create and add series
+                    var s1 = new Series(seriesName);
+
+                    s1.Bind(maxKey, maxValue);
+                    c.AddSeries(s1);
+
+                    // Insert chart into document
+                    document.InsertChart(c);
+                }
+            }
+            else if (seqInfo.ReportTypeID == AccidentRptElementInfo.ReportType.ImpactForce || seqInfo.ReportTypeID == AccidentRptElementInfo.ReportType.DisplaceReation || seqInfo.ReportTypeID == AccidentRptElementInfo.ReportType.InternalMomentReation)
+            {
+                NodeInfo nodeInfo = finiteDao.GetNode(seqInfo.FiniteNodeID);
+                ElementInfo elementInfo = finiteDao.GetElement(seqInfo.FiniteNodeID);
+
+                if (seqInfo.ReportTypeID == AccidentRptElementInfo.ReportType.ImpactForce)
+                {
+                    nodes = finiteDao.GetImpactForces(SessionInfo.selectedBridge.BridgeAreaID, selectedAccident.AccidentID, nodeInfo.CapNumID, nodeInfo.Node);
+                    seriesName = "节点撞击力";
+                }
+                else if (seqInfo.ReportTypeID == AccidentRptElementInfo.ReportType.DisplaceReation)
+                {
+                    nodes = finiteDao.GetDisplaceReations(SessionInfo.selectedBridge.BridgeAreaID, selectedAccident.AccidentID, nodeInfo.CapNumID, nodeInfo.Node, 0, direction);
+                    seriesName = string.Format("{0}方向节点位移", direction);
+                }
+                else if (seqInfo.ReportTypeID == AccidentRptElementInfo.ReportType.InternalMomentReation)
+                {
+                    nodes = finiteDao.GetInternalMomentReations(SessionInfo.selectedBridge.BridgeAreaID, selectedAccident.AccidentID, elementInfo.CapNumID, elementInfo.Element, direction);
+                    seriesName = string.Format("{0}方向单元弯矩", direction);
+                }
+
+                List<string> key = new List<string>();
+                List<double> value = new List<double>();
+
+                if (nodes.Count != 0)
+                {
+                    foreach (KeyValuePair<Double, double> node in nodes)
+                    {
+                        key.Add(node.Key.ToString());
+                        value.Add(node.Value);
+                    }
+                    // Create a line chart.
+                    var c = new LineChart();
+
+                    c.AddLegend(ChartLegendPosition.TopRight, false);
+                    // Create and add series
+                    var s1 = new Series(seriesName);
+
+                    s1.Bind(key, value);
+                    c.AddSeries(s1);
+
+                    // Insert chart into document
+                    document.InsertChart(c);
+                }
+            }
+            if (seqInfo.Title != "")
+                // Add a title
+                document.InsertParagraph(seqInfo.Title).StyleName = StyleImgDes;
+            
+        }
+
+        public static void AddTable(AccidentRptElementInfo seqInfo, AccidentInfo selectedAccident, DocX document)
+        {
+            if (seqInfo.ReportTypeID == 0) return;
+            int i = 1;
+            Dictionary<double, double> infos = null;
+            Dictionary<string, double> maxInfos = null;
+            Table table1 = null;
+            NodeInfo nodeInfo = finiteDao.GetNode(seqInfo.FiniteNodeID);
+            ElementInfo elementInfo = finiteDao.GetElement(seqInfo.FiniteNodeID);
+            string direction = null;
+            int elementType = 0;
+            if (seqInfo.FiniteNodeDirection == AccidentRptElementInfo.Direction.X)
+            {
+                direction = AccidentRptElementInfo.Direction.GetDesc(AccidentRptElementInfo.Direction.X);
+                elementType = ElementType.X;
+            }
+            else
+            {
+                direction = AccidentRptElementInfo.Direction.GetDesc(AccidentRptElementInfo.Direction.Y);
+                elementType = ElementType.Y;
+            }
+
+            if (seqInfo.ReportTypeID == AccidentRptElementInfo.ReportType.ImpactForce)
+            {
+                infos = finiteDao.GetImpactForces(selectedAccident.BridgeAreaID, selectedAccident.AccidentID, nodeInfo.CapNumID, nodeInfo.Node);
+                table1 = document.AddTable(infos.Count + 1, 2);
+                table1.Rows[0].Cells[0].Paragraphs.First().InsertText("时间");
+                table1.Rows[0].Cells[1].Paragraphs.First().InsertText("节点撞击力");
+            }
+            else if (seqInfo.ReportTypeID == AccidentRptElementInfo.ReportType.DisplaceReation)
+            {
+                infos = finiteDao.GetDisplaceReations(selectedAccident.BridgeAreaID, selectedAccident.AccidentID, nodeInfo.CapNumID, nodeInfo.Node, 0, direction);
+                table1 = document.AddTable(infos.Count + 1, 2);
+                table1.Rows[0].Cells[0].Paragraphs.First().InsertText("时间");
+                table1.Rows[0].Cells[1].Paragraphs.First().InsertText("节点位移");
+            }
+            else if (seqInfo.ReportTypeID == AccidentRptElementInfo.ReportType.InternalMomentReation)
+            {
+                infos = finiteDao.GetInternalMomentReations(selectedAccident.BridgeAreaID, selectedAccident.AccidentID, elementInfo.CapNumID, elementInfo.Element, direction);
+                table1 = document.AddTable(infos.Count + 1, 2);
+                table1.Rows[0].Cells[0].Paragraphs.First().InsertText("时间");
+                table1.Rows[0].Cells[1].Paragraphs.First().InsertText("单元弯矩");
+            }
+            else if (seqInfo.ReportTypeID == AccidentRptElementInfo.ReportType.MaxDisplace)
+            {
+                maxInfos = finiteDao.GetMaxDisplaceReations(selectedAccident.BridgeAreaID, selectedAccident.AccidentID, 0, direction);
+                table1 = document.AddTable(maxInfos.Count + 1, 2);
+                table1.Rows[0].Cells[0].Paragraphs.First().InsertText("节点");
+                table1.Rows[0].Cells[1].Paragraphs.First().InsertText("节点最大位移");
+            }
+            else if (seqInfo.ReportTypeID == AccidentRptElementInfo.ReportType.MaxInternalMoment)
+            {
+                maxInfos = finiteDao.GetMaxInternalMomentReations(selectedAccident.BridgeAreaID, selectedAccident.AccidentID, direction, elementType);
+                table1 = document.AddTable(maxInfos.Count + 1, 2);
+                table1.Rows[0].Cells[0].Paragraphs.First().InsertText("单元");
+                table1.Rows[0].Cells[1].Paragraphs.First().InsertText("单元最大弯矩");
+            }
+
+            if (seqInfo.ReportTypeID == AccidentRptElementInfo.ReportType.ImpactForce || seqInfo.ReportTypeID == AccidentRptElementInfo.ReportType.DisplaceReation || seqInfo.ReportTypeID == AccidentRptElementInfo.ReportType.InternalMomentReation)
+            {
+                foreach (KeyValuePair<Double, double> info in infos)
+                {
+                    table1.Rows[i].Cells[0].Paragraphs.First().InsertText(SQLUtil.TrimNull(info.Key));
+                    table1.Rows[i].Cells[1].Paragraphs.First().InsertText(SQLUtil.TrimNull(info.Value));
+                    i++;
+                }
+            }
+            if (seqInfo.ReportTypeID == AccidentRptElementInfo.ReportType.MaxDisplace || seqInfo.ReportTypeID == AccidentRptElementInfo.ReportType.MaxInternalMoment)
+            {
+                foreach (KeyValuePair<string, double> info in maxInfos)
+                {
+                    table1.Rows[i].Cells[0].Paragraphs.First().InsertText(SQLUtil.TrimNull(info.Key));
+                    table1.Rows[i].Cells[1].Paragraphs.First().InsertText(SQLUtil.TrimNull(info.Value));
+                    i++;
+                }
+            }
+
+
+            document.InsertTable(table1);
+            
+            if (seqInfo.Title != "")
+                // Add a title
+                document.InsertParagraph(seqInfo.Title).StyleName = StyleImgDes;
+        }
+
+        public static void AddPicture(AccidentRptElementInfo seqInfo, DocX document)
+        {
+            if (seqInfo.Content != "" && seqInfo.Content != null)
+            {
+                var image = document.AddImage(seqInfo.Content);
+                var picture = image.CreatePicture();
+                var p = document.InsertParagraph();
+                p.AppendPicture(picture);
+                p.SpacingAfter(10);
+                p.Alignment = Alignment.both;
+
+                if (seqInfo.Title != "")
+                {
+                    document.InsertParagraph(seqInfo.Title).StyleName = StyleImgDes;
+                }
+            }
+        }
+
+        public static void CreateDoc4Momemt(string fileName, List<MomemtRptElementInfo> seqInfos, MomemtInfo selectedMomemt, string userName)
+        {
+            using (DocX document = DocX.Create(fileName))
+            {
+                // The path to a template document,
+                string templatePath = Path.Combine(AppFolder, "Template.docx");
+
+                // Apply a template to the document based on a path.
+                document.ApplyTemplate(templatePath, false);
+
+                // Add a title
+                var p1 = document.InsertParagraph();
+                p1.Append((string.Format("{0}", SessionInfo.selectedBridge.BridgeAreaName)));
+                p1.StyleName = StyleBridgeName;
+
+                var p2 = document.InsertParagraph();
+                p2.Append("背景评估报告");
+                p2.StyleName = "ReportTitle";
+
+                var p3 = document.InsertParagraph();
+                p3.Append(string.Format("{0}管理处", SessionInfo.selectedBridge.BridgeAreaName));
+                p3.StyleName = StyleDateAndStation;
+
+                var p4 = document.InsertParagraph();
+                p4.Append(string.Format("日期-{0}年{1}月{2}日", DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day));
+                p4.StyleName = StyleDateAndStation;
+
+                var p5 = document.InsertParagraph();
+                p5.Append(string.Format("桥 梁 名 称：{0}", SessionInfo.selectedBridge.BridgeAreaName));
+                p5.StyleName = StyleReportDetail;
+
+                var p6 = document.InsertParagraph();
+                p6.Append(string.Format("桥 梁 管 理 单 位：{0}", SessionInfo.selectedBridge.ManagerDepartmentName));
+                p6.StyleName = StyleReportDetail;
+
+                var p7 = document.InsertParagraph();
+                p7.Append(string.Format("报 告 生 成 软 件：{0} {1}", SystemName, System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString()));
+                p7.StyleName = StyleReportDetail;
+
+                var p8 = document.InsertParagraph();
+                p8.Append(string.Format("报 告 修 改 人：{0}", userName));
+                p8.StyleName = StyleReportDetail;
+
+                var p9 = document.InsertParagraph();
+                p9.Append(string.Format("报 告 生 成 时 间：{0}年{1}月{2}日", DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day));
+                p9.StyleName = StyleReportDetail;
+                p9.SpacingAfter(100d);
+
+                var p10 = document.InsertParagraph();
+                p10.Append(string.Format("报 告 推 送："));
+                p10.StyleName = StyleReportDetail;
+                p10.InsertPageBreakAfterSelf();
+
+                document.AddHeaders();
+                document.AddFooters();
+                document.DifferentFirstPage = true;
+
+                var oddFooter = document.Footers.Odd;
+                var p11 = oddFooter.InsertParagraph();
+                p11.Append(string.Format("{0}管理处                                                       ", SessionInfo.selectedBridge.BridgeAreaName));
+                p11.Append("-").AppendPageNumber(PageNumberFormat.normal);
+                p11.Append("-");
+                p11.StyleName = StyleReportFooter;
+                p11.InsertHorizontalLine(HorizontalBorderPosition.top, "single", 6, 1, "auto");
+
+                var oddHeader = document.Headers.Odd;
+                var p13 = oddHeader.InsertParagraph();
+                p13.Append(string.Format("{0}船撞安全背景评估报告                             {1}年{2}月{3}日",SessionInfo.selectedBridge.BridgeAreaName, DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day));
+                p13.StyleName = StyleReportFooter;
+                p13.InsertHorizontalLine(HorizontalBorderPosition.bottom, "single", 6, 1, "auto");
+
+                document.InsertParagraph("目录").StyleName = StyleBridgeName;
+                document.InsertTableOfContents("", TableOfContentsSwitches.O | TableOfContentsSwitches.U | TableOfContentsSwitches.Z | TableOfContentsSwitches.H, StyleBody);
+
+                document.InsertSection();
+
+                for (int i = 0; i < seqInfos.Count; i++)
+                {
+                    if (seqInfos[i].ElementTypeID == MomemtRptElementInfo.ElementType.Paragraph || seqInfos[i].ElementTypeID == MomemtRptElementInfo.ElementType.Section || seqInfos[i].ElementTypeID == MomemtRptElementInfo.ElementType.stanzas)
+                    {
+                        AddParagraph4Momemt(seqInfos[i], document);
+                    }
+                    else if (seqInfos[i].ElementTypeID == MomemtRptElementInfo.ElementType.Table)
+                    {
+                        AddTable4Momemt(seqInfos[i], selectedMomemt, document);
+                    }
+                    else if (seqInfos[i].ElementTypeID == MomemtRptElementInfo.ElementType.Picture)
+                    {
+                        AddPicture4Momemt(seqInfos[i], document);
+                    }
+                }
+
+                // Save this document to disk.
+                document.Save();
+                UIUtil.ShowInfo("导出评估报告成功", "导出");
+            }
+        }
+
+        public static void AddParagraph4Momemt(MomemtRptElementInfo seqInfo, DocX document)
+        {
+            if (seqInfo.IsBrief == true)
+            {
+                string templateCommonPath = Path.Combine(AppFolder, "BridgeDescription.docx");
+                using (DocX document1 = DocX.Load(templateCommonPath))
+                {
+                    document.InsertDocument(document1);
+                }
+            }
+            else
+            {
+                if (seqInfo.Title != "")
+                {
+                    // Insert a Paragraph into this document.
+                    var p = document.InsertParagraph();
+
+                    // Append some text and add formatting.
+                    p.Append(seqInfo.Title);
+                    if (seqInfo.ElementTypeID == MomemtRptElementInfo.ElementType.Paragraph)
+                        p.StyleName = "Heading1";
+                    else if (seqInfo.ElementTypeID == MomemtRptElementInfo.ElementType.Section)
+                        p.StyleName = "Heading2";
+                    else if (seqInfo.ElementTypeID == MomemtRptElementInfo.ElementType.stanzas)
+                        p.StyleName = "Heading3";
+                }
+                // Insert another Paragraph into this document.
+                if (seqInfo.Content != "" && seqInfo.Content != null)
+                {
+                    var p2 = document.InsertParagraph();
+
+                    // Append some text and add formatting.
+                    p2.Append(seqInfo.Content);
+                    p2.StyleName = StyleBody;
+                }
+            }
+        }
+
+        public static void AddTable4Momemt(MomemtRptElementInfo seqInfo, MomemtInfo selectedMomemt, DocX document)
+        {
+            if (seqInfo.ReportTypeID == 0) return;
+
+            Table table1 = null;
+            int TypeNum = 3;
+            List<CollisionProbabilityInfo> CollisionInfo = new List<CollisionProbabilityInfo>();
+            List<CollapseProbabilityInfo> CollapseInfo = new List<CollapseProbabilityInfo>();
+
+            if (seqInfo.ReportTypeID == MomemtRptElementInfo.ReportType.Collision)
+            {
+                CollisionInfo = momemtDao.GetCollisionProbabilitys(selectedMomemt.ID, SessionInfo.selectedBridge.BridgeAreaID);
+            }
+            else
+            {
+                TypeNum = 4;
+                CollapseInfo = momemtDao.GetCollapseProbabilitys(selectedMomemt.ID, SessionInfo.selectedBridge.BridgeAreaID);
+            }
+
+            List<int> capNums = bridgeDao.GetCapNum(SessionInfo.selectedBridge.BridgeAreaID);
+
+            table1 = document.AddTable(TypeNum + 1, capNums.Count + 1);
+            var t = table1.Rows[0].Cells[0].Paragraphs[0];
+            t.Alignment = Alignment.center;
+            t.Append("桥墩编号");
+            t.Bold();
+            foreach (int capNum in capNums)
+            {
+                var p = table1.Rows[0].Cells[capNum].Paragraphs[0];
+                p.Alignment = Alignment.center;
+                p.Append("#" + capNum);
+                p.Bold();
+            }
+
+            if (seqInfo.ReportTypeID == MomemtRptElementInfo.ReportType.Collision)
+            {
+                for (int i = 0; i < TypeNum; i++)
+                {
+                    int index = i + 1;
+                    table1.Rows[index].Cells[0].Paragraphs.First().InsertText(CollisionProbabilityInfo.Types.GetDesc(i + 1));
+                    for (int j = 0; j < capNums.Count; j++)
+                    {
+                        table1.Rows[index].Cells[j + 1].Paragraphs.First().InsertText((from CollisionProbabilityInfo info in CollisionInfo where info.Type == i + 1 && info.CapNumID == capNums[j] select info.Probability).FirstOrDefault().ToString());
+                    }
+                }
+            }
+            else
+            {
+                for (int i = 0; i < TypeNum; i++)
+                {
+                    int index = i + 1;
+                    table1.Rows[index].Cells[0].Paragraphs.First().InsertText(CollapseProbabilityInfo.Types.GetDesc(i));
+                    for (int j = 0; j < capNums.Count; j++)
+                    {
+                        table1.Rows[index].Cells[j + 1].Paragraphs.First().InsertText((from CollapseProbabilityInfo info in CollapseInfo where info.Type == i && info.CapNumID == capNums[j] select info.Probability).FirstOrDefault().ToString());
+                    }
+                }
+            }
+
+            document.InsertTable(table1);
+
+            if (seqInfo.Title != "")
+                // Add a title
+                document.InsertParagraph(seqInfo.Title).StyleName = StyleImgDes;
+        }
+
+        public static void AddPicture4Momemt(MomemtRptElementInfo seqInfo, DocX document)
+        {
+            if (seqInfo.Content != "" && seqInfo.Content != null)
+            {
+                var image = document.AddImage(seqInfo.Content);
+                var picture = image.CreatePicture();
+                var p = document.InsertParagraph();
+                p.AppendPicture(picture);
+                p.SpacingAfter(10);
+                p.Alignment = Alignment.both;
+
+                if (seqInfo.Title != "")
+                {
+                    document.InsertParagraph(seqInfo.Title).StyleName = StyleImgDes;
+                }
+            }
+        }
+
+    }
+}
+
+
+--------------------------------------------------------------------------------END----------------------------------------------------------------------------------------
+
+
+----------------------------------------------------------------------UIUtil.cs----------------------------------------------------------------------------------------
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Windows.Forms;
+using System.Drawing;
+using System.Data;
+using System.Collections;
+using System.Diagnostics;
+using System.IO;
+using BCWS.BusinessObjects.Util;
+
+namespace BCWSDesktop.Util
+{
+    public static class UIUtil
+    {
+        #region "MessageBox"
+        public static void ShowError(string message, string caption)
+        {
+            MessageBox.Show(message, caption, MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+
+        public static void ShowWarning(string message, string caption)
+        {
+            MessageBox.Show(message, caption, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+        }
+
+        public static void ShowInfo(string message, string caption)
+        {
+            MessageBox.Show(message, caption, MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
+        public static DialogResult ShowConfirm(string message, string caption, MessageBoxButtons messageBoxButtons = MessageBoxButtons.OKCancel, MessageBoxDefaultButton messageBoxDefaultButton = MessageBoxDefaultButton.Button1)
+        {
+            return MessageBox.Show(message, caption, messageBoxButtons, MessageBoxIcon.Question, messageBoxDefaultButton);
+        }
+        #endregion
+
+        #region "Control Validation"
+        public static Boolean CheckTextBoxEmpty(TextBox txtBox, String fieldName)
+        {
+            txtBox.Text = txtBox.Text.Trim();
+
+            if (txtBox.Text == String.Empty)
+            {
+                MessageBox.Show(String.Format("请输入'{0}'.", fieldName), "输入", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                txtBox.Focus();
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
+
+        public static Boolean CheckComboBoxSelected(ComboBox comboBox, String fieldName)
+        {
+            if (comboBox.SelectedIndex == -1)
+            {
+                MessageBox.Show(String.Format("请选择'{0}'.", fieldName), "输入", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                comboBox.Focus();
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
+
+        public static Boolean CheckDateTimePickerSelected(DateTimePicker dateTimePicker, String fieldName)
+        {
+            if (SQLUtil.TrimNull(dateTimePicker.Text) == string.Empty)
+            {
+                MessageBox.Show(String.Format("请选择'{0}'.", fieldName), "输入", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                dateTimePicker.Focus();
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
+
+        public static Boolean CheckNumericField(TextBox txtBox, string fieldName, int precision, bool notZero)
+        {
+            if (CheckNumericField(txtBox.Text, fieldName, precision, notZero) == false)
+            {
+                txtBox.Focus();
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
+
+        public static Boolean CheckNumericField(string fieldValue, string fieldName, int precision, bool notZero)
+        {
+            double d;
+            if (double.TryParse(fieldValue, out d) == false)
+            {
+                ShowWarning(string.Format("{0}必须是数字 ", fieldName), "警告");
+                return false;
+            }
+
+            if (precision > 0)
+            {
+                if (fieldValue.IndexOf(".") > -1)
+                {
+                    if (fieldValue.Substring(fieldValue.IndexOf(".") + 1).Length > precision)
+                    {
+                        ShowWarning(string.Format("{0} can have {1} precision.", fieldName, precision), "Warning");
+                        return false;
+                    }
+                }
+            }
+
+            if (notZero == true)
+            {
+                if (Convert.ToDecimal(fieldValue) == 0)
+                {
+                    ShowWarning(string.Format("{0} should be greater than zero.", fieldName), "Warning");
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        public static Boolean CheckDateRange(DateTimePicker dtpStart, DateTimePicker dtpEnd, bool withCheckBox = false, string dateLabel1 = "", string dateLabel2 = "")
+        {
+            if (withCheckBox == true)
+            {
+                if (dtpStart.Checked == false || dtpEnd.Checked == false) return true;
+            }
+            if (dateLabel1 == string.Empty) dateLabel1 = "Date Start";
+            if (dateLabel2 == string.Empty) dateLabel2 = "Date End";
+
+            if (dtpStart.Value.CompareTo(dtpEnd.Value) > 0)
+            {
+                ShowWarning(string.Format("{0} 必须早于 {1}.", dateLabel1, dateLabel2), "Warning");
+                dtpEnd.Focus();
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
+
+        public static Boolean CheckPassword(TextBox txtNewPassword, TextBox txtConfirmPassword)
+        {
+            if (txtNewPassword.Text.Length < 4)
+            {
+                UIUtil.ShowWarning("请输入至少4位密码.", "密码错误");
+                txtNewPassword.Text = "";
+                txtNewPassword.Focus();
+                txtConfirmPassword.Text = "";
+                return false;
+            }
+
+            if (!txtNewPassword.Text.Equals(txtConfirmPassword.Text))
+            {
+                UIUtil.ShowWarning("确认密码与密码不同!", "密码错误");
+                txtNewPassword.Text = "";
+                txtNewPassword.Focus();
+                txtConfirmPassword.Text = "";
+                return false;
+            }
+
+            return true;
+        }
+
+        public static Boolean CheckEmailTextBox(TextBox theBox)
+        {
+            string email = theBox.Text;
+            if (!System.Text.RegularExpressions.Regex.IsMatch(email, @"^[\w\-\.]+[@@]{1}[\w\-\.]+(\.\w+)+$"))
+            {
+                ShowWarning("邮箱格式错误.", "输入");
+                theBox.Focus();
+                return false;
+            }
+
+            return true;
+        }
+
+        public static Boolean CheckCheckedListBoxSelect(CheckedListBox checkedListBox, string fieldName)
+        {
+            if (checkedListBox.CheckedItems.Count == 0)
+            {
+                MessageBox.Show(String.Format("Please select at least one {0}.", fieldName), "Input", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                checkedListBox.Focus();
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
+
+        public static Boolean IsInteger(char key)
+        {
+            if (((int)(key) >= 48 && (int)(key) <= 57) || (int)(key) == 8)
+                return true;
+            else
+                return false;
+        }
+
+        public static Boolean IsDouble(char key)
+        {
+            if (((int)(key) >= 48 && (int)(key) <= 57) || (int)(key) == 8 || (int)(key) == 45 || (int)(key) == 46)
+                return true;
+            else
+                return false;
+        }
+
+        public static Boolean IsChar(char key)
+        {
+            if (((int)(key) >= 65 && (int)(key) <= 90) || (int)(key) == 8)
+                return true;
+            else if ((int)(key) >= 97 && (int)(key) <= 122)
+                return true;
+            else
+                return false;
+        }
+
+        public static Boolean IsNumeric(object obj)
+        {
+            int iValue;
+            return int.TryParse(obj.ToString(), out iValue);
+        }
+
+        public static Boolean IsFloat(object obj)
+        {
+            double dValue;
+            return double.TryParse(obj.ToString(), out dValue);
+        }
+
+        #endregion
+
+        #region "ComboBox"
+        public static void SetGridRowColor(DataGridView dgvLines)
+        {
+            for (int i = 0; i < dgvLines.Rows.Count; i++)
+            {
+                if (i % 2 == 0)
+                {
+                    dgvLines.Rows[i].DefaultCellStyle.BackColor = Color.White;
+                }
+                else
+                {
+                    dgvLines.Rows[i].DefaultCellStyle.BackColor = Color.WhiteSmoke;
+                }
+                dgvLines.Rows[i].HeaderCell.ToolTipText = (i + 1).ToString();
+            }
+        }
+
+        public static void SetGridComboBoxDataSource(DataGridViewComboBoxColumn cb, DataTable dt, string valueMember, string displayMember = "", Boolean insertEmpty = false, string emptyValue = "", string emptyDisplay = "")
+        {
+            if (insertEmpty == true)
+            {
+                DataRow dr = dt.NewRow();
+                dr[valueMember] = emptyValue;
+                if (displayMember != "")
+                    dr[displayMember] = emptyDisplay;
+                dt.Rows.InsertAt(dr, 0);
+            }
+
+            cb.DataSource = dt;
+            cb.ValueMember = valueMember;
+            if (displayMember != "")
+                cb.DisplayMember = displayMember;
+        }
+
+        public static void SetGridComboBoxDataSource(DataGridViewComboBoxColumn cb, List<string> items, Boolean insertEmpty = false)
+        {
+            if (insertEmpty == true)
+            {
+                items.Insert(0, string.Empty);
+            }
+
+            cb.Items.Clear();
+            cb.Items.AddRange(items.ToArray());
+        }
+
+        public static void SetComboBoxDataSource(ComboBox cb, DataTable dt, string valueMember, string displayMember = "", Boolean insertEmpty = false, string emptyValue = "", string emptyDisplay = "")
+        {
+            if (insertEmpty == true)
+            {
+                DataRow dr = dt.NewRow();
+                dr[valueMember] = emptyValue;
+                if (displayMember != "")
+                    dr[displayMember] = emptyDisplay;
+                dt.Rows.InsertAt(dr, 0);
+            }
+
+            cb.DataSource = dt;
+            cb.ValueMember = valueMember;
+            if (displayMember != "")
+                cb.DisplayMember = displayMember;
+
+            cb.SelectedIndex = -1;
+        }
+
+        public static void SetComboBoxDataSource(ComboBox cb, IList datasource, string valueMember = "", string displayMember = "")
+        {
+            cb.DataSource = datasource;
+            if (valueMember != "")
+                cb.ValueMember = valueMember;
+            if (displayMember != "")
+                cb.DisplayMember = displayMember;
+            cb.SelectedIndex = -1;
+        }
+
+        public static void SetComboBoxDataSource(ComboBox cb, List<string> items, Boolean insertEmpty = false)
+        {
+            if (insertEmpty == true)
+            {
+                items.Insert(0, string.Empty);
+            }
+
+            cb.Items.Clear();
+            cb.Items.AddRange(items.ToArray());
+            cb.SelectedIndex = -1;
+        }
+        #endregion
+
+        #region "Disable/enable and reset form controls"
+
+        public static void DisableAllControls(Control parentControl)
+        {
+            foreach (Control control in parentControl.Controls)
+            {
+                if (control.Controls.Count > 0)
+                {
+                    DisableAllControls(control);
+                }
+                else
+                {
+                    if (control is CheckBox || control is ComboBox || control is DateTimePicker ||
+                            control is MaskedTextBox || control is RadioButton)
+                        control.Enabled = false;
+                    else if (control is TextBox)
+                        ((TextBox)control).ReadOnly = true;
+                    else if (control is CheckedListBox)
+                        ((CheckedListBox)control).CheckOnClick = false;
+                    else if (control is Button)
+                    {
+                        if (control.Text.Contains("View") == true || control.Name.Contains("View") == true
+                                || control.Name == "btnNewNote" || control.Name == "btnViewNote"
+                                || control.Name == "btnNewAttachment" || control.Name == "btnEditAttachment" || control.Name == "btnOpenAttachment" || control.Name == "btnRemoveAttachment")
+                        { }
+                        else if (control.Text == "Cancel" || control.Text == "Close")
+                            control.Text = "Close";
+                        else
+                            control.Enabled = false;
+                    }
+                }
+            }
+        }
+
+        public static void EnableAllControls(Control parentControl)
+        {
+            foreach (Control control in parentControl.Controls)
+            {
+                if (control.Controls.Count > 0)
+                {
+                    EnableAllControls(control);
+                }
+                else
+                {
+                    if (control is Button || control is CheckBox || control is ComboBox || control is DateTimePicker ||
+                            control is MaskedTextBox || control is RadioButton)
+                        control.Enabled = true;
+                    else if (control is CheckedListBox)
+                        ((CheckedListBox)control).CheckOnClick = true;
+                    else if (control is TextBox)
+                        ((TextBox)control).ReadOnly = false;
+                }
+            }
+        }
+
+        public static void TrimTextBoxes(Control parentControl)
+        {
+            foreach (Control control in parentControl.Controls)
+            {
+                if (control.Controls.Count > 0)
+                {
+                    TrimTextBoxes(control);
+                }
+                else
+                {
+                    if (control is TextBox)
+                        ((TextBox)control).Text = ((TextBox)control).Text.Trim();
+                }
+            }
+        }
+        #endregion
+
+        public static void FormResize(Form currentForm, Control childPanel)
+        {
+            currentForm.AutoScrollPosition = new Point(0, 0);
+
+            int parentFormWidth = currentForm.Width;
+            childPanel.Location = new System.Drawing.Point(parentFormWidth > childPanel.Width ? (parentFormWidth - childPanel.Width) / 2 : -10, childPanel.Top);
+        }
+
+        public static void OpenFile(string filePath)
+        {
+            ProcessStartInfo psInfo = new ProcessStartInfo();
+
+            psInfo.FileName = filePath;
+            psInfo.WindowStyle = ProcessWindowStyle.Maximized;
+            Process.Start(psInfo);
+        }
+
+        public static void CheckDirectory(string folderPath)
+        {
+            if (Directory.Exists(folderPath) == false)
+                Directory.CreateDirectory(folderPath);
+        }
+
+        public static DateTime GetDateWithTime(DateTime selectedDate)
+        {
+            if (selectedDate == DateTime.Today)
+            {
+                return DateTime.Now.AddMinutes(-1);
+            }
+            else if (selectedDate < DateTime.Today)
+            {
+                return selectedDate.AddDays(1).AddMinutes(-1);
+            }
+            else
+            {
+                return selectedDate;
+            }
+        }
+
+        public static TreeNode GetRootNode(TreeNode childNode)
+        {
+            TreeNode parentNode = childNode;
+
+            while (true)
+            {
+                if (parentNode.Parent == null)
+                    break;
+                else
+                    parentNode = parentNode.Parent;
+            }
+
+            return parentNode;
+        }
+
+        public static void NumOnly(object sender, KeyPressEventArgs e, Button btn)
+        {
+            if (e.KeyChar == Convert.ToChar(Keys.Enter))
+            {
+                btn.PerformClick();
+            }
+            if (((int)e.KeyChar >= 48 && (int)e.KeyChar <= 57) || (int)e.KeyChar == 8)
+                e.Handled = false;
+            else
+                e.Handled = true;
+        }
+
+        public static void OpenChildForm(Type formType, Form mdiParent)
+        {
+            if (ShowChildrenForm(formType, mdiParent) == false)
+            {
+                Form childForm = (Form)Activator.CreateInstance(formType);
+
+                childForm.MdiParent = mdiParent;
+                childForm.WindowState = FormWindowState.Minimized;
+                childForm.Show();
+                childForm.WindowState = FormWindowState.Normal;
+            }
+        }
+
+        private static bool ShowChildrenForm(Type formType, Form mdiParent)
+        {
+            //依次检测当前窗体的子窗体
+            for (int i = 0; i < mdiParent.MdiChildren.Length; i++)
+            {
+                //判断当前子窗体的Text属性值是否与传入的字符串值相同
+                if (mdiParent.MdiChildren[i].GetType() == formType)
+                {
+                    //如果值相同则表示此子窗体为想要调用的子窗体，激活此子窗体并返回true值
+                    mdiParent.MdiChildren[i].Activate();
+                    return true;
+                }
+            }
+            //如果没有相同的值则表示要调用的子窗体还没有被打开，返回false值
+            return false;
+        }
+    }
+}
+
+--------------------------------------------------------------------------------END----------------------------------------------------------------------------------------
+
+
+----------------------------------------------------------------------login_page.dart----------------------------------------------------------------------------------------
+import 'package:flutter/material.dart';
+import 'package:atoi/home_page.dart';
+import 'package:atoi/engineer_home_page.dart';
+import 'package:atoi/user_home_page.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:atoi/utils/http_request.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:connectivity/connectivity.dart';
+import 'dart:async';
+import 'dart:convert';
+import 'package:flutter_jpush/flutter_jpush.dart';
+
+class LoginPage extends StatefulWidget {
+  static String tag = 'login-page';
+  @override
+  _LoginPageState createState() => new _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
+
+  TextEditingController phoneController = new TextEditingController();
+  TextEditingController regPhoneController = new TextEditingController();
+  TextEditingController passwordController = new TextEditingController();
+  TextEditingController verificationController = new TextEditingController();
+  TextEditingController nameController = new TextEditingController();
+  TextEditingController confirmPass = new TextEditingController();
+  bool _loading = false;
+  Future<SharedPreferences> prefs = SharedPreferences.getInstance();
+  var _stage = 'login';
+  Timer _timer;
+  int _countdownTime = 0;
+  bool _validPhone = false;
+  String _regId = '';
+  
+  Future<Null> isLogin() async {
+    var _prefs = await prefs;
+    var _isLogin = await _prefs.getBool('isLogin');
+    if (_isLogin != null && _isLogin) {
+      var _role = await _prefs.getInt('role');
+      switch (_role) {
+        case 1:
+          Navigator.of(context).pushNamed(HomePage.tag);
+          break;
+        case 2:
+          Navigator.of(context).pushNamed(EngineerHomePage.tag);
+          break;
+        case 4:
+          Navigator.of(context).pushNamed(UserHomePage.tag);
+          break;
+        default:
+          return;
+      }
+    }
+  }
+
+  void _startupJpush() async {
+    print("初始化jpush");
+    await FlutterJPush.startup();
+    print("初始化jpush成功");
+
+    FlutterJPush.getRegistrationID().then((rid) {
+      print("get regid： ${rid}");
+      setState(() {
+        _regId = rid;
+      });
+    });
+
+    FlutterJPush.addnetworkDidLoginListener((String registrationId) {
+      setState(() {
+        /// 用于推送
+        print("收到设备号:$registrationId");
+        //this.registrationId = registrationId;
+      });
+    });
+
+    FlutterJPush.addReceiveNotificationListener((JPushNotification notification) {
+      print("收到推送提醒: $notification");
+      setState(() {
+        /// 收到推送
+        //notificationList.add(notification);
+      });
+    });
+
+
+    FlutterJPush.addReceiveCustomMsgListener((JPushMessage msg) {
+      setState(() {
+        print("收到推送消息提醒: $msg");
+        /// 打开了推送提醒
+        //notificationList.add(msg);
+      });
+    });
+  }
+
+  Future<Null> isConnected() async {
+    var connectivityResult = await (Connectivity().checkConnectivity());
+    if (connectivityResult == ConnectivityResult.none) {
+      showDialog(context: context,
+        builder: (context) => CupertinoAlertDialog(
+          title: new Text('请连接网络',
+            style: new TextStyle(
+                fontSize: 16.0,
+                fontWeight: FontWeight.w400,
+                color: Colors.black54
+            ),
+          ),
+        )
+      );
+    }
+  }
+
+  void startCountdownTimer() {
+    const oneSec = const Duration(seconds: 1);
+    var callback = (timer) =>
+      setState(() {
+        if (_countdownTime < 1) {
+          _timer.cancel();
+        } else {
+          _countdownTime = _countdownTime - 1;
+        }
+      });
+    _timer = Timer.periodic(oneSec, callback);
+  }
+
+  Future _doLogin() async {
+    setState(() {
+      _loading = !_loading;
+    });
+    var _prefs = await prefs;
+    var _data = await HttpRequest.request(
+      '/User/Login',
+      method: HttpRequest.POST,
+      data: {
+        'LoginID': phoneController.text,
+        'LoginPwd': passwordController.text,
+        'RegistrationID': _regId,
+        'OSName': 'iOS'
+      }
+    );
+    setState(() {
+      _loading = !_loading;
+    });
+    if (_data['ResultCode'] == '00') {
+      print(_data);
+      var _prefs = await prefs;
+      await _prefs.setString('userInfo', jsonEncode(_data['Data']));
+      await _prefs.setInt('userID', _data['Data']['ID']);
+      await _prefs.setInt('role', _data['Data']['Role']['ID']);
+      await _prefs.setBool('isLogin', true);
+      await _prefs.setString('roleName', _data['Data']['Role']['Name']);
+      await _prefs.setString('userName', _data['Data']['Name']);
+      await _prefs.setString('mobile', _data['Data']['Mobile']);
+      switch (_data['Data']['Role']['ID']) {
+        case 1:
+          Navigator.of(context).pushNamed(HomePage.tag);
+          break;
+        case 2:
+          Navigator.of(context).pushNamed(EngineerHomePage.tag);
+          break;
+        case 4:
+          Navigator.of(context).pushNamed(UserHomePage.tag);
+          break;
+      }
+    } else {
+      showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+        title: new Text(
+            _data['ResultMessage'],
+          style: new TextStyle(
+            fontSize: 16.0,
+            fontWeight: FontWeight.w400,
+            color: Colors.black54
+          ),
+        ),
+      ));
+    }
+  }
+
+  Future<Null> _userReg() async {
+    if (passwordController.text.isEmpty) {
+      showDialog(context: context,
+          builder: (context) => CupertinoAlertDialog(
+            title: new Text('密码不可为空',
+              style: new TextStyle(
+                  fontSize: 16.0,
+                  fontWeight: FontWeight.w400,
+                  color: Colors.black54
+              ),
+            ),
+          )
+      );
+      return;
+    }
+    if (regPhoneController.text.isEmpty) {
+      showDialog(context: context,
+          builder: (context) => CupertinoAlertDialog(
+            title: new Text('手机号不可为空',
+              style: new TextStyle(
+                  fontSize: 16.0,
+                  fontWeight: FontWeight.w400,
+                  color: Colors.black54
+              ),
+            ),
+          )
+      );
+      return;
+    }
+    if (nameController.text.isEmpty) {
+      showDialog(context: context,
+          builder: (context) => CupertinoAlertDialog(
+            title: new Text('姓名不可为空',
+              style: new TextStyle(
+                  fontSize: 16.0,
+                  fontWeight: FontWeight.w400,
+                  color: Colors.black54
+              ),
+            ),
+          )
+      );
+      return;
+    }
+    if (verificationController.text.isEmpty) {
+      showDialog(context: context,
+          builder: (context) => CupertinoAlertDialog(
+            title: new Text('验证码不可为空',
+              style: new TextStyle(
+                  fontSize: 16.0,
+                  fontWeight: FontWeight.w400,
+                  color: Colors.black54
+              ),
+            ),
+          )
+      );
+      return;
+    }
+    var resp = await HttpRequest.request(
+      '/User/Register',
+      method: HttpRequest.POST,
+      data: {
+        'info': {
+          'LoginID': regPhoneController.text,
+          'Name': nameController.text,
+          'LoginPwd': passwordController.text,
+          'Department': {
+            'ID': 1
+          }
+        },
+        'VerificationCode': verificationController.text.toString()
+      }
+    );
+    print(resp);
+    if (resp['ResultCode'] == '00') {
+      showDialog(context: context,
+          builder: (context) => CupertinoAlertDialog(
+            title: new Text('注册成功',
+              style: new TextStyle(
+                  fontSize: 16.0,
+                  fontWeight: FontWeight.w400,
+                  color: Colors.black54
+              ),
+            ),
+          )
+      );
+      setState(() {
+        _stage = 'login';
+        phoneController.text = regPhoneController.text;
+        passwordController.text = '';
+      });
+    } else {
+      showDialog(context: context,
+          builder: (context) => CupertinoAlertDialog(
+            title: new Text(resp['ResultMessage'],
+              style: new TextStyle(
+                  fontSize: 16.0,
+                  fontWeight: FontWeight.w400,
+                  color: Colors.black54
+              ),
+            ),
+          )
+      );
+    }
+  }
+
+  void initState() {
+    isLogin();
+    isConnected();
+    _startupJpush();
+    super.initState();
+  }
+
+  @override
+  void deactivate() {
+    print('移除时：deactivate');
+    super.deactivate();
+  }
+
+  @override
+  void dispose() {
+    print('移除时：dispose');
+    super.dispose();
+  }
+
+  Future<Null> getVerificationCode() async {
+    if (regPhoneController.text.isEmpty || regPhoneController.text.length!=11) {
+      showDialog(context: context,
+        builder: (context) => CupertinoAlertDialog(
+          title: new Text('请输入正确的手机号',
+            style: new TextStyle(
+                fontSize: 16.0,
+                fontWeight: FontWeight.w400,
+                color: Colors.black54
+            ),
+          ),
+        )
+      );
+      return;
+    }
+    var resp = await HttpRequest.request(
+      '/User/GetVerificationCode',
+      method: HttpRequest.GET,
+      params: {
+        'mobilePhone': regPhoneController.text
+      }
+    );
+    print(resp);
+    if (resp['ResultCode'] == '00') {
+      showDialog(context: context,
+          builder: (context) => CupertinoAlertDialog(
+        title: new Text('验证码已发送',
+          style: new TextStyle(
+              fontSize: 16.0,
+              fontWeight: FontWeight.w400,
+              color: Colors.black54
+          ),
+        ),
+      )
+    );
+      setState(() {
+        _countdownTime = 60;
+      });
+      startCountdownTimer();
+    } else {
+      showDialog(context: context,
+          builder: (context) => CupertinoAlertDialog(
+            title: new Text(resp['ResultMessage'],
+              style: new TextStyle(
+                  fontSize: 16.0,
+                  fontWeight: FontWeight.w400,
+                  color: Colors.black54
+              ),
+            ),
+          )
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+
+    final logo = Hero(
+      tag: 'hero',
+      child: CircleAvatar(
+        backgroundColor: Colors.transparent,
+        radius: 48.0,
+        child: Image.asset('assets/atoi.png'),
+      ),
+    );
+
+    var phone = TextFormField(
+      keyboardType: TextInputType.text,
+      controller: phoneController,
+      autofocus: false,
+      decoration: InputDecoration(
+        hintText: _stage=='login'?'用户名/手机号':'手机号',
+        contentPadding: EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(32.0)),
+      ),
+      validator: (value) {
+        return value.length>20?'用户名过长':null;
+      },
+    );
+
+    var name = TextFormField(
+      keyboardType: TextInputType.text,
+      controller: nameController,
+      autofocus: false,
+      decoration: InputDecoration(
+        hintText: '姓名',
+        contentPadding: EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(32.0)),
+      ),
+    );
+
+    var regPhone = TextFormField(
+      keyboardType: TextInputType.number,
+      controller: regPhoneController,
+      autofocus: false,
+      decoration: InputDecoration(
+        hintText: '手机号',
+        contentPadding: EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(32.0)),
+      ),
+    );
+
+    var verification = Row(
+      children: <Widget>[
+        new Container(
+          width: 175.0,
+          child: TextField(
+            keyboardType: TextInputType.number,
+            controller: verificationController,
+            autofocus: false,
+            decoration: InputDecoration(
+              hintText: '验证码',
+              contentPadding: EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(32.0)),
+            ),
+            onChanged: (value) {
+              if (value.length == 6) {
+                setState(() {
+                  _validPhone = true;
+                });
+              }
+            },
+          ),
+        ),
+        SizedBox(width: 8.0,),
+        new Container(
+          width: 125,
+          child: RaisedButton(
+            color: Colors.blue,
+            child: Text(
+              _countdownTime>0?'$_countdownTime后重新获取':'获取验证码',
+              style: new TextStyle(
+                  color: Colors.white
+              ),
+            ),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(24),
+            ),
+            disabledColor: Colors.blueAccent,
+            onPressed: () {
+              _countdownTime>0?null:getVerificationCode();
+            },
+          ),
+        ),
+      ],
+    );
+
+    var password = TextFormField(
+      autofocus: false,
+      controller: passwordController,
+      obscureText: true,
+      enabled: _stage=='login'?true:_validPhone,
+      decoration: InputDecoration(
+        hintText: '密码',
+        contentPadding: EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(32.0)),
+      ),
+    );
+
+    var confirmPassword = TextFormField(
+      autofocus: false,
+      controller: confirmPass,
+      obscureText: true,
+      enabled: _validPhone,
+      decoration: InputDecoration(
+        hintText: '确认密码',
+        contentPadding: EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(32.0)),
+      ),
+    );
+
+    var loginButton = Padding(
+      padding: EdgeInsets.symmetric(vertical: 16.0),
+      child: RaisedButton(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(24),
+        ),
+        onPressed: () {
+          _stage=='login'?_doLogin():_userReg();
+        },
+        padding: EdgeInsets.all(12),
+        color: new Color(0xff183dca),
+        child: Text(
+            _stage=='login'?'登录':'注册', style: TextStyle(color: Colors.white)),
+      ),
+    );
+
+    var forgotLabel = FlatButton(
+      child: Text(
+        '忘记密码?',
+        style: TextStyle(color: Colors.black54),
+      ),
+      onPressed: () {},
+    );
+
+    var userRegister = FlatButton(
+      child: Text(
+        _stage=='login'?'报修用户注册':'返回登录',
+        style: TextStyle(color: Colors.blue),
+      ),
+      onPressed: () {
+        setState(() {
+          _stage=='login'?_stage='reg':_stage='login';
+          phoneController.text = '';
+          regPhoneController.text = '';
+          passwordController.text = '';
+          verificationController.text = '';
+          nameController.text = '';
+        });
+      },
+    );
+
+    List<Widget> buildLogin() {
+      List<Widget> _list = [];
+      if (_stage == 'login') {
+        _list.addAll(
+            [
+              logo,
+              _loading?SpinKitRotatingPlain(color: Colors.blue):SizedBox(height: 50.0),
+              phone,
+              SizedBox(height: 8.0),
+              password,
+              SizedBox(height: 8.0),
+              loginButton,
+              userRegister,
+            ]
+        );
+      } else {
+        _list.addAll([
+          logo,
+          _loading?SpinKitRotatingPlain(color: Colors.blue):SizedBox(height: 50.0),
+          regPhone,
+          SizedBox(height: 8.0,),
+          verification,
+          SizedBox(height: 8.0,),
+          password,
+          SizedBox(height: 8.0,),
+          confirmPassword,
+          SizedBox(height: 8.0,),
+          name,
+          SizedBox(height: 8.0,),
+          loginButton,
+          userRegister,
+        ]);
+      }
+      return _list;
+    }
+
+    return new WillPopScope(
+        child: Scaffold(
+          backgroundColor: Colors.white,
+          body: Center(
+            child: ListView(
+              shrinkWrap: true,
+              padding: EdgeInsets.only(left: 24.0, right: 24.0),
+              children: buildLogin()
+            ),
+          ),
+        ),
+        onWillPop: () async {
+          return false;
+        }
+    );
+  }
+}
+
+--------------------------------------------------------------------------------END----------------------------------------------------------------------------------------
+
+
+----------------------------------------------------------------------main.dart----------------------------------------------------------------------------------------
+
+import 'package:flutter/material.dart';
+import 'package:atoi/home_page.dart';
+import 'package:atoi/login_page.dart';
+import 'package:atoi/pages/manager/manager_assign_page.dart';
+import 'package:atoi/pages/manager/manager_audit_voucher_page.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:atoi/pages/manager/manager_audit_report_page.dart';
+import 'package:atoi/engineer_home_page.dart';
+import 'package:atoi/pages/engineer/engineer_start_page.dart';
+import 'package:atoi/pages/engineer/engineer_voucher_page.dart';
+import 'package:atoi/pages/engineer/engineer_report_page.dart';
+import 'package:atoi/pages/manager/manager_complete_page.dart';
+import 'package:atoi/user_home_page.dart';
+import 'package:scoped_model/scoped_model.dart';
+import 'package:atoi/models/models.dart';
+import 'package:atoi/pages/user/user_scan_page.dart';
+import 'package:atoi/pages/user/user_repair_page.dart';
+import 'package:atoi/pages/engineer/signature_page.dart';
+import 'package:atoi/pages/request/repair_request.dart';
+import 'package:atoi/pages/request/bad_request.dart';
+import 'package:atoi/pages/request/correction_request.dart';
+import 'package:atoi/pages/request/equipment_request.dart';
+import 'package:atoi/pages/request/maintain_request.dart';
+import 'package:atoi/pages/request/mandatory_request.dart';
+import 'package:atoi/pages/request/other_request.dart';
+import 'package:atoi/pages/request/patrol_request.dart';
+import 'package:atoi/pages/lifecycle/equipment_check.dart';
+import 'package:atoi/pages/lifecycle/equipment_contract.dart';
+import 'package:atoi/pages/lifecycle/equipment_install.dart';
+import 'package:atoi/pages/lifecycle/equipment_lending.dart';
+import 'package:atoi/pages/lifecycle/equipment_scrap.dart';
+import 'package:atoi/pages/lifecycle/equipment_transfer.dart';
+import 'package:flutter/services.dart';
+import 'dart:async';
+import 'package:firebase_messaging/firebase_messaging.dart';
+//import 'package:jpush_flutter/jpush_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_jpush/flutter_jpush.dart';
+
+
+class AtoiApp extends StatefulWidget{
+  _AtoiAppState createState() => _AtoiAppState();
+}
+
+class _AtoiAppState extends State<AtoiApp> {
+  final routes = <String, WidgetBuilder>{
+    LoginPage.tag: (context) => LoginPage(),
+    HomePage.tag: (context) => HomePage(),
+    EngineerHomePage.tag: (context) => EngineerHomePage(),
+    ManagerAssignPage.tag: (context) => ManagerAssignPage(),
+    ManagerAuditVoucherPage.tag: (context) => ManagerAuditVoucherPage(),
+    ManagerAuditReportPage.tag: (context) => ManagerAuditReportPage(),
+    EngineerStartPage.tag: (context) => EngineerStartPage(),
+    EngineerVoucherPage.tag: (context) => EngineerVoucherPage(),
+    EngineerReportPage.tag: (context) => EngineerReportPage(),
+    ManagerCompletePage.tag: (context) => ManagerCompletePage(),
+    UserHomePage.tag: (context) => UserHomePage(),
+    UserScanPage.tag: (context) => UserScanPage(),
+    UserRepairPage.tag: (context) => UserRepairPage(),
+    SignaturePage.tag: (context) => SignaturePage(),
+    RepairRequest.tag: (context) => RepairRequest(),
+    BadRequest.tag: (context) => BadRequest(),
+    CorrectionRequest.tag: (context) => CorrectionRequest(),
+    EquipmentRequest.tag: (context) => EquipmentRequest(),
+    MaintainRequest.tag: (context) => MaintainRequest(),
+    MandatoryRequest.tag: (context) => MandatoryRequest(),
+    OtherRequest.tag: (context) => OtherRequest(),
+    PatrolRequest.tag: (context) => PatrolRequest(),
+    EquipmentCheck.tag: (context) => EquipmentCheck(),
+    EquipmentContract.tag: (context) => EquipmentContract(),
+    EquipmentInstall.tag: (context) => EquipmentInstall(),
+    EquipmentLending.tag: (context) => EquipmentLending(),
+    EquipmentScrap.tag: (context) => EquipmentScrap(),
+    EquipmentTransfer.tag: (context) => EquipmentTransfer()
+  };
+
+  final MainModel mainModel = MainModel();
+  String _homeScreenText = "Waiting for token...";
+  String _messageText = "Waiting for message...";
+  String debugLable = '';
+
+  Future<SharedPreferences> prefs = SharedPreferences.getInstance();
+  final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
+  //final JPush jpush = new JPush();
+
+  void _startupJpush() async {
+    print("初始化jpush");
+    await FlutterJPush.startup();
+    print("初始化jpush成功");
+    var _prefs = await prefs;
+
+    FlutterJPush.getRegistrationID().then((rid) {
+      print("get regid： ${rid}");
+      _prefs.setString('regId', rid);
+    });
+
+    FlutterJPush.addnetworkDidLoginListener((String registrationId) {
+      setState(() {
+        /// 用于推送
+        print("收到设备号:$registrationId");
+        //this.registrationId = registrationId;
+      });
+    });
+
+    FlutterJPush.addReceiveNotificationListener((JPushNotification notification) {
+      print("收到推送提醒: $notification");
+      setState(() {
+        /// 收到推送
+        //notificationList.add(notification);
+      });
+    });
+
+
+    FlutterJPush.addReceiveCustomMsgListener((JPushMessage msg) {
+      setState(() {
+        print("收到推送消息提醒: $msg");
+        /// 打开了推送提醒
+        //notificationList.add(msg);
+      });
+    });
+
+  }
+
+//  Future<void> initPlatformState() async {
+//    String platformVersion;
+//    var prefs = await _prefs;
+//    // Platform messages may fail, so we use a try/catch PlatformException.
+//    jpush.setBadge(66).then((map) {
+//      print(map);
+//    });
+//    jpush.getRegistrationID().then((rid) {
+//      print(rid);
+//      prefs.setString('regId', rid);
+//      setState(() {
+//        debugLable = "flutter getRegistrationID: $rid";
+//      });
+//    });
+//    jpush.setup(
+//      appKey: "3f7f5523e972c577860e6181",
+//      production: false,
+//      debug: true,
+//    );
+//    jpush.applyPushAuthority(new NotificationSettingsIOS(
+//        sound: true,
+//        alert: true,
+//        badge: true));
+//    try {
+//      jpush.addEventHandler(
+//        onReceiveNotification: (Map<String, dynamic> message) async {
+//          print("flutter onReceiveNotification: $message");
+//          setState(() {
+//            debugLable = "flutter onReceiveNotification: $message";
+//          });
+//        },
+//        onOpenNotification: (Map<String, dynamic> message) async {
+//          print("flutter onOpenNotification: $message");
+//          setState(() {
+//            debugLable = "flutter onOpenNotification: $message";
+//          });
+//        },
+//        onReceiveMessage: (Map<String, dynamic> message) async {
+//          print("flutter onReceiveMessage: $message");
+//          setState(() {
+//            debugLable = "flutter onReceiveMessage: $message";
+//          });
+//        },
+//      );
+//    } on PlatformException {
+//      platformVersion = 'Failed to get platform version.';
+//    }
+//    // If the widget was removed from the tree while the asynchronous platform
+//    // message was in flight, we want to discard the reply rather than calling
+//    // setState to update our non-existent appearance.
+//    if (!mounted) return;
+//    setState(() {
+//      debugLable = platformVersion;
+//    });
+//  }
+
+  Future<Null> firebaseInit() async {
+    _firebaseMessaging.configure(
+      onMessage: (Map<String, dynamic> message) async {
+        setState(() {
+          _messageText = "Push Messaging message: $message";
+        });
+        print("onMessage: $message");
+      },
+      onLaunch: (Map<String, dynamic> message) async {
+        setState(() {
+          _messageText = "Push Messaging message: $message";
+        });
+        print("onLaunch: $message");
+      },
+      onResume: (Map<String, dynamic> message) async {
+        setState(() {
+          _messageText = "Push Messaging message: $message";
+        });
+        print("onResume: $message");
+      },
+    );
+    _firebaseMessaging.requestNotificationPermissions(
+        const IosNotificationSettings(sound: true, badge: true, alert: true));
+    _firebaseMessaging.onIosSettingsRegistered
+        .listen((IosNotificationSettings settings) {
+      print("Settings registered: $settings");
+    });
+    _firebaseMessaging.getToken().then((String token) {
+      assert(token != null);
+      setState(() {
+        _homeScreenText = "Push Messaging token: $token";
+      });
+      print(_homeScreenText);
+    });
+  }
+  @override
+  void initState() {
+    super.initState();
+    //initPlatformState();
+    //firebaseInit();
+    //_startupJpush();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown
+    ]);
+    return ScopedModel<MainModel>(
+      model: mainModel,
+      child: new MaterialApp(
+          title: 'ATOI医疗设备管理系统',
+          theme: new ThemeData(
+              primaryColor: new Color(0xff3b4674),
+              accentColor: new Color(0xff2c5c85),
+              buttonColor: new Color(0xff2E94B9)
+          ),
+          home: new LoginPage(),
+          routes: routes,
+          localizationsDelegates: [
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+          ],
+          supportedLocales: [
+            const Locale('zh', 'CH'),
+            const Locale('en', 'US'),
+          ]
+      )
+    );
+  }
+
+}
+
+void main() {
+  runApp(new AtoiApp());
+}
+
+--------------------------------------------------------------------------------END----------------------------------------------------------------------------------------
+
+----------------------------------------------------------------------manager_model.dart----------------------------------------------------------------------------------------
+
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:scoped_model/scoped_model.dart';
+import 'package:atoi/utils/http_request.dart';
+
+class ManagerModel extends Model {
+  String _badgeA = '0';
+  String _badgeB = '0';
+  String _badgeC = '0';
+  List<dynamic> _requests = [];
+  List<dynamic> _dispatches = [];
+  List<dynamic> _todos = [];
+  int _offset = 10;
+  int _offsetDispatch = 10;
+  int _offsetTodo = 10;
+
+  get badgeA => _badgeA;
+  get badgeB => _badgeB;
+  get badgeC => _badgeC;
+  get requests => _requests;
+  get dispatches => _dispatches;
+  get todos => _todos;
+
+
+  Future<Null> getCount() async {
+    var resp = await HttpRequest.request(
+      '/User/GetAdminCount',
+      method: HttpRequest.GET,
+    );
+    print(resp);
+    if (resp['ResultCode'] == '00') {
+      _badgeA = resp['Data']['newCount'].toString();
+      _badgeB = resp['Data']['dispatchCount'].toString();
+      _badgeC = resp['Data']['unfinishedCount'].toString();
+    }
+    notifyListeners();
+  }
+
+  Future<Null> getRequests() async {
+    Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
+    var prefs = await _prefs;
+    var userID = await prefs.getInt('userID');
+    var resp = await HttpRequest.request(
+      '/Request/GetRequests?userID=${userID}&statusID=1&statusID=5&statusID=6&statusID=7&typeID=0&PageSize=10&CurRowNum=0',
+      method: HttpRequest.GET,
+    );
+    print(resp);
+    if (resp['ResultCode'] == '00') {
+      _requests = resp['Data'];
+      _offset = 10;
+      //_badgeA = _requests.length.toString();
+    }
+    notifyListeners();
+  }
+
+  Future<Null> getMoreRequests() async {
+    Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
+    var prefs = await _prefs;
+    var userID = await prefs.getInt('userID');
+    var resp = await HttpRequest.request(
+      '/Request/GetRequests?userID=${userID}&statusID=1&statusID=5&statusID=6&statusID=7&typeID=0&PageSize=10&CurRowNum=${_offset}',
+      method: HttpRequest.GET,
+    );
+    print(resp);
+    if (resp['ResultCode'] == '00') {
+      _requests.addAll(resp['Data']);
+      _offset = _offset + 10;
+      //_badgeA = _requests.length.toString();
+    }
+    notifyListeners();
+  }
+
+  Future<Null> getDispatches() async {
+    Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
+    var prefs = await _prefs;
+    var userID = await prefs.getInt('userID');
+    var resp = await HttpRequest.request(
+      '/Dispatch/GetDispatchs',
+      method: HttpRequest.GET,
+      params: {
+        'userID': userID,
+        'statusIDs': 3,
+        'pageSize': 10,
+        'curRowNum': 0
+      }
+    );
+    print(resp);
+    if (resp['ResultCode'] == '00') {
+      _dispatches = resp['Data'];
+      _offsetDispatch = 10;
+    }
+    notifyListeners();
+  }
+
+  Future<Null> getMoreDispatches() async {
+    Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
+    var prefs = await _prefs;
+    var userID = await prefs.getInt('userID');
+    var resp = await HttpRequest.request(
+        '/Dispatch/GetDispatchs',
+        method: HttpRequest.GET,
+        params: {
+          'userID': userID,
+          'statusIDs': 3,
+          'pageSize': 10,
+          'curRowNum': _offsetDispatch
+        }
+    );
+    print(resp);
+    if (resp['ResultCode'] == '00') {
+      _dispatches.addAll(resp['Data']);
+      _offsetDispatch = _offsetDispatch + 10;
+    }
+    notifyListeners();
+  }
+
+  Future<Null> getTodos() async {
+    Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
+    var prefs = await _prefs;
+    var userID = await prefs.getInt('userID');
+    Map<String, dynamic> params = {
+      'userID': userID,
+      'statusID': 98,
+      'typeID': 0,
+      'pageSize': 10,
+      'curRowNum': 0
+    };
+    var resp = await HttpRequest.request(
+        '/Request/GetRequests',
+        method: HttpRequest.GET,
+        params: params
+    );
+    print(resp);
+    if (resp['ResultCode'] == '00') {
+      _todos = resp['Data'];
+      _offsetTodo = 10;
+    }
+    notifyListeners();
+  }
+
+  Future<Null> getMoreTodos() async {
+    Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
+    var prefs = await _prefs;
+    var userID = await prefs.getInt('userID');
+    Map<String, dynamic> params = {
+      'userID': userID,
+      'statusID': 98,
+      'typeID': 0,
+      'pageSize': 10,
+      'curRowNum': _offsetTodo
+    };
+    var resp = await HttpRequest.request(
+        '/Request/GetRequests',
+        method: HttpRequest.GET,
+        params: params
+    );
+    print(resp);
+    if (resp['ResultCode'] == '00') {
+      _todos.addAll(resp['Data']);
+      _offsetTodo = _offsetTodo + 10;
+    }
+    notifyListeners();
+  }
+}
+
+--------------------------------------------------------------------------------END----------------------------------------------------------------------------------------
+
+----------------------------------------------------------------------engineer_model.dart----------------------------------------------------------------------------------------
+
+import 'package:scoped_model/scoped_model.dart';
+import 'package:atoi/utils/http_request.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+class EngineerModel extends Model {
+
+  List<dynamic> _tasksToStart = [];
+  List<dynamic> _tasksToReport = [];
+  String _badgeEA = '0';
+  String _badgeEB = '0';
+  int _offset = 10;
+  int _offsetReport = 10;
+
+  get badgeEA => _badgeEA;
+  get badgeEB => _badgeEB;
+  get offset => _offset;
+
+  get tasksToStart => _tasksToStart;
+  get tasksToReport => _tasksToReport;
+
+
+  Future<Null> getCountEngineer() async {
+    Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
+    var prefs = await _prefs;
+    var userID = await prefs.getInt('userID');
+    var resp = await HttpRequest.request(
+      '/User/GetEngineerCount',
+      method: HttpRequest.GET,
+      params: {
+        'userID': userID
+      }
+    );
+    print(resp);
+    if (resp['ResultCode'] == '00') {
+      _badgeEA = resp['Data']['newdispatchCount'].toString();
+      _badgeEB = resp['Data']['pendingDispatchCount'].toString();
+    }
+    notifyListeners();
+  }
+
+  Future<Null> getTasksToStart() async {
+    Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
+    var prefs = await _prefs;
+    var userID = await prefs.getInt('userID');
+    var resp = await HttpRequest.request(
+      '/Dispatch/GetDispatchs',
+      method: HttpRequest.GET,
+      params: {
+        'userID': userID,
+        'statusIDs': 1,
+        'PageSize': 10,
+        'CurRowNum': 0
+      }
+    );
+    print('model call');
+    print(resp);
+    if (resp['ResultCode'] == '00') {
+      _tasksToStart = resp['Data'];
+      _offset = 10;
+    }
+    notifyListeners();
+  }
+
+  Future<Null> getMoreTasksToStart() async {
+    Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
+    var prefs = await _prefs;
+    var userID = await prefs.getInt('userID');
+    var resp = await HttpRequest.request(
+        '/Dispatch/GetDispatchs',
+        method: HttpRequest.GET,
+        params: {
+          'userID': userID,
+          'statusIDs': 1,
+          'PageSize': 10,
+          'CurRowNum': _offset
+        }
+    );
+    print(resp);
+    if (resp['ResultCode'] == '00') {
+      _tasksToStart.addAll(resp['Data']);
+      _offset = _offset + 10;
+    }
+    notifyListeners();
+  }
+
+  Future<Null> getTasksToReport() async {
+    Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
+    var prefs = await _prefs;
+    var userID = await prefs.getInt('userID');
+    var resp = await HttpRequest.request(
+      '/Dispatch/GetDispatchs?userID=${userID}&statusIDs=2&statusIDs=3&pageSize=10&curRowNum=0}',
+      method: HttpRequest.GET,
+    );
+    print(resp);
+    if (resp['ResultCode'] == '00') {
+      _tasksToReport = resp['Data'];
+      _offsetReport = 10;
+    }
+    notifyListeners();
+  }
+
+  Future<Null> getMoreTasksToReport() async {
+    Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
+    var prefs = await _prefs;
+    var userID = await prefs.getInt('userID');
+    var resp = await HttpRequest.request(
+      '/Dispatch/GetDispatchs?userID=${userID}&statusIDs=2&statusIDs=3&pageSize=10&curRowNum=${_offsetReport}',
+      method: HttpRequest.GET,
+    );
+    print(resp);
+    if (resp['ResultCode'] == '00') {
+      _tasksToReport.addAll(resp['Data']);
+      _offsetReport = _offsetReport + 10;
+    }
+    notifyListeners();
+  }
+}
+
+
+--------------------------------------------------------------------------------END----------------------------------------------------------------------------------------
+
+
+
+----------------------------------------------------------------------engineer_report_page.dart----------------------------------------------------------------------------------------
+
+
+import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:atoi/utils/http_request.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:atoi/utils/constants.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:convert';
+import 'package:atoi/pages/engineer/engineer_report_accessory.dart';
+import 'package:atoi/widgets/build_widget.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
+import 'dart:typed_data';
+
+class EngineerReportPage extends StatefulWidget {
+  static String tag = 'engineer-report-page';
+  EngineerReportPage({Key key, this.dispatchId, this.reportId, this.status}):super(key: key);
+  final int dispatchId;
+  final int reportId;
+  final int status;
+
+  @override
+  _EngineerReportPageState createState() => new _EngineerReportPageState();
+}
+
+class _EngineerReportPageState extends State<EngineerReportPage> {
+
+  var _isExpandedBasic = false;
+  var _isExpandedDetail = false;
+  var _isExpandedAssign = true;
+  var _isExpandedComponent = false;
+  bool _isDelayed = false;
+  var _accessory = [];
+
+  List _serviceResults = [
+    '待分配',
+    '问题升级',
+    '待第三方支持',
+    '已解决'
+  ];
+
+  List _sources = [
+    '外部供应商',
+    '备件库'
+  ];
+
+
+  List<DropdownMenuItem<String>> _dropDownMenuItems;
+  List<DropdownMenuItem<String>> _dropDownMenuSources;
+  String _currentResult;
+  String _currentSource;
+  var _dispatch = {};
+  Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
+  var _frequency = new TextEditingController();
+  var _code = new TextEditingController();
+  var _status = new TextEditingController();
+  var _description = new TextEditingController();
+  var _analysis = new TextEditingController();
+  var _solution = new TextEditingController();
+  var _delay = new TextEditingController();
+  var _unsolved = new TextEditingController();
+  //List<dynamic> _imageList = [];
+  var _imageList;
+  var _fujiComments = "";
+  String _reportStatus = '新建';
+  String _reportOID;
+
+  String _userName = '';
+  String _mobile = '';
+
+  Future<Null> getRole() async {
+    var prefs = await _prefs;
+    var userName = prefs.getString('userName');
+    var mobile = prefs.getString('mobile');
+    setState(() {
+      _userName = userName;
+      _mobile = mobile;
+    });
+  }
+  Future getImage() async {
+    var image = await ImagePicker.pickImage(
+        source: ImageSource.camera,
+        imageQuality: 1
+    );
+    if (image != null) {
+      var bytes = await image.readAsBytes();
+      var _compressed = await FlutterImageCompress.compressWithList(bytes, minWidth: 480, minHeight: 600);
+      setState(() {
+        _imageList = _compressed;
+      });
+    }
+  }
+
+  Future<Null> getImageFile(int fileId) async {
+    var resp = await HttpRequest.request(
+      '/DispatchReport/DownloadUploadFile',
+      method: HttpRequest.GET,
+      params: {
+        'ID': fileId
+      }
+    );
+    if (resp['ResultCode'] == '00') {
+      setState(() {
+        _imageList = base64Decode(resp['Data']);
+      });
+    }
+  }
+
+  Future<String> getAccessoryFile(int fileId) async {
+    String _image = '';
+    var resp = await HttpRequest.request(
+      '/DispatchReport/DownloadAccessoryFile',
+      method: HttpRequest.GET,
+      params: {
+        'ID': fileId
+      }
+    );
+    if (resp['ResultCode'] == '00') {
+      _image = resp['Data'];
+    }
+    return _image;
+  }
+
+  Future<Null> getReport() async {
+    if (widget.reportId != 0) {
+      var prefs = await _prefs;
+      var userID = prefs.getInt('userID');
+      var reportId = widget.reportId;
+      var resp = await HttpRequest.request(
+        '/DispatchReport/GetDispatchReport',
+        method: HttpRequest.GET,
+        params: {
+          'userID': userID,
+          'dispatchReportId': reportId
+        }
+      );
+      print(resp);
+      if (resp['ResultCode'] == '00') {
+        var data = resp['Data'];
+        setState(() {
+          _frequency.text = data['FaultFrequency'];
+          _code.text = data['FaultCode'];
+          _status.text = data['FaultSystemStatus'];
+          _description.text = data['FaultDesc'];
+          _analysis.text = data['SolutionCauseAnalysis'];
+          _solution.text = data['SolutionWay'];
+          _currentResult = data['SolutionResultStatus']['Name']==''?_currentResult:data['SolutionResultStatus']['Name'];
+          _delay.text = data['DelayReason'];
+          _unsolved.text = data['SolutionUnsolvedComments'];
+          _accessory = data['ReportAccessories'];
+          _fujiComments = data['FujiComments'];
+          _reportStatus = data['Status']['Name'];
+          _reportOID = data['OID'];
+        });
+        await getImageFile(resp['Data']['FileInfo']['ID']);
+        for(var _acc in _accessory) {
+          var _imageNew = _acc['FileInfos'].firstWhere((info) => info['FileType']==1, orElse: () => null);
+          var _imageOld = _acc['FileInfos'].firstWhere((info) => info['FileType']==2, orElse: () => null);
+          if (_imageNew != null) {
+            var _fileNew = await getAccessoryFile(_imageNew['ID']);
+            _imageNew['FileContent'] = _fileNew;
+            setState(() {
+              _acc['ImageNew'] = _imageNew;
+            });
+          }
+          if (_imageOld != null) {
+            var _fileOld = await getAccessoryFile(_imageOld['ID']);
+            _imageOld['FileContent'] = _fileOld;
+            setState(() {
+              _acc['ImageOld'] = _imageOld;
+            });
+          }
+        }
+        setState(() {
+          _accessory = _accessory;
+        });
+      }
+    }
+  }
+
+  Future<Null> getDispatch() async {
+    var prefs = await _prefs;
+    var userID = prefs.getInt('userID');
+    var dispatchId = widget.dispatchId;
+    var resp = await HttpRequest.request(
+        '/Dispatch/GetDispatchByID',
+        method: HttpRequest.GET,
+        params: {
+          'userID': userID,
+          'dispatchID': dispatchId
+        }
+    );
+    print(resp);
+    if (resp['ResultCode'] == '00') {
+      setState(() {
+        _dispatch = resp['Data'];
+      });
+      var _createTime = DateTime.parse(resp['Data']['CreateDate']);
+      var _startTime = DateTime.parse(resp['Data']['StartDate']);
+      var _duration = _startTime.difference(_createTime).inMinutes;
+      print("_duration:${_duration}");
+      if (_duration > resp['Data']['Request']['Equipments'][0]['ResponseTimeLength']) {
+        setState(() {
+          _isDelayed = true;
+        });
+      }
+    }
+  }
+
+  Future<Null> uploadReport(int statusId) async {
+    if (_isDelayed && _delay.text.isEmpty) {
+      showDialog(context: context,
+          builder: (context) => AlertDialog(
+            title: new Text('误工说明不可为空'),
+          )
+      );
+      return;
+    }
+    if (_frequency.text.isEmpty || _code.text.isEmpty || _status.text.isEmpty || _analysis.text.isEmpty || _solution.text.isEmpty) {
+      showDialog(context: context,
+        builder: (context) => AlertDialog(
+          title: new Text('报告不可有空字段'),
+        )
+      );
+    } else {
+      Map _json;
+      if (_imageList != null) {
+        var content = base64Encode(_imageList);
+        _json = {
+          'FileContent': content,
+          'FileName': 'dispatch_${widget.dispatchId}_report_attachment.jpg',
+          'ID': 0,
+          'FileType': 1
+        };
+      }
+      var prefs = await _prefs;
+      var userID = prefs.getInt('userID');
+      var _data = {
+        'userID': userID,
+        'DispatchReport': {
+          'Dispatch': {
+            'ID': widget.dispatchId
+          },
+          'Type': {
+            'ID': 1,
+            'Name': '通用作业报告'
+          },
+          'FaultFrequency': _frequency.text,
+          'FaultCode': _code.text,
+          'FaultSystemStatus': _status.text,
+          'FaultDesc': _description.text,
+          'SolutionCauseAnalysis': _analysis.text,
+          'SolutionWay': _solution.text,
+          'SolutionResultStatus': {
+            'ID': AppConstants.SolutionStatus[_currentResult],
+            'Name': _currentResult
+          },
+          'SolutionUnsolvedComments': _unsolved.text,
+          'DelayReason': _delay.text,
+          'Status': {
+            'ID': statusId,
+          },
+          'FileInfo': _json,
+          'ReportAccessories': _accessory,
+          'ID': widget.reportId
+        }
+      };
+      var resp = await HttpRequest.request(
+          '/DispatchReport/SaveDispatchReport',
+          method: HttpRequest.POST,
+          data: _data
+      );
+      print(resp);
+      if (resp['ResultCode'] == '00') {
+        showDialog(context: context,
+            builder: (context) =>
+                AlertDialog(
+                    title: statusId==1?new Text('保存报告成功'):new Text('上传报告成功')
+                )
+        ).then((result) =>
+            Navigator.of(context, rootNavigator: true).pop(result)
+        );
+      } else {
+        showDialog(context: context,
+          builder: (context) => AlertDialog(
+            title: new Text(resp['ResultMessage']),
+          )
+        );
+      }
+    }
+  }
+
+  void initState(){
+    _dropDownMenuItems = getDropDownMenuItems(_serviceResults);
+    _dropDownMenuSources = getDropDownMenuItems(_sources);
+    _currentResult = _dropDownMenuItems[0].value;
+    _currentSource = _dropDownMenuSources[0].value;
+    getDispatch();
+    getReport();
+    getRole();
+    super.initState();
+  }
+
+  List<DropdownMenuItem<String>> getDropDownMenuItems(List list) {
+    List<DropdownMenuItem<String>> items = new List();
+    for (String method in list) {
+      items.add(new DropdownMenuItem(
+          value: method,
+          child: new Text(method,
+            style: new TextStyle(
+                fontSize: 20.0
+            ),
+          )
+      ));
+    }
+    return items;
+  }
+
+  Column buildField(String label, TextEditingController controller) {
+    return new Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        new Text(
+          label,
+          style: new TextStyle(
+              fontSize: 20.0,
+              fontWeight: FontWeight.w600
+          ),
+        ),
+        new TextField(
+          controller: controller,
+          decoration: InputDecoration(
+            fillColor: AppConstants.AppColors['app_accent_m'],
+            filled: true
+          ),
+        ),
+        new SizedBox(height: 5.0,)
+      ],
+    );
+  }
+
+
+  void changedDropDownMethod(String selectedMethod) {
+    setState(() {
+      _currentResult = selectedMethod;
+    });
+  }
+
+  void changedDropDownSource(String selectedMethod) {
+    setState(() {
+      _currentSource = selectedMethod;
+    });
+  }
+
+  TextField buildTextField(String labelText, String defaultText, bool isEnabled) {
+    return new TextField(
+      decoration: InputDecoration(
+          labelText: labelText,
+          labelStyle: new TextStyle(
+              fontSize: 20.0
+          ),
+          fillColor: AppConstants.AppColors['app_accent_m'],
+          filled: true,
+          disabledBorder: UnderlineInputBorder(
+              borderSide: BorderSide(
+                  color: Colors.grey,
+                  width: 1
+              )
+          )
+      ),
+      controller: new TextEditingController(text: defaultText),
+      enabled: isEnabled,
+      style: new TextStyle(
+          fontSize: 20.0
+      ),
+    );
+  }
+
+  Padding buildRow(String labelText, String defaultText) {
+    return new Padding(
+      padding: EdgeInsets.symmetric(vertical: 5.0),
+      child: new Row(
+        children: <Widget>[
+          new Expanded(
+            flex: 4,
+            child: new Text(
+              labelText,
+              style: new TextStyle(
+                  fontSize: 20.0,
+                  fontWeight: FontWeight.w600
+              ),
+            ),
+          ),
+          new Expanded(
+            flex: 6,
+            child: new Text(
+              defaultText,
+              style: new TextStyle(
+                  fontSize: 20.0,
+                  fontWeight: FontWeight.w400,
+                  color: Colors.black54
+              ),
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
+  Row buildDropdown(String title, String currentItem, List dropdownItems, Function changeDropdown) {
+    return new Row(
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: <Widget>[
+        new Expanded(
+          flex: 4,
+          child: new Padding(
+            padding: EdgeInsets.symmetric(vertical: 5.0),
+            child: new Text(
+              title,
+              style: new TextStyle(
+                  fontSize: 20.0,
+                  fontWeight: FontWeight.w600
+              ),
+            ),
+          ),
+        ),
+        new Expanded(
+          flex: 6,
+          child: new DropdownButton(
+            value: currentItem,
+            items: dropdownItems,
+            onChanged: changeDropdown,
+          ),
+        )
+      ],
+    );
+  }
+
+  Row buildImageRow() {
+    List<Widget> _list = [];
+    if (_imageList != null ){
+      _list.add(
+          new Stack(
+            alignment: FractionalOffset(1.0, 0),
+            children: <Widget>[
+              new Container(
+                width: 100.0,
+                child: Image.memory(Uint8List.fromList(_imageList)),
+              ),
+              widget.status==0||widget.status==1?new Padding(
+                padding: EdgeInsets.symmetric(horizontal: 0.0),
+                child: new IconButton(icon: Icon(Icons.cancel), color: Colors.white, onPressed: (){
+                  setState(() {
+                    _imageList = null;
+                  });
+                }),
+              ):new Container()
+            ],
+          )
+      );
+      _list.add(
+          new Container(
+            width: 10,
+          )
+      );
+    } else {
+      _list.add(new Container());
+    }
+
+    return new Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: _list
+    );
+  }
+
+  List<Widget> buildAccessory() {
+    List<Widget> _list = [];
+
+    void saveAccessory(Map accessory) async {
+      setState(() {
+        _accessory.add(accessory);
+      });
+    }
+
+    _list.add(new Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: <Widget>[
+        widget.status==0||widget.status==1?new Text('新增零件'):new Container(),
+        widget.status==0||widget.status==1?new IconButton(icon: Icon(Icons.add), onPressed: () async {
+          //_addAccessory();
+          final _acc = await Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
+            return new EngineerReportAccessory();
+          }));
+          print(_acc);
+          if (_acc != null) {
+            saveAccessory(_acc);
+          }
+        }):new Container()
+      ],
+    )); 
+    if (_accessory != null) {
+      for(var _acc in _accessory) {
+        var _imageNew = _acc['FileInfos'].firstWhere((info) => info['FileType']==1, orElse: () => null);
+        var _imageOld = _acc['FileInfos'].firstWhere((info) => info['FileType']==2, orElse: () => null);
+        if (_imageNew != null) {
+          _acc['ImageNew'] = _imageNew;
+        }
+        if (_imageOld != null) {
+          _acc['ImageOld'] = _imageOld;
+        }
+        var _accList = [
+          BuildWidget.buildRow('名称', _acc['Name']),
+          BuildWidget.buildRow('来源', _acc['Source']['Name']),
+          _acc['Source']['Name']=='外部供应商'?BuildWidget.buildRow('外部供应商', _acc['Supplier']['Name']):new Container(),
+          BuildWidget.buildRow('新装零件编号', _acc['NewSerialCode']),
+          BuildWidget.buildRow('附件', ''),
+          new Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              _acc['ImageNew']!=null&&_acc['ImageNew']['FileContent']!=null?new Container(width: 100.0, child: new Image.memory(base64Decode(_acc['ImageNew']['FileContent'])),):new Container()
+            ],
+          ),
+          BuildWidget.buildRow('金额（元/件）', _acc['Amount'].toString()),
+          BuildWidget.buildRow('数量', _acc['Qty'].toString()),
+          BuildWidget.buildRow('拆下零件编号', _acc['OldSerialCode']),
+          BuildWidget.buildRow('附件', ''),
+          new Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              _acc['ImageOld']!=null&&_acc['ImageOld']['FileContent']!=null?new Container(width: 100.0, child: new Image.memory(base64Decode(_acc['ImageOld']['FileContent'])),):new Container()
+            ],
+          ),
+          widget.status==3||widget.status==2?new Container():new Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: <Widget>[
+              new Text(
+                '删除零件',
+              ),
+              new IconButton(icon: Icon(Icons.delete_forever), onPressed: () {
+                setState(() {
+                  _accessory.remove(_acc);
+                });
+              })
+            ],
+          ),
+          new Divider()
+        ];
+        _list.addAll(_accList);
+      }
+    }
+    return _list;
+  }
+
+  List<ExpansionPanel> buildExpansion() {
+    List<ExpansionPanel> _list = [];
+    if (_dispatch['RequestType']['ID'] != 14) {
+      _list.add(
+        new ExpansionPanel(
+          headerBuilder: (context, isExpanded) {
+            return ListTile(
+              leading: new Icon(Icons.info,
+                size: 24.0,
+                color: Colors.blue,
+              ),
+              title: Text('设备基本信息',
+                style: new TextStyle(
+                    fontSize: 22.0,
+                    fontWeight: FontWeight.w400
+                ),
+              ),
+            );
+          },
+          body: new Padding(
+            padding: EdgeInsets.symmetric(horizontal: 8.0),
+            child: new Column(
+              children: buildEquipments(),
+            ),
+          ),
+          isExpanded: _isExpandedBasic,
+        ),
+      );
+    }
+    _list.addAll(
+    [
+      new ExpansionPanel(
+        headerBuilder: (context, isExpanded) {
+          return ListTile(
+              leading: new Icon(Icons.description,
+                size: 24.0,
+                color: Colors.blue,
+              ),
+              title: Text('派工内容',
+                style: new TextStyle(
+                    fontSize: 22.0,
+                    fontWeight: FontWeight.w400
+                ),
+              ),
+          );
+        },
+        body: new Padding(
+          padding: EdgeInsets.symmetric(horizontal: 8.0),
+          child: new Column(
+            children: <Widget>[
+              BuildWidget.buildRow('派工单编号', _dispatch['OID']),
+              BuildWidget.buildRow('派工单状态', _dispatch['Status']['Name']),
+              BuildWidget.buildRow('派工类型', _dispatch['RequestType']['Name']),
+              BuildWidget.buildRow('工程师姓名', _dispatch['Engineer']['Name']),
+              //widget.status==3||widget.status==2?new Container():BuildWidget.buildRow('处理方式', _dispatch['Request']['DealType']['Name']),
+              BuildWidget.buildRow('紧急程度', _dispatch['Request']['Priority']['Name']),
+              _dispatch['RequestType']['ID']==14?new Container():BuildWidget.buildRow('机器状态', _dispatch['MachineStatus']['Name']),
+              BuildWidget.buildRow('出发时间', AppConstants.TimeForm(_dispatch['ScheduleDate'], 'yyyy-mm-dd')),
+              BuildWidget.buildRow('备注', _dispatch['LeaderComments']),
+            ],
+          ),
+        ),
+        isExpanded: _isExpandedDetail,
+      ),
+      new ExpansionPanel(
+        headerBuilder: (context, isExpanded) {
+          return ListTile(
+            leading: new Icon(Icons.perm_contact_calendar,
+              size: 24.0,
+              color: Colors.blue,
+            ),
+            title: Text('作业报告信息',
+              style: new TextStyle(
+                  fontSize: 22.0,
+                  fontWeight: FontWeight.w400
+              ),
+            ),
+          );
+        },
+        body: new Padding(
+          padding: EdgeInsets.symmetric(horizontal: 8.0),
+          child: new Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              _reportOID!=null?BuildWidget.buildRow('报告编号', _reportOID):new Container(),
+              BuildWidget.buildRow('审批状态', _reportStatus),
+              _fujiComments.isNotEmpty?BuildWidget.buildRow('审批结果', _fujiComments):new Container(),
+              new Divider(),
+              widget.status!=0&&widget.status!=1?BuildWidget.buildRow('发生频率', _frequency.text):buildField('发生频率：', _frequency),
+              widget.status!=0&&widget.status!=1?BuildWidget.buildRow('故障描述', _description.text):buildField('故障描述：', _description),
+              widget.status!=0&&widget.status!=1?BuildWidget.buildRow('系统状态', _status.text):buildField('系统状态：', _status),
+              widget.status!=0&&widget.status!=1?BuildWidget.buildRow('错误代码', _code.text):buildField('错误代码：', _code	),
+              widget.status!=0&&widget.status!=1?BuildWidget.buildRow('分析原因', _analysis.text):buildField('分析原因：', _analysis),
+              widget.status!=0&&widget.status!=1?BuildWidget.buildRow('处理方法', _solution.text):buildField('处理方法：', _solution),
+              widget.status!=0&&widget.status!=1?BuildWidget.buildRow('备注', _unsolved.text):buildField('备注：', _unsolved),
+              (widget.status==0||widget.status==1)&&_isDelayed?buildField('误工说明：', _delay):new Container(),
+              widget.status!=0&&widget.status!=1&&_isDelayed?BuildWidget.buildRow('误工说明', _delay.text):new Container(),
+              new Divider(),
+              widget.status!=0&&widget.status!=1?BuildWidget.buildRow('作业结果', _currentResult):BuildWidget.buildDropdownLeft('作业结果：', _currentResult, _dropDownMenuItems, changedDropDownMethod),
+              widget.status==0||widget.status==1?new Padding(
+                padding: EdgeInsets.symmetric(vertical: 5.0),
+                child: new Row(
+                  children: <Widget>[
+                    new Text(
+                      '添加附件：',
+                      style: new TextStyle(
+                          fontSize: 20.0,
+                          fontWeight: FontWeight.w600
+                      ),
+                    ),
+                    new IconButton(
+                        icon: Icon(Icons.add_a_photo),
+                        onPressed: () {
+                          getImage();
+                        })
+                  ],
+                ),
+              ):BuildWidget.buildRow('附件', ''),
+              buildImageRow()
+            ],
+          ),
+        ),
+        isExpanded: _isExpandedAssign,
+      ),
+    ]
+    );
+    if (_dispatch['RequestType']['ID'] == 1) {
+      _list.add(
+        new ExpansionPanel(
+          headerBuilder: (context, isExpanded) {
+            return ListTile(
+                leading: new Icon(Icons.settings,
+                  size: 24.0,
+                  color: Colors.blue,
+                ),
+                title: Text('零配件信息',
+                  style: new TextStyle(
+                      fontSize: 22.0,
+                      fontWeight: FontWeight.w400
+                  ),
+                ),
+            );
+          },
+          body: new Padding(
+            padding: EdgeInsets.symmetric(horizontal: 8.0),
+            child: new Column(
+              children: buildAccessory(),
+            ),
+          ),
+          isExpanded: _isExpandedComponent,
+        ),
+      );
+    }
+    return _list;
+  }
+
+  List<Widget> buildEquipments() {
+    var _equipments = _dispatch['Request']['Equipments'];
+    List<Widget> _list = [];
+    for(var _equipment in _equipments) {
+      var equipList = [
+        BuildWidget.buildRow('系统编号', _equipment['OID']??''),
+        BuildWidget.buildRow('名称', _equipment['Name']??''),
+        BuildWidget.buildRow('型号', _equipment['EquipmentCode']??''),
+        BuildWidget.buildRow('序列号', _equipment['SerialCode']??''),
+        BuildWidget.buildRow('使用科室', _equipment['Department']['Name']??''),
+        BuildWidget.buildRow('安装地点', _equipment['InstalSite']??''),
+        BuildWidget.buildRow('设备厂商', _equipment['Manufacturer']['Name']??''),
+        BuildWidget.buildRow('资产等级', _equipment['AssetLevel']['Name']??''),
+        BuildWidget.buildRow('维保状态', _equipment['WarrantyStatus']??''),
+        BuildWidget.buildRow('服务范围', _equipment['ContractScope']['Name']??''),
+        new Divider()
+      ];
+      _list.addAll(equipList);
+    }
+    return _list;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // TODO: implement build
+    return new Scaffold(
+      appBar: new AppBar(
+        title: new Text(
+            widget.status==2||widget.status==3?'查看报告':'上传报告'
+        ),
+        elevation: 0.7,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.centerLeft,
+              end: Alignment.centerRight,
+              colors: [
+                Theme.of(context).primaryColor,
+                Theme.of(context).accentColor
+              ],
+            ),
+          ),
+        ),
+        actions: <Widget>[
+          new Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 5.0, vertical: 19.0),
+            child: Text(_userName),
+          ),
+        ],
+      ),
+      body: _dispatch.isEmpty?new Center(child: new SpinKitRotatingPlain(color: Colors.blue),):new Padding(
+        padding: EdgeInsets.symmetric(vertical: 5.0),
+        child: new Card(
+          child: new ListView(
+            children: <Widget>[
+              new ExpansionPanelList(
+                animationDuration: Duration(milliseconds: 200),
+                expansionCallback: (index, isExpanded) {
+                  setState(() {
+                    if (index == 0) {
+                      _dispatch['RequestType']['ID']==14?_isExpandedDetail=!isExpanded:_isExpandedBasic = !isExpanded;
+                    } else {
+                      if (index == 1) {
+                        _dispatch['RequestType']['ID']==14?_isExpandedAssign=!isExpanded:_isExpandedDetail = !isExpanded;
+                      } else {
+                        if (index == 2) {
+                          _dispatch['RequestType']['ID']==14?_isExpandedComponent=!isExpanded:_isExpandedAssign = !isExpanded;
+                        } else {
+                          _isExpandedComponent = !isExpanded;
+                        }
+                      }
+                    }
+                  });
+                },
+                children: buildExpansion(),
+              ),
+              SizedBox(height: 24.0),
+              widget.status==0||widget.status==1?new Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                mainAxisSize: MainAxisSize.max,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: <Widget>[
+                  new RaisedButton(
+                    onPressed: () {
+                      uploadReport(2);
+                    },
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(24),
+                    ),
+                    padding: EdgeInsets.all(12.0),
+                    color: new Color(0xff2E94B9),
+                    child: Text('上传报告', style: TextStyle(color: Colors.white)),
+                  ),
+                  new RaisedButton(
+                    onPressed: () {
+                      uploadReport(1);
+                    },
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(24),
+                    ),
+                    padding: EdgeInsets.all(12.0),
+                    color: new Color(0xff2E94B9),
+                    child: Text('保存报告', style: TextStyle(color: Colors.white)),
+                  ),
+                ],
+              ):new Container()
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+
+
+--------------------------------------------------------------------------------END----------------------------------------------------------------------------------------
+

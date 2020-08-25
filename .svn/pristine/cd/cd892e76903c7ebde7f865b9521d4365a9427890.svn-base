@@ -1,0 +1,328 @@
+﻿using BusinessObjects.Manager;
+using BusinessObjects.Util;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace BusinessObjects.Domain
+{
+    public class FujiClass2Info : EntityInfo, IComparable<FujiClass2Info>
+    {
+        public string Name { get; set; }
+        public string Description { get; set; }
+        public FujiClass1Info FujiClass1 { get; set; }
+
+        public Boolean IncludeLabour { get; set; }
+        public double PatrolTimes { get; set; }
+        public double PatrolHours { get; set; }
+        public double MaintenanceTimes { get; set; }
+        public double MaintenanceHours { get; set; }
+        public double RepairHours { get; set; }
+
+        public Boolean IncludeContract { get; set; }
+        public double FullCoveragePtg { get; set; }
+        public double TechCoveragePtg { get; set; }
+
+        public Boolean IncludeSpare { get; set; }
+        public double SparePrice { get; set; }
+        public double SpareRentPtg { get; set; }
+
+        public Boolean IncludeRepair { get; set; }
+        public int Usage { get; set; }
+        public KeyValueInfo EquipmentType { get; set; }
+        public double RepairComponentCost { get; set; }
+        public double Repair3partyRatio { get; set; }
+        public double Repair3partyCost { get; set; }
+        public double RepairCostRatio { get; set; }
+        public Method MethodID { get; set; }
+
+        public DateTime AddDate { get; set; }
+        public DateTime UpdateDate { get; set; }
+
+        public List<FaultRateInfo> Repairs { get; set; }
+        public List<ComponentInfo> Components { get; set; }
+        public List<ConsumableInfo> Consumables { get; set; }
+
+        // display only
+        public bool hasEdited { get; set; }
+
+        public FujiClass2Info()
+        {
+            this.FujiClass1 = new FujiClass1Info();
+            this.EquipmentType = new KeyValueInfo();
+            this.Repairs = new List<FaultRateInfo>();
+            this.Components = new List<ComponentInfo>();
+            this.Consumables = new List<ConsumableInfo>();
+        }
+
+        public FujiClass2Info(DataRow dr)
+            : this()
+        {
+            this.ID = SQLUtil.ConvertInt(dr["ID"]);
+            this.Name = SQLUtil.TrimNull(dr["Name"]);
+            this.Description = SQLUtil.TrimNull(dr["Description"]);
+            this.FujiClass1.ID = SQLUtil.ConvertInt(dr["FujiClass1ID"]);
+            if (dr.Table.Columns.Contains("FujiClass1Name"))
+                this.FujiClass1.Name = SQLUtil.TrimNull(dr["FujiClass1Name"]);
+
+            this.IncludeLabour = SQLUtil.ConvertBoolean(dr["IncludeLabour"]);
+            this.PatrolTimes = SQLUtil.ConvertDouble(dr["PatrolTimes"]);
+            this.PatrolHours = SQLUtil.ConvertDouble(dr["PatrolHours"]);
+            this.MaintenanceTimes = SQLUtil.ConvertDouble(dr["MaintenanceTimes"]);
+            this.MaintenanceHours = SQLUtil.ConvertDouble(dr["MaintenanceHours"]);
+            this.RepairHours = SQLUtil.ConvertDouble(dr["RepairHours"]);
+
+            this.IncludeContract = SQLUtil.ConvertBoolean(dr["IncludeContract"]);
+            this.FullCoveragePtg = SQLUtil.ConvertDouble(dr["FullCoveragePtg"]);
+            this.TechCoveragePtg = SQLUtil.ConvertDouble(dr["TechCoveragePtg"]);
+
+            this.IncludeSpare = SQLUtil.ConvertBoolean(dr["IncludeSpare"]);
+            this.SparePrice = SQLUtil.ConvertDouble(dr["SparePrice"]);
+            this.SpareRentPtg = SQLUtil.ConvertDouble(dr["SpareRentPtg"]);
+
+            this.IncludeRepair = SQLUtil.ConvertBoolean(dr["IncludeRepair"]);
+            this.Usage = SQLUtil.ConvertInt(dr["Usage"]);
+            this.EquipmentType.ID = SQLUtil.ConvertInt(dr["EquipmentType"]);
+            this.EquipmentType.Name = LookupManager.GetEquipmentTypeDesc(this.EquipmentType.ID);
+            this.RepairComponentCost = SQLUtil.ConvertDouble(dr["RepairComponentCost"]);
+            this.Repair3partyRatio = SQLUtil.ConvertDouble(dr["Repair3partyRatio"]);
+            this.Repair3partyCost = SQLUtil.ConvertDouble(dr["Repair3partyCost"]);
+            this.RepairCostRatio = SQLUtil.ConvertDouble(dr["RepairCostRatio"]);
+            this.MethodID = SQLUtil.ConvertEnum<Method>(dr["MethodID"]);
+
+            this.AddDate = SQLUtil.ConvertDateTime(dr["AddDate"]);
+            this.UpdateDate = SQLUtil.ConvertDateTime(dr["UpdateDate"]);
+        }
+
+        public void CheckEquipmentTypeRelatedFields()
+        {
+            if (this.EquipmentType.ID == LKPEquipmentType.General) {
+                this.RepairComponentCost = 0d;
+                this.Repair3partyRatio = 0d;
+                this.Repair3partyCost = 0d;
+            }
+            else
+            {
+                this.RepairCostRatio = 0d;
+            }
+        } 
+
+        public AuditHdrInfo ConvertAudit(FujiClass2Info newInfo,UserInfo user)//DataTable
+        {
+
+            AuditHdrInfo audit = new AuditHdrInfo();
+            audit.ObjectType.ID = ObjectTypes.FujiClass2;
+            audit.ObjectID = this.ID;
+            audit.Operation.ID = AuditHdrInfo.AuditOperations.Update;
+            audit.TransUser = user;
+            List<AuditDetailInfo> infos = audit.DetailInfo;
+
+            // DataTable dt = new DataTable();
+            // dt.Columns.Add("AuditID");
+            // dt.Columns.Add("FieldName");
+            // dt.Columns.Add("OldValue");
+            // dt.Columns.Add("NewValue");
+
+            if (this.FujiClass1.ID != newInfo.FujiClass1.ID)
+                //dt.Rows.Add("", "FujiClass2FujiClass1", this.FujiClass1.Name, newInfo.FujiClass1.Name);
+                infos.Add(new AuditDetailInfo() { FieldName = "FujiClass2FujiClass1", OldValue = this.FujiClass1.Name, NewValue = newInfo.FujiClass1.Name }); 
+
+            if (!this.Name.Equals(newInfo.Name))
+                //dt.Rows.Add("", "FujiClass2Name", this.Name, newInfo.Name); 
+                infos.Add(new AuditDetailInfo() { FieldName = "FujiClass2Name", OldValue = this.Name, NewValue = newInfo.Name });
+
+            if (!this.Description.Equals(newInfo.Description))
+                //dt.Rows.Add("", "FujiClass2Description", this.Description, newInfo.Description); 
+                infos.Add(new AuditDetailInfo() { FieldName = "FujiClass2Description", OldValue = this.Description, NewValue = newInfo.Description });
+
+            if (this.IncludeLabour != newInfo.IncludeLabour)
+                //dt.Rows.Add("", "FujiClass2IncludeLabour", this.IncludeLabour ? "是" : "否", newInfo.IncludeLabour ? "是" : "否");
+                infos.Add(new AuditDetailInfo() { FieldName = "FujiClass2IncludeLabour", OldValue = this.IncludeLabour ? "是" : "否", NewValue = newInfo.IncludeLabour ? "是" : "否" });
+
+            if (this.PatrolTimes != newInfo.PatrolTimes)
+                //dt.Rows.Add("", "FujiClass2PatrolTimes", this.PatrolTimes, newInfo.PatrolTimes);
+                infos.Add(new AuditDetailInfo() { FieldName = "FujiClass2PatrolTimes", OldValue = this.PatrolTimes.ToString(), NewValue = newInfo.PatrolTimes.ToString() });
+
+            if (this.PatrolHours != newInfo.PatrolHours)
+                //dt.Rows.Add("", "FujiClass2PatrolHours", this.PatrolHours, newInfo.PatrolHours);
+                infos.Add(new AuditDetailInfo() { FieldName = "FujiClass2PatrolHours", OldValue = this.PatrolHours.ToString(), NewValue = newInfo.PatrolHours.ToString() });
+
+            if (this.MaintenanceTimes != newInfo.MaintenanceTimes)
+                //dt.Rows.Add("", "FujiClass2MaintenanceTimes", this.MaintenanceTimes, newInfo.MaintenanceTimes);
+                infos.Add(new AuditDetailInfo() { FieldName = "FujiClass2MaintenanceTimes", OldValue = this.MaintenanceTimes.ToString(), NewValue = newInfo.MaintenanceTimes.ToString() });
+
+            if (this.MaintenanceHours != newInfo.MaintenanceHours)
+                //dt.Rows.Add("", "FujiClass2MaintenanceHours", this.MaintenanceHours, newInfo.MaintenanceHours);
+                infos.Add(new AuditDetailInfo() { FieldName = "FujiClass2MaintenanceHours", OldValue = this.MaintenanceHours.ToString(), NewValue = newInfo.MaintenanceHours.ToString() });
+
+            if (this.RepairHours != newInfo.RepairHours)
+                //dt.Rows.Add("", "FujiClass2RepairHours", this.RepairHours, newInfo.RepairHours);
+                infos.Add(new AuditDetailInfo() { FieldName = "FujiClass2RepairHours", OldValue = this.RepairHours.ToString(), NewValue = newInfo.RepairHours.ToString() });
+
+            if (this.IncludeContract != newInfo.IncludeContract)
+                //dt.Rows.Add("", "FujiClass2IncludeContract", this.IncludeContract ? "是" : "否", newInfo.IncludeContract ? "是" : "否");
+                infos.Add(new AuditDetailInfo() { FieldName = "FujiClass2IncludeContract", OldValue = this.IncludeContract ? "是" : "否", NewValue = newInfo.IncludeContract ? "是" : "否" });
+
+            if (this.FullCoveragePtg != newInfo.FullCoveragePtg)
+                //dt.Rows.Add("", "FujiClass2FullCoveragePtg", this.FullCoveragePtg, newInfo.FullCoveragePtg);
+                infos.Add(new AuditDetailInfo() { FieldName = "FujiClass2FullCoveragePtg", OldValue = this.FullCoveragePtg.ToString(), NewValue = newInfo.FullCoveragePtg.ToString() });
+
+            if (this.TechCoveragePtg != newInfo.TechCoveragePtg)
+                //dt.Rows.Add("", "FujiClass2TechCoveragePtg", this.TechCoveragePtg, newInfo.TechCoveragePtg);
+                infos.Add(new AuditDetailInfo() { FieldName = "FujiClass2TechCoveragePtg", OldValue = this.TechCoveragePtg.ToString(), NewValue = newInfo.TechCoveragePtg.ToString() });
+
+            if (this.IncludeSpare != newInfo.IncludeSpare)
+                //dt.Rows.Add("", "FujiClass2IncludeSpare", this.IncludeSpare ? "是" : "否", newInfo.IncludeSpare ? "是" : "否");
+                infos.Add(new AuditDetailInfo() { FieldName = "FujiClass2IncludeSpare", OldValue = this.IncludeSpare ? "是" : "否", NewValue = newInfo.IncludeSpare ? "是" : "否" });
+
+            if (this.SparePrice != newInfo.SparePrice)
+                //dt.Rows.Add("", "FujiClass2SparePrice", this.SparePrice, newInfo.SparePrice);
+                infos.Add(new AuditDetailInfo() { FieldName = "FujiClass2SparePrice", OldValue = this.SparePrice.ToString(), NewValue = newInfo.SparePrice.ToString() });
+
+            if (this.SpareRentPtg != newInfo.SpareRentPtg)
+                //dt.Rows.Add("", "FujiClass2SpareRentPtg", this.SpareRentPtg, newInfo.SpareRentPtg);
+                infos.Add(new AuditDetailInfo() { FieldName = "FujiClass2SpareRentPtg", OldValue = this.SpareRentPtg.ToString(), NewValue = newInfo.SpareRentPtg.ToString() });
+
+            if (this.IncludeRepair != newInfo.IncludeRepair)
+                //dt.Rows.Add("", "FujiClass2IncludeRepair", this.IncludeRepair ? "是" : "否", newInfo.IncludeRepair ? "是" : "否");
+                infos.Add(new AuditDetailInfo() { FieldName = "FujiClass2IncludeRepair", OldValue = this.IncludeRepair ? "是" : "否", NewValue = newInfo.IncludeRepair ? "是" : "否" });
+
+            if (this.Usage != newInfo.Usage)
+                //dt.Rows.Add("", "FujiClass2Usage", this.Usage, newInfo.Usage);
+                infos.Add(new AuditDetailInfo() { FieldName = "FujiClass2Usage", OldValue = this.Usage.ToString(), NewValue = newInfo.Usage.ToString() });
+
+            if (this.EquipmentType.ID != newInfo.EquipmentType.ID)
+                //dt.Rows.Add("", "FujiClass2EquipmentType", this.EquipmentType.Name, newInfo.EquipmentType.Name);
+                infos.Add(new AuditDetailInfo() { FieldName = "FujiClass2EquipmentType", OldValue = this.EquipmentType.Name, NewValue = LookupManager.GetEquipmentTypeDesc(newInfo.EquipmentType.ID) });
+
+            if (this.RepairComponentCost != newInfo.RepairComponentCost)
+                //dt.Rows.Add("", "FujiClass2RepairComponentCost", this.RepairComponentCost, newInfo.RepairComponentCost);
+                infos.Add(new AuditDetailInfo() { FieldName = "FujiClass2RepairComponentCost", OldValue = this.RepairComponentCost.ToString(), NewValue = newInfo.RepairComponentCost.ToString() });
+
+            if (this.Repair3partyRatio != newInfo.Repair3partyRatio)
+                //dt.Rows.Add("", "FujiClass2Repair3partyRatio", this.Repair3partyRatio, newInfo.Repair3partyRatio);
+                infos.Add(new AuditDetailInfo() { FieldName = "FujiClass2Repair3partyRatio", OldValue = this.Repair3partyRatio.ToString(), NewValue = newInfo.Repair3partyRatio.ToString() });
+
+            if (this.Repair3partyCost != newInfo.Repair3partyCost)
+                //dt.Rows.Add("", "FujiClass2Repair3partyCost", this.Repair3partyCost, newInfo.Repair3partyCost);
+                infos.Add(new AuditDetailInfo() { FieldName = "FujiClass2Repair3partyCost", OldValue = this.Repair3partyCost.ToString(), NewValue = newInfo.Repair3partyCost.ToString() });
+
+            if (this.RepairCostRatio != newInfo.RepairCostRatio)
+                //dt.Rows.Add("", "FujiClass2RepairCostRatio", this.RepairCostRatio, newInfo.RepairCostRatio);
+                infos.Add(new AuditDetailInfo() { FieldName = "FujiClass2RepairCostRatio", OldValue = this.RepairCostRatio.ToString(), NewValue = newInfo.RepairCostRatio.ToString() });
+
+            if (this.MethodID != newInfo.MethodID)
+                //dt.Rows.Add("", "FujiClass2MethodID", this.MethodID.GetDescription(), newInfo.MethodID.GetDescription());
+                infos.Add(new AuditDetailInfo() { FieldName = "FujiClass2MethodID", OldValue = this.MethodID.GetDescription(), NewValue = newInfo.MethodID.GetDescription() });
+
+            // if (infos.Count == 0)
+            //     audit = null;
+            // return dt;
+            return audit;
+        }
+
+        public static DataTable ConvertFujiClass2DataTable(List<FujiClass2Info> infos)
+        {
+            DataTable dt = new DataTable();
+            dt.Columns.Add("ID", typeof(int));
+            dt.Columns.Add("FujiClass1ID", typeof(int));
+            dt.Columns.Add("Name");
+            dt.Columns.Add("Description");
+            dt.Columns.Add("IsActive", typeof(bool));
+            dt.Columns.Add("IncludeLabour", typeof(bool));
+            dt.Columns.Add("PatrolTimes", typeof(double));
+            dt.Columns.Add("PatrolHours", typeof(double));
+            dt.Columns.Add("MaintenanceTimes", typeof(double));
+            dt.Columns.Add("MaintenanceHours", typeof(double));
+            dt.Columns.Add("RepairHours", typeof(double));
+            dt.Columns.Add("IncludeContract", typeof(bool));
+            dt.Columns.Add("FullCoveragePtg", typeof(double));
+            dt.Columns.Add("TechCoveragePtg", typeof(double));
+            dt.Columns.Add("IncludeSpare", typeof(bool));
+            dt.Columns.Add("SparePrice", typeof(double));
+            dt.Columns.Add("SpareRentPtg", typeof(double));
+            dt.Columns.Add("IncludeRepair", typeof(bool));
+            dt.Columns.Add("Usage", typeof(int));
+            dt.Columns.Add("EquipmentType", typeof(int));
+            dt.Columns.Add("RepairComponentCost", typeof(double));
+            dt.Columns.Add("Repair3partyRatio", typeof(double));
+            dt.Columns.Add("Repair3partyCost", typeof(double));
+            dt.Columns.Add("RepairCostRatio", typeof(double));
+            dt.Columns.Add("MethodID", typeof(int));
+
+            infos.ForEach(info => {
+                DataRow dr = dt.NewRow();
+                dr["ID"] = info.ID;
+                dr["FujiClass1ID"] = info.FujiClass1.ID;
+                dr["Name"] = info.Name;
+                dr["Description"] = info.Description;
+                dr["IncludeLabour"] = info.IncludeLabour;
+                dr["PatrolTimes"] = info.PatrolTimes;
+                dr["PatrolHours"] = info.PatrolHours;
+                dr["MaintenanceTimes"] = info.MaintenanceTimes;
+                dr["MaintenanceHours"] = info.MaintenanceHours;
+                dr["RepairHours"] = info.RepairHours;
+                dr["IncludeContract"] = info.IncludeContract;
+                dr["FullCoveragePtg"] = info.FullCoveragePtg;
+                dr["TechCoveragePtg"] = info.TechCoveragePtg;
+                dr["IncludeSpare"] = info.IncludeSpare;
+                dr["SparePrice"] = info.SparePrice;
+                dr["SpareRentPtg"] = info.SpareRentPtg;
+                dr["IncludeRepair"] = info.IncludeRepair;
+                dr["Usage"] = info.Usage;
+                dr["EquipmentType"] = info.EquipmentType.ID;
+                dr["RepairComponentCost"] = info.RepairComponentCost;
+                dr["Repair3partyRatio"] = info.Repair3partyRatio;
+                dr["Repair3partyCost"] = info.Repair3partyCost;
+                dr["RepairCostRatio"] = info.RepairCostRatio;
+                dr["MethodID"] = info.MethodID;
+                dt.Rows.Add(dr);
+            });
+            return dt;
+        }
+
+        public int CompareTo(FujiClass2Info other)
+        {
+            return this.ID.CompareTo(other.ID);
+        }
+
+        public static class LKPEquipmentType{
+            public const int Import = 1;
+            public const int General = 3;
+        }
+
+        public enum Method
+        {
+            [Description("")]
+            Null,
+            [Description("手动")]
+            Manual ,
+            [Description("韦伯")]
+            WebbStatistics,
+            [Description("定期")]
+            Regular
+        }
+
+
+        public enum SectionType
+        {
+            [Description("人工费")]
+            Labour = 1,
+            [Description("服务费")]
+            Contract,
+            [Description("备用机")]
+            Spare,
+            [Description("额外维保")]
+            Repair,
+            [Description("零件")]
+            Component,
+            [Description("耗材")]
+            Consumable
+        }
+    }
+     
+}

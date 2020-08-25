@@ -1,0 +1,24 @@
+﻿@{ var user = (BusinessObjects.Domain.UserInfo)Session[MedicalEquipmentHostingSystem.Controllers.BaseController.SESSION_KEY_USER]; var roleID = user != null ? user.Role.ID : -1; }<!DOCTYPE html>
+<html style="background: #d7e0ee;">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>board</title>
+    <link rel="stylesheet" href="../Content/css/dashboard/font_dashboard.css" type="text/css">
+    <script src="../Content/scripts/dashboard/flexible.js"></script>
+    <script src="../Content/scripts/dashboard/iconfont.js"></script>
+    <link href="../Content/css/dashboard/app.css" rel="stylesheet">
+</head>
+<body style="background: #d7e0ee;">
+    <script>
+var roleID = @roleID //debug可根据自定义值将@roleID替换为常量 //@roleID  //1,2,3
+        var systemName = '@MedicalEquipmentHostingSystem.App_Start.WebConfig.SYSTEM_NAME';
+        var userName = "@user.Role.Name";
+        var userRole = "@user.Name";
+        var background = '@Url.Action("RequestList", "Request")'
+        var logout = '@Url.Action("Login", "Home")'</script><div id="app"></div>
+    <script type="text/javascript" src="../Content/scripts/dashboard/manifest.js"></script>
+    <script type="text/javascript" src="../Content/scripts/dashboard/vendor.js"></script>
+    <script type="text/javascript" src="../Content/scripts/dashboard/app.js"></script>
+</body>
+</html>

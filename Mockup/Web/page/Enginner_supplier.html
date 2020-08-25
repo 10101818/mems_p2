@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width,initial-scale=1" />
+	<title></title>
+	<link rel="stylesheet" type="text/css" href="../css/bootstrap.min.css" />
+	<link rel="stylesheet" type="text/css" href="../style.css" />
+	<script src="../js/jquery-1.11.0.js"></script>
+	<script type="text/javascript" src="../js/bootstrap.min.js"></script>
+	<style></style>
+</head>
+
+<body>
+	<div class="iframeBody">
+		<table class="filterTable">
+			<tr>
+				<td style="width:200px;">
+					<table class="toolsTable" cellspacing="0">
+						<tr>
+							<td>
+								<h3 align="left">供应商列表</h3>
+							</td>
+						</tr>
+					</table>
+				</td>
+				<td>
+					<table cellspacing="0" cellpadding="9" class="">
+						<tr>
+							<td>
+								<button class="btn  btn-sm btnFilter"
+									style=" border-radius: .25rem;"><span
+										class="btnContent">全部</span><span class="btnBadge">16</span></button>
+							</td>
+							<td>
+								<button class="btn btn-sm btnFilter" ><span
+										class="btnContent">厂商</span><span class="btnBadge">05</span></button>
+							</td>
+							<td>
+								<button class="btn btn-sm btnFilter" ><span
+										class="btnContent">经销商</span><span class="btnBadge">01</span></button>
+							</td>
+							<td>
+								<button class="btn btn-sm btnFilter" ><span
+										class="btnContent">代理商</span><span class="btnBadge">05</span></button>
+							</td>
+							<td>
+								<button class="btn btn-sm btnFilter" ><span
+										class="btnContent">其他供应商</span><span class="btnBadge">05</span></button>
+							</td>
+						</tr>
+					</table>
+				</td>
+				<td width="1%">
+					<table style="width: 200px;text-align:center;" cellspacing="20px" cellpadding="5px">
+						<tr>
+							<td>
+								<button class="btn btn-secondary  btn-sm">打印</button>
+							</td>
+							<td>
+								<button class="btn btn-secondary  btn-sm">导出</button>
+							</td>
+							<td>
+								<button class="btn btn-secondary btn-sm">刷新</button>
+							</td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+		</table>
+		<table class="operationTable"  cellpadding="0" cellspacing="0">
+			<tr >
+				<td>
+					<table>
+						<tbody>
+							<tr >
+								<td>
+									状态：
+									<select class="">
+										<option>全部</option>
+										<option>启用</option>
+										<option>停用</option>
+									</select>&nbsp;&nbsp;&nbsp;&nbsp;
+								</td>
+								<td>搜索：
+									<select class="">
+										<option>系统编号</option>
+										<option>供应商名称</option>
+										<option>联系人</option>
+										<option>地址</option>
+										<option>电话</option>
+									</select>
+									<input type="text" class="shortInput " /><img src="../img/icons8-search-48.png" class="update">
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</td>
+			</tr>
+		</table>
+		<table class=" table ">
+			<thead class="thead-light">
+				<tr>
+					<th scope="col" width="120px" style="color:#17A2B8;">系统编号<span class="sortIcon">▼</span></th>
+					<th scope="col">供应商名称</th>
+					<th scope="col" width="80px" style="color:#17A2B8;">类型</th>
+					<th scope="col" width="80px">省份</th>
+					<th scope="col">地址</th>
+					<th scope="col" width="80px">联系人</th>
+					<th scope="col" width="120px">电话</th>
+					<th scope="col" width="120px" style="color:#17A2B8;">添加日期</th>
+					<th scope="col" width="50px" style="color:#17A2B8;">状态</th>
+					<th scope="col" width="50px">查看</th>
+				</tr>
+			</thead>
+			<tr>
+				<td scope="row">GYS00000001</td>
+				<td>飞利浦医疗(上海)有限公司</td>
+				<td>经销商</td>
+				<td>上海</td>
+				<td>上海市静安区灵石路718号</td>
+				<td>张测试</td>
+				<td>13586496548</td>
+				<td>2018-02-15</td>
+				<td>启用</td>
+				<td><img class="update btn-editSupplier" src="../img/look.png"></td>
+			</tr>
+			<tr>
+				<td scope="row">GYS00000002</td>
+				<td>常州市友邦医疗康复器材有限公司</td>
+				<td>厂商</td>
+				<td>江苏</td>
+				<td>江苏常州遥观镇勤新工业园孙塘村108号</td>
+				<td>李成周</td>
+				<td>15300225599</td>
+				<td>2018-02-15</td>
+				<td>启用</td>
+			<td><img class="update btn-editSupplier" src="../img/look.png"></td>
+			</tr>
+			<tr>
+				<td scope="row">GYS00000003</td>
+				<td>深圳市亚奥克三维科技有限公司</td>
+				<td>代理商</td>
+				<td>深圳</td>
+				<td>广东深圳龙华新区民治街道办民兴路特区</td>
+				<td>陈良维</td>
+				<td>13586496845</td>
+				<td>2018-02-19</td>
+				<td>启用</td>
+			<td><img class="update btn-editSupplier" src="../img/look.png"></td>
+			</tr>
+			<tr>
+				<td scope="row">GYS00000004</td>
+				<td>河南惠河制箱有限公司</td>
+				<td>厂商</td>
+				<td>河南</td>
+				<td>河南开封祥符区祥符大道与园区路</td>
+				<td>王庆钟</td>
+				<td>13226594563</td>
+				<td>2018-05-01</td>
+				<td>停用</td>
+			<td><img class="update btn-editSupplier" src="../img/look.png"></td>
+			</tr>
+			<tr>
+				<td scope="row">GYS00000005</td>
+				<td>无锡东晓金属制品有限公司</td>
+				<td>其他供应商</td>
+				<td>江苏</td>
+				<td>江苏无锡北环路118号C1幢厂房</td>
+				<td>张栋梁</td>
+				<td>17625498453</td>
+				<td>2018-06-12</td>
+				<td>停用</td>
+			<td><img class="update btn-editSupplier" src="../img/look.png"></td>
+			</tr>
+			<tr>
+				<td scope="row">GYS00000006</td>
+				<td>杭州富森环保科技股份有限公司</td>
+				<td>厂商</td>
+				<td>浙江</td>
+				<td>浙江杭州滨江区滨文路12号</td>
+				<td>张文轩</td>
+				<td>13954778954</td>
+				<td>2018-10-01</td>
+				<td>停用</td>
+			<td><img class="update btn-editSupplier" src="../img/look.png"></td>
+			</tr>
+			<tr>
+				<td scope="row">GYS00000007</td>
+				<td>沧州首信电器设备有限公司</td>
+				<td>经销商</td>
+				<td>河北</td>
+				<td>河北沧州青县开发区</td>
+				<td>李志亮</td>
+				<td>18033665976</td>
+				<td>2018-10-18</td>
+				<td>停用</td>
+			<td><img class="update btn-editSupplier" src="../img/look.png"></td>
+			</tr>
+			<tr>
+				<td scope="row">GYS00000008</td>
+				<td>研江智能科技有限公司</td>
+				<td>厂商</td>
+				<td>深圳</td>
+				<td>深圳龙华新区大浪华达路佳运大厦B栋3楼</td>
+				<td>魏阳光</td>
+				<td>13056897458</td>
+				<td>2018-11-11</td>
+				<td>停用</td>
+			<td><img class="update btn-editSupplier" src="../img/look.png"></td>
+			</tr>
+			<tr>
+				<td scope="row">GYS00000009</td>
+				<td>深圳市踢踢电子有限公司</td>
+				<td>代理商</td>
+				<td>广东</td>
+				<td>广东深圳西丽镇塘朗田寮工业区A14栋5楼</td>
+				<td>程池</td>
+				<td>18623458635</td>
+				<td>2018-12-01</td>
+				<td>停用</td>
+			<td><img class="update btn-editSupplier" src="../img/look.png"></td>
+			</tr>
+			<tr>
+				<td scope="row">GYS00000010</td>
+				<td>青岛爱德康医疗设备工程有限公司</td>
+				<td>厂商</td>
+				<td>山东</td>
+				<td>山东青岛城阳区夏庄街道夏庄村王沙路1718号</td>
+				<td>刘璐</td>
+				<td>15632222233</td>
+				<td>2018-12-23</td>
+				<td>停用</td>
+				<td><img class="update btn-editSupplier" src="../img/look.png"></td>
+			</tr>
+			<tr>
+				<td></td>
+				<td colspan="9">
+					<div style="float: right;">
+						<nav aria-lable="Page navigation example">
+							<ul class="pagination">
+								<li class="page-item">
+									<a class="page-link " href="#">首页</a>
+								</li>
+								<li class="page-item">
+									<a class="page-link" href="#">上一页</a>
+								</li>
+								<li class="page-item">
+									<a class="page-link" href="#">1</a>
+								</li>
+								<li class="page-item">
+									<a class="page-link" href="#">2</a>
+								</li>
+								<li class="page-item">
+									<a class="page-link" href="#">3</a>
+								</li>
+								<li class="page-item">
+									<a class="page-link" href="#">下一页</a>
+								</li>
+								<li class="page-item">
+									<a class="page-link" href="#">末页</a>
+								</li>
+							</ul>
+						</nav>
+					</div>
+				</td>
+			</tr>
+		</table>
+	</div>
+	<div class="modal fade" id="supplierModal" tabindex="-1" role="dialog"
+		aria-lableledby="supplierModalCenterTitle" aria-hidden="true">
+		<div class="modal-dialog  modal-dialog-centered" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h6 class="modal-title" id="supplierModalLongTitle">查看供应商</h6>
+					<button type="button" class="close" data-dismiss="modal" aria-lable="Close"><span class="modal-icon"
+							aria-hidden="true">&times;</span></button>
+				</div>
+				<div class="modal-body">
+					<table class="table table-sm  table-input modal-table" style="text-align: left; margin:10px auto 20px;" >
+						<tbody>
+							<tr>
+								<td width="35%" class=""><span class="requiredItem">系统编号:</span></td>
+								<td ><label class="disableContent">GYS00000001</label></td>
+							</tr>
+							<tr>
+								<td class=""><span class="requiredItem "></span>名称:</td>
+								<td><label class="disableContent">飞利浦医疗(上海)有限公司</label></td>
+							</tr>
+							<tr>
+								<td class=""><span class="requiredItem"></span>类型:</td>
+								<td>
+									<label class="disableContent">厂商</label>
+								</td>
+							</tr>
+							<tr>
+								<td class=""><span class="requiredItem"></span>省份:</td>
+								<td><label class="disableContent">上海</label></td>
+							</tr>
+							<tr>
+								<td class=""><span class="requiredItem"></span>电话:</td>
+								<td><label class="disableContent">021-0000001</label></td>
+							</tr>
+							<tr>
+								<td class=""><span class="requiredItem"></span>地址:</td>
+								<td><label class="disableContent">上海市静安区灵石路718号</label></td>
+							</tr>
+							<tr>
+								<td class=""><span class="unrequiredItem"></span>联系人:</td>
+								<td><label class="disableContent">张测试</label></td>
+							</tr>
+							<tr>
+								<td class=""><span class="unrequiredItem"></span>联系人电话:</td>
+								<td><label class="disableContent">13586496548</label></td>
+							</tr>
+							<tr>
+								<td class=""><span class="requiredItem"></span>供应商经营状态:</td>
+								<td><label class="disableContent">启用</label></td>
+							</tr>
+							<tr>
+								<td class=""><span class="unrequiredItem"></span>医疗器械经营许可证:</td>
+								<td><a href="#" class="linkFile">XKZ-05621013</a></td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+<script>
+	$(document).ready(function () {
+		var x = $("#id1").css("display")
+		$("#show").click(function () {
+			$("#id1").show();
+			$("#show").hide();
+			$("#hide").show();
+		});
+		$("#hide").click(function () {
+			$("#id1").hide();
+			$("#show").show();
+			$("#hide").hide();
+		});
+	});
+	$(document).ready(function () {
+		$("#15452").click(function () {
+			$("#showslow").animate({
+				right: '250px',
+			});
+		});
+	});
+	var options = {};
+	$(".btn-newSupplier").click(function () {
+		$("#supplierModalCenter").modal(options);
+	})
+	$(".btn-editSupplier").click(function () {
+		$("#supplierModal").modal(options);
+	})
+</script>
+
+</html>

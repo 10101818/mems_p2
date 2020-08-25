@@ -1,0 +1,73 @@
+<!DOCTYPE <!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>用户主页</title>
+	<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+	<link type="text/css" rel="stylesheet" href="css/materialize.css"  media="screen,projection"/>
+	<link type="text/css" rel="stylesheet" href="css/style.css"  media="screen,projection"/>
+    <!--Let browser know website is optimized for mobile-->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <script src="js/lib.js" type="text/javascript" charset="utf-8" async defer></script>
+</head>
+<body>
+	<div class="container">
+		<div class="row top-row">
+			<div class="header">
+				<div class="row">
+					<div class="col s9">
+						<span>设备管理系统</span>
+					</div>
+					<div class="col s3">
+						<span>
+							<i class="material-icons icon-header">face</i>
+						</span>
+						<span>Jin</span>
+					</div>
+				</div>
+			</div>
+			<div class="sub-menu" style="height:600px;">
+				<div class="row" style="">
+					<div class="col s6 center">
+						<div class="item-body">
+							<div class="icon-container waves-effect waves-teal" onclick="navigateTo('c_scan_qrcode_page')">
+								<i class="material-icons icon-sm">build</i>
+							</div>
+							<div class="text-footer">报修</div>
+						</div>
+					</div>
+					<div class="col s6 center">
+						<div class="item-body">
+							<div class="icon-container waves-effect waves-teal" onclick="navigateTo('c_client_report_page')">
+								<i class="material-icons icon-sm">history</i>
+							</div>
+							<div class="text-footer">报修历史</div>
+						</div>
+					</div>
+				</div>
+				<div class="row" style="margin-bottom: 0px;">
+					<div class="col s6 center">
+						<div class="item-body">
+							<div class="icon-container waves-effect waves-teal" onclick="navigateTo('report_repair_page')">
+								<i class="material-icons icon-sm">assignment_ind</i>
+							</div>
+							<div class="text-footer">联系管理员</div>
+						</div>
+					</div>
+					<div class="col s6 center">
+						<div class="item-body">
+							<div class="icon-container waves-effect waves-teal" onclick="navigateTo('c_other_service')">
+								<i class="material-icons icon-sm">remove_red_eye</i>
+							</div>
+							<div class="text-footer">其他服务</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!--JavaScript at end of body for optimized loading-->
+    <script type="text/javascript" src="js/materialize.min.js"></script>
+</body>
+</html>

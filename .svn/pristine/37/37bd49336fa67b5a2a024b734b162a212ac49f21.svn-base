@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<title>ATOI医疗设备管理系统</title>
+		<link href="css/mui.min.css" rel="stylesheet" />
+		<link href="css/style.css" rel="stylesheet" />
+	</head>
+	<body>
+		<header class="mui-bar mui-bar-nav">
+			<a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+			<h1 class="mui-title mui-text-left" style="left: 60px;">设备报修</h1>
+			<div class="top-login-info mui-clearfix">
+				<img src="img/face.svg" />
+				<h2 class="top-login-name">陈晓辉</h2>
+			</div>
+		</header>
+		<div class="mui-content mui-fullscreen">
+			<div class="equipment-wrapper">
+				<div class="equipment-header">
+					<img src="img/info.svg" />
+					<span class="title">设备基本信息</span>
+					<span class="mui-icon mui-icon-arrowup"></span>
+					<span class="mui-icon mui-icon-arrowdown" style="display: none;"></span>
+				</div>
+				<ul class="equipment-info mui-table-view">
+					<li class="mui-table-view-cell">
+						<div class="mui-table">
+							<div class="mui-table-cell mui-col-xs-5">
+								<h4 class="mui-ellipsis">设备系统编号：</h4>
+							</div>
+							<div class="mui-table-cell mui-col-xs-7">
+								<span id="eq_no" class="mui-h5">ZC00000001</span>
+							</div>
+						</div>
+					</li>
+					<li class="mui-table-view-cell">
+						<div class="mui-table">
+							<div class="mui-table-cell mui-col-xs-5">
+								<h4 class="mui-ellipsis">设备名称：</h4>
+							</div>
+							<div class="mui-table-cell mui-col-xs-7">
+								<span id="eq_name" class="mui-h5">医用磁共振设备</span>
+							</div>
+						</div>
+					</li>
+					<li class="mui-table-view-cell">
+						<div class="mui-table">
+							<div class="mui-table-cell mui-col-xs-5">
+								<h4 class="mui-ellipsis">使用科室：</h4>
+							</div>
+							<div class="mui-table-cell mui-col-xs-7">
+								<span id="eq_department" class="mui-h5">磁共振</span>
+							</div>
+						</div>
+					</li>
+					<li class="mui-table-view-cell">
+						<div class="mui-table">
+							<div class="mui-table-cell mui-col-xs-5">
+								<h4 class="mui-ellipsis">设备厂商：</h4>
+							</div>
+							<div class="mui-table-cell mui-col-xs-7">
+								<span id="eq_producer" class="mui-h5">飞利浦</span>
+							</div>
+						</div>
+					</li>
+					<li class="mui-table-view-cell">
+						<div class="mui-table">
+							<div class="mui-table-cell mui-col-xs-5">
+								<h4 class="mui-ellipsis">资产等级：</h4>
+							</div>
+							<div class="mui-table-cell mui-col-xs-7">
+								<span id="eq_level" class="mui-h5">重要</span>
+							</div>
+						</div>
+					</li>
+					<li class="mui-table-view-cell">
+						<div class="mui-table">
+							<div class="mui-table-cell mui-col-xs-5">
+								<h4 class="mui-ellipsis">设备型号：</h4>
+							</div>
+							<div class="mui-table-cell mui-col-xs-7">
+								<span id="eq_type" class="mui-h5">Philips 781-296</span>
+							</div>
+						</div>
+					</li>
+					<li class="mui-table-view-cell">
+						<div class="mui-table">
+							<div class="mui-table-cell mui-col-xs-5">
+								<h4 class="mui-ellipsis">安装地点：</h4>
+							</div>
+							<div class="mui-table-cell mui-col-xs-7">
+								<span id="eq_address" class="mui-h5">磁共振1室</span>
+							</div>
+						</div>
+					</li>
+					<li class="mui-table-view-cell">
+						<div class="mui-table">
+							<div class="mui-table-cell mui-col-xs-5">
+								<h4 class="mui-ellipsis">保修状况：</h4>
+							</div>
+							<div class="mui-table-cell mui-col-xs-7">
+								<span id="eq_status" class="mui-h5">保内</span>
+							</div>
+						</div>
+					</li>
+				</ul>
+			</div>
+			<div class="equipment-wrapper">
+				<div class="equipment-header">
+					<img src="img/description.svg" />
+					<span class="title">报修内容</span>
+					<span class="mui-icon mui-icon-arrowup"></span>
+					<span class="mui-icon mui-icon-arrowdown" style="display: none;"></span>
+				</div>
+				<ul class="equipment-info mui-table-view">
+					<li class="mui-table-view-cell">
+						<div class="mui-table">
+							<div class="mui-table-cell mui-col-xs-5">
+								<h4 class="mui-ellipsis">故障描述：</h4>
+							</div>
+							<div class="mui-table-cell mui-col-xs-7">
+								<input type="text" id="eq-problem" />
+							</div>
+						</div>
+					</li>
+					<li class="mui-table-view-cell">
+						<div class="mui-table">
+							<div class="mui-table-cell mui-col-xs-5">
+								<h4 class="mui-ellipsis">故障分类：</h4>
+							</div>
+							<div class="mui-table-cell mui-col-xs-7">
+								<input type="text" id="eq-problem-type" />
+							</div>
+						</div>
+					</li>
+					<li class="mui-table-view-cell">
+						<span class="mui-h5">上传故障照片</span>
+					</li>
+					<li class="mui-table-view-cell">
+						<span class="mui-icon mui-icon-camera" style="padding: 5px;" onclick="takePicture()"></span>
+						<img id="eq_pic" />
+					</li>
+				</ul>
+			</div>
+			<div class="equipment-button mui-text-center">
+				<button class="btn-submit">点击报修</button>
+			</div>
+		</div>
+	</body>
+	<script src="js/mui.min.js"></script>
+	<script src="js/jquery-2.1.0.js"></script>
+	<script>
+		mui.init();
+		mui.plusReady(function() {
+			exData = plus.webview.currentWebview().exdata;
+			console.log(exData);
+			var eqinfo = JSON.parse(exData);
+			document.getElementById('eq_no').innerText = eqinfo.SBXTBH;
+			document.getElementById('eq_name').innerText = eqinfo.SBMC;
+			document.getElementById('eq_department').innerText = eqinfo.SYKS;
+			document.getElementById('eq_producer').innerText = eqinfo.SBCS;
+			document.getElementById('eq_level').innerText = eqinfo.ZCDJ;
+			document.getElementById('eq_type').innerText = eqinfo.SBXH;
+			document.getElementById('eq_address').innerText = eqinfo.AZDD;
+			document.getElementById('eq_status').innerText = eqinfo.BXZK;
+		});
+		
+		$('.mui-icon-arrowup').click(function() {
+			$(this).hide().siblings('.mui-icon-arrowdown').show();
+			$(this).parent().siblings('ul').slideUp();
+		});
+		
+		$('.mui-icon-arrowdown').click(function() {
+			$(this).hide().siblings('.mui-icon-arrowup').show();
+			$(this).parent().siblings('ul').slideDown();
+		});
+		
+		$('.btn-submit').click(function() {
+// 			mui.alert('报修成功', '报修成功', function() {
+// 				mui.back();
+// 			});
+			mui.toast("报修成功", {type:"div", duration: 1500});
+			setTimeout(function(){mui.back();}, 1500);
+		});
+
+		function takePicture() {
+			var imgObj = document.getElementById('eq_pic');
+			var btnArray = [{
+				title: "拍照"
+			}, {
+				title: "选取现有的"
+			}];
+			plus.nativeUI.actionSheet({
+				title: "选择照片",
+				cancel: "取消",
+				buttons: btnArray
+			}, function(e) {
+				var index = e.index;
+				switch (index) {
+					case 0:
+						text += "取消";
+						break;
+					case 1:
+						appendByCamera(imgObj);
+						break;
+					case 2:
+						appendByGallery(imgObj);
+						break;
+				}
+			});
+		}
+
+		function appendByCamera(imgObj) {
+			console.log(1);
+			plus.camera.getCamera().captureImage(
+				function(path) {
+					compressImage(path, imgObj);
+				},
+				function(e) {
+					console.log('失败：' + e.message);
+				}, {
+					filename: '_doc/camera/',
+					index: 1
+				}
+			);
+		}
+
+		//调取相册
+
+		function appendByGallery(imgObj) {
+			plus.gallery.pick(
+				function(path) {
+					compressImage(path, imgObj);
+				},
+				function(e) {}
+			);
+		}
+
+		//压缩图片
+		function compressImage(srcPath, imgObj) {
+			var zipPath = '_doc/camera/tmp.jpg';
+			plus.nativeUI.showWaiting('加载中...');
+			plus.zip.compressImage({
+				src: srcPath,
+				dst: zipPath,
+				quality: 100,
+				width: '160px',
+				height: '160px',
+				overwrite: true
+			}, function(i) {
+				plus.io.resolveLocalFileSystemURL(zipPath, function(entry) {
+					entry.file(function(file) {
+						if (file.size > 1024 * 1024) {
+							compressImageAgain(zipPath, imgObj);
+						} else {
+							showImage(zipPath, imgObj);
+						}
+					});
+				}, function(e) {
+					mui.toast(App.config.Message.ImageError, {
+						type: 'div'
+					});
+					plus.nativeUI.closeWaiting();
+					return;
+				});
+			}, function(e) {
+				plus.nativeUI.closeWaiting();
+			});
+		};
+
+		//再次压缩图片
+		function compressImageAgain(zipPath, imgObj) {
+			plus.zip.compressImage({
+				src: zipPath,
+				dst: zipPath,
+				quality: 50,
+				overwrite: true
+			}, function(i) {
+				showImage(zipPath, imgObj);
+			}, function(e) {
+				plus.nativeUI.closeWaiting();
+			});
+		}
+
+		//显示图片
+		function showImage(path, imgObj) {
+			plus.io.resolveLocalFileSystemURL(path, function(entry) {
+				entry.file(function(file) {
+					var fileReader = new plus.io.FileReader();
+					fileReader.readAsDataURL(file);
+					fileReader.onloadend = function(evt) {
+						base64 = evt.target.result;
+						imgObj.setAttribute('src', base64);
+						imgObj.setAttribute('style', 'width:50px;height:50px;');
+						plus.nativeUI.closeWaiting();
+					}
+					fileReader.onerror = function() {
+						mui.toast(App.config.Message.ImageError, {
+							type: 'div'
+						});
+						plus.nativeUI.closeWaiting();
+					}
+				});
+			}, function(e) {
+				mui.toast(App.config.Message.ImageError, {
+					type: 'div'
+				});
+				plus.nativeUI.closeWaiting();
+			});
+		}
+	</script>
+</html>

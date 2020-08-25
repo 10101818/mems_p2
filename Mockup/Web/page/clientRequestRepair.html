@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>客户请求列表-维修请求</title>
+		<link rel="stylesheet" type="text/css" href="../css/bootstrap.min.css" />
+		<link rel="stylesheet" type="text/css" href="../style.css" />
+		<script src="../js/jquery-1.11.0.js"></script>
+	</head>
+	<body>
+		<div class="iframeBody">
+			<table class="filterTable">
+				<tr>
+					<td>
+						<table cellspacing="0px" cellpadding="9px">
+							<tr>
+								<td>
+									<button class="btn btn-sm btnFilter" ><span class="">核磁科</span><span class="btnBadge">05</span></button>
+								</td>
+								<td>
+									<button class="btn btn-sm btnFilter" ><span class="">骨科</span><span class="btnBadge">01</span></button>
+								</td>
+								<td>
+									<button class="btn btn-sm btnFilter" ><span class="">口腔科</span><span class="btnBadge">05</span></button>
+								</td>
+								<td>
+									<button class="btn btn-sm btnFilter" ><span class="">放射科</span><span
+										 class="btnBadge">05</span></button>
+								</td>
+							</tr>
+						</table>
+					</td>
+					<td width="1%">
+						<table style="width: 200px;" cellspacing="0" cellpadding="5px">
+							<tr>
+								<td>
+									<button class="btn btn-secondary  btn-sm">打印</button>
+								</td>
+								<td>
+									<button class="btn btn-secondary  btn-sm">导出</button>
+								</td>
+								<td>
+									<button class="btn btn-secondary btn-sm">刷新</button>
+								</td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+				<tr>
+					<td  style="font-size: 20px;font-weight: bold;" align="center">
+						今日报修清单
+					</td>
+				</tr>
+			</table>
+			<table class="operationTable" cellpadding="0" cellspacing="0">
+				<tr>
+					<td>
+						<table>
+							<tbody>
+								<tr>
+									<td colspan="2" hidden="hidden">
+										请求日期:&nbsp;<input type="date" value="2019-04-10" style="width:140px" />—<input type="date" value="2019-04-20"
+										 style="width:140px" />&nbsp;&nbsp;
+									</td>
+									<td>状态：
+										<select>
+											<option value="">全部</option>
+											<option value="">新建</option>
+											<option value="">已分配</option>
+											<option value="">已响应</option>
+											<option value="">待审批</option>
+											<option value="">待分配</option>
+											<option value="">问题升级</option>
+											<option value="">待第三方支持</option>
+											<option value="">未完成</option>
+											<option value="">终止</option>
+											<option value="">关闭</option>
+										</select>&nbsp;&nbsp;&nbsp;
+									</td>
+									<td>类型：
+										<select id="s1">
+											<option value="维修">全部</option>
+											<option value="维修">维修</option>
+											<option value="保养">保养</option>
+											<option value="强检">强检</option>
+											<option value="巡检">巡检</option>
+											<option value="校正">校正</option>
+											<option value="设备新增">设备新增</option>
+											<option value="不良事件">不良事件</option>
+											<option value="合同档案">合同档案</option>
+											<option value="验收安装">验收安装</option>
+											<option value="召回">召回</option>
+											<option value="调拨">调拨</option>
+											<option value="借用">借用</option>
+											<option value="盘点">盘点</option>
+											<option value="报废">报废</option>
+											<option value="其他服务">其他服务</option>
+										</select>&nbsp;&nbsp;&nbsp;
+									</td>	
+									<td>科室：
+										<select id="s1">
+											<option>全部</option>
+											<option>功能科</option>
+											<option>放射科</option>
+											<option>重症医学科</option>
+											<option>核磁共振</option>
+											<option>肾病综合内科</option>
+											<option>检验科</option>
+											<option>内科</option>
+											<option>手术室</option>
+										</select>&nbsp;&nbsp;&nbsp;
+									</td>
+									<td>紧急程度:
+										<select>
+											<option value="">全部</option>
+											<option value="">紧急</option>
+											<option value="">普通</option>
+										</select>&nbsp;&nbsp;&nbsp;
+									</td>
+									<td>
+										<input type="checkbox" />&nbsp;超期&nbsp;&nbsp;&nbsp;
+									</td>
+									<td colspan="2">搜索:
+										<select>
+											<option value="">请求编号</option>
+											<option value="">设备系统编号</option>
+											<option value="">设备名称</option>
+											<option value="">请求人</option>
+										</select>
+										<input type="text" /><img src="../img/icons8-search-48.png" alt="" style="width: 30px;" />
+									</td>
+								</tr>
+							</tbody>
+						</table>
+					</td>
+				</tr>
+			</table>
+			<table class="table " cellspacing="0px" cellpadding="5px">
+				<thead class="thead-light">
+					<tr>
+						<th scope="col" style="color:#17A2B8;">请求编号<span class="sortIcon">▼</span></th>
+						<th scope="col">设备系统编号</th>
+						<th scope="col">设备名称</th>
+						<th scope="col">科室</th>
+						<th scope="col">请求人</th>
+						<th scope="col" style="color:#17A2B8;">请求日期</th>
+						<th scope="col">请求来源</th>
+						<th scope="col">类型</th>
+						<th scope="col">状态</th>
+						<th scope="col">派工单</th>
+						<th scope="col">查看</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td>C00000001</td>
+						<td>ZC00000001</td>
+						<td>彩超</td>
+						<td>功能科</td>
+						<td>刘宇</td>
+						<td>2019-04-11</td>
+						<td>服务请求</td>
+						<td>维修</td>
+						<td>待分配</td>
+						<td> <a href="DeviceUserServerRequest.html"><img src="../img/paigongList.png" class="update"></a> </td>
+						<td><img src="../img/look.png" class="update" onclick="view()"></td>
+					</tr>
+					<tr>
+						<td>C00000002</td>
+						<td>ZC00000002</td>
+						<td>CT机</td>
+						<td>放射科</td>
+						<td>系统</td>
+						<td>2019-04-11</td>
+						<td>计划服务</td>
+						<td>维修</td>
+						<td>问题升级</td>
+						<td> <a href="DeviceUserServerRequest.html"><img src="../img/paigongList.png" class="update"></a> </td>
+						<td><img src="../img/look.png" class="update" onclick="view()"></td>
+					</tr>
+					<tr>
+						<td>C00000003</td>
+						<td>ZC00000003</td>
+						<td>呼吸机</td>
+						<td>重症医学科</td>
+						<td>魏宸园</td>
+						<td>2019-04-11</td>
+						<td>服务请求</td>
+						<td>维修</td>
+						<td>待审批</td>
+						<td> <a href="DeviceUserServerRequest.html"><img src="../img/paigongList.png" class="update"></a> </td>
+						<td><img src="../img/look.png" class="update" onclick="view()"></td>
+					</tr>
+					<tr>
+						<td>C00000004</td>
+						<td>多设备</td>
+						<td>多设备</td>
+						<td>功能科</td>
+						<td>刘宇</td>
+						<td>2019-04-11</td>
+						<td>系统</td>
+						<td>维修</td>
+						<td>已审批</td>
+						<td> <a href="DeviceUserServerRequest.html"><img src="../img/paigongList.png" class="update"></a> </td>
+						<td><img src="../img/look.png" class="update" onclick="view()"></td>
+					</tr>
+					<tr>
+						<td >C00000005</td>
+						<td>ZC00000005</td>
+						<td>医用磁共振成像系统</td>
+						<td>核磁共振</td>
+						<td>顾长善</td>
+						<td>2019-04-11</td>
+						<td>服务请求</td>
+						<td>维修</td>
+						<td>新建</td>
+						<td> <a href="DeviceUserServerRequest.html"><img src="../img/paigongList.png" class="update"></a> </td>
+						<td><img src="../img/look.png" class="update" onclick="view()"></td>
+					</tr>
+					<tr>
+						<td>C00000006</td>
+						<td>ZC00000006</td>
+						<td>电子胃肠镜</td>
+						<td>肾病综合内科</td>
+						<td>刘宇</td>
+						<td>2019-04-11</td>
+						<td>服务请求</td>
+						<td>维修</td>
+						<td>待第三方支持</td>
+						<td> <a href="DeviceUserServerRequest.html"><img src="../img/paigongList.png" class="update"></a> </td>
+						<td><img src="../img/look.png" class="update" onclick="view()"></td>
+					<tr>
+						<td>C00000007</td>
+						<td>ZC00000007</td>
+						<td>全自动生化分析仪</td>
+						<td>检验科</td>
+						<td>系统</td>
+						<td>2019-04-11</td>
+						<td>计划服务</td>
+						<td>维修</td>
+						<td>问题升级</td>
+						<td> <a href="DeviceUserServerRequest.html"><img src="../img/paigongList.png" class="update"></a> </td>
+						<td><img src="../img/look.png" class="update" onclick="view()"></td>
+					</tr>
+					<tr>
+						<td>C00000008</td>
+						<td>ZC00000008</td>
+						<td>内窥镜摄像系统</td>
+						<td>内科</td>
+						<td>魏宸园</td>
+						<td>2019-04-11</td>
+						<td>服务请求</td>
+						<td>保养</td>
+						<td>待分配</td>
+						<td> <a href="DeviceUserServerRequest.html"><img src="../img/paigongList.png" class="update"></a> </td>
+						<td><img src="../img/look.png" class="update" onclick="view()"></td>
+					</tr>
+					<tr>
+						<td>C00000009</td>
+						<td>ZC00000009</td>
+						<td>内窥镜摄像系统</td>
+						<td>手术室</td>
+						<td>顾长善</td>
+						<td>2019-04-11</td>
+						<td>服务请求</td>
+						<td>维修</td>
+						<td>待响应</td>
+						<td> <a href="DeviceUserServerRequest.html"><img src="../img/paigongList.png" class="update"></a> </td>
+						<td><img src="../img/look.png" class="update" onclick="view()"></td>
+					</tr>
+					<tr>
+						<td>C00000010</td>
+						<td>ZC00000010</td>
+						<td>数字X射线摄影系统</td>
+						<td>放射科</td>
+						<td>刘宇</td>
+						<td>2019-04-11</td>
+						<td>服务请求</td>
+						<td>维修</td>
+						<td>待分配</td>
+						<td> <a href="DeviceUserServerRequest.html"><img src="../img/paigongList.png" class="update"></a> </td>
+						<td><img src="../img/look.png" class="update" onclick="view()"></td>
+					</tr>
+					<tr>
+						<td colspan="11">
+							<div class="pagenationDiv">
+								<nav aria-lable="Page navigation example">
+									<ul class="pagination">
+										<li class="page-item">
+											<a class="page-link" href="#">首页</a>
+										</li>
+										<li class="page-item">
+											<a class="page-link" href="#">上一页</a>
+										</li>
+										<li class="page-item">
+											<a class="page-link" href="#">1</a>
+										</li>
+										<li class="page-item">
+											<a class="page-link" href="#">2</a>
+										</li>
+										<li class="page-item">
+											<a class="page-link" href="#">3</a>
+										</li>
+										<li class="page-item">
+											<a class="page-link" href="#">下一页</a>
+										</li>
+										<li class="page-item">
+											<a class="page-link" href="#">末页</a>
+										</li>
+									</ul>
+								</nav>
+							</div>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+	</body>
+	<script>
+		$(document).ready(function() {
+			var x = $("#id1").css("display")
+			$("#show").click(function() {
+				$("#id1").show();
+				$("#show").hide();
+				$("#hide").show();
+			});
+			$("#hide").click(function() {
+				$("#id1").hide();
+				$("#show").show();
+				$("#hide").hide();
+			});
+		});
+		$(document).ready(function() {
+			$("#15452").click(function() {
+				$("#showslow").animate({
+					right: '250px',
+				});
+			});
+		});
+
+		function approve() {
+			window.location = "ApproveRepairApplication.html";
+		}
+
+		function update() {
+			window.location.href = "updateServerRequest.html";
+		}
+
+		function cat() {
+			window.location = "AllocatedRepairApplication.html";
+		}
+
+		function view() {
+			window.location = "DMApproveRepairApplication.html";
+		}
+		$(function() {
+			$(".addService").click(function() {
+				window.location.href = "addNewServers.html";
+			})
+		})
+	</script>
+
+</html>

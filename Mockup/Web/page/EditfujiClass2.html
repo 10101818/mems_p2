@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<title>编辑富士II类</title>
+	<link rel="stylesheet" type="text/css" href="../css/bootstrap.min.css" />
+	<link rel="stylesheet" type="text/css" href="../style.css" />
+	<script src=" ../js/jquery-1.11.0.js"></script>
+	<script type="text/javascript" src="../js/bootstrap.min.js"></script>
+</head>
+<style>
+	.modal input[type='text'] {
+		min-width: 40px;
+		width: 90%;
+	}
+
+	.modal td {
+		min-width: 50px;
+	}
+
+	.modal-body {
+		overflow: auto;
+	}
+</style>
+
+<body>
+	<div class="body addDeviceDetails">
+		<div>
+			<div style="font-size:18px;margin-top:3%;"><a onclick="window.history.back()" href="#" class="linkFile">
+					<<返回 </a>
+			</div>
+			<p class="tblTitle">编辑富士II类</p>
+			<!--基本信息-->
+			<table class="tblDetail" width="800" border="1" bordercolor="000000" cellpadding="0" cellspacing="0">
+				<tbody>
+					<tr>
+						<td colspan="4" class="headtr">基本信息</td>
+					</tr>
+					<tr>
+						<td class="tdDetailHead" width="20%">简称</td>
+						<td width="30%" class="inputContent">
+							<input type="text" class="deviceName" value="医用刀类" name="deviceName" />
+						</td>
+						<td class="tdDetailHead" width="20%">描述</td>
+						<td width="30%" class="inputContent">
+							<input type="text" class="deviceName" value="医用磁共振" name="deviceName" />
+						</td>
+					</tr>
+					<tr>
+						<td class="tdDetailHead">富士I类</td>
+						<td class="inputContent">
+							<select class="deviceType">
+								<option value="1">医用激光类</option>
+								<option value="6801">医用刀类</option>
+								<option value="6802">灯床塔</option>
+								<option value="6807">输注泵</option>
+							</select>
+						</td>
+						<td class="tdDetailHead">状态</td>
+						<td class="inputContent">
+							<input name="select" type="radio" checked />启用
+							<input name="select" type="radio" />停用
+						</td>
+					</tr>
+				</tbody>
+			</table>
+			<br />
+			<!--人工费-->
+			<table class="tblDetail" width="800" border="1" bordercolor="000000" cellpadding="0" cellspacing="0">
+				<tbody>
+					<tr>
+						<td colspan="4" class="headtr">人工费&nbsp;<input type="checkbox" checked /></td>
+					</tr>
+					<tr>
+						<td class="tdDetailHead" width="20%">巡检次数（次/年）</td>
+						<td width="30%" class="inputContent">
+							<input type="text" class="deviceName" value="1" name="deviceName" />
+						</td>
+						<td class="tdDetailHead" width="20%">巡检工时（次/时）</td>
+						<td width="30%" class="inputContent">
+							<input type="text" class="deviceName" value="0.5" name="deviceName" />
+						</td>
+					</tr>
+					<tr>
+						<td class="tdDetailHead" width="20%">保养次数（次/年）</td>
+						<td width="30%" class="inputContent">
+							<input type="text" class="deviceName" value="1" name="deviceName" />
+						</td>
+						<td class="tdDetailHead" width="20%">保养工时（次/时）</td>
+						<td width="30%" class="inputContent">
+							<input type="text" class="deviceName" value="1" name="deviceName" />
+						</td>
+					</tr>
+					<tr>
+						<td class="tdDetailHead">每月维修平均工时（时）</td>
+						<td class="inputContent" colspan="3">
+							<input type="text" class="deviceName" value="120" name="deviceName" />
+						</td>
+					</tr>
+				</tbody>
+			</table>
+			<br />
+			<!--维保服务费-->
+			<table class="tblDetail" width="800" border="1" bordercolor="000000" cellpadding="0" cellspacing="0">
+				<tbody>
+					<tr>
+						<td colspan="4" class="headtr">维保服务费&nbsp;<input type="checkbox" checked /></td>
+					</tr>
+					<tr>
+						<td class="tdDetailHead" width="20%">全保保单单价占设备金额百分比（%）</td>
+						<td width="30%" class="inputContent">
+							<input type="text" class="deviceName" value="5" name="deviceName" />
+						</td>
+						<td class="tdDetailHead" width="20%">技术保保单单价占设备金额百分比（%）</td>
+						<td width="30%" class="inputContent">
+							<input type="text" class="deviceName" value="3" name="deviceName" />
+						</td>
+					</tr>
+				</tbody>
+			</table>
+			<br />
+			<!--备用机-->
+			<table class="tblDetail" width="800" border="1" bordercolor="000000" cellpadding="0" cellspacing="0">
+				<tbody>
+					<tr>
+						<td colspan="4" class="headtr">备用机成本&nbsp;<input type="checkbox" checked /></td>
+					</tr>
+					<tr>
+						<td class="tdDetailHead" width="20%">标准价格（元）</td>
+						<td width="30%" class="inputContent">
+							<input type="text" class="deviceName" value="3580000" name="deviceName" />
+						</td>
+						<td class="tdDetailHead" width="20%">月租占标准价格的比率（%）</td>
+						<td width="30%" class="inputContent">
+							<input type="text" class="deviceName" value="3" name="deviceName" />
+						</td>
+					</tr>
+				</tbody>
+			</table>
+			<br />
+			<!--维保额外维修费-->
+			<table class="tblDetail" width="800" border="1" bordercolor="000000" cellpadding="0" cellspacing="0">
+				<tbody>
+					<tr>
+						<td colspan="4" class="headtr">维保额外维修费&nbsp;<input type="checkbox" checked /></td>
+					</tr>
+					<tr>
+						<td class="tdDetailHead" width="20%">设备等级</td>
+						<td width="30%" class="inputContent">
+							<select class="deviceType" id="EqptLevel" >
+								<option value="1">重点</option>
+								<option value="2">次重点</option>
+								<option value="3">一般</option>
+							</select>
+						</td>
+						<td class="tdDetailHead" width="20%">工程师无法修复概率（%）</td>
+						<td class="inputContent" width="30%">
+							<input type="text" class="deviceName" value="3" name="deviceName" />
+						</td>
+					</tr>
+					<tr>
+						<td class="tdDetailHead" width="20%" id="EqptLevelLabel">单次维修平均零件成本（元）</td>
+						<td class="inputContent" width="30%">
+							<input type="text" class="deviceName" id="EqptLevelValue" value="3500" name="deviceName" />
+						</td>
+						<td class="tdDetailHead">外购维修服务平均成本（元）</td>
+						<td class="inputContent">
+							<input type="text" class="deviceName" value="3500" name="deviceName" />
+						</td>
+					</tr>
+					<tr>
+						<td class="tdDetailHead">故障成本占设备金额的比例（%）</td>
+						<td class="inputContent">
+							<input type="text" class="deviceName" value="3" name="deviceName" />
+						</td>
+						<td class="tdDetailHead">使用量</td>
+						<td class="inputContent">
+							<input type="text" class="deviceName" value="200" name="deviceName" />
+						</td>
+					</tr>
+					<tr>
+						<td class="tdDetailHead">故障概率</td>
+						<td colspan="3" style="padding:0">
+							<button class="btn btn-info btn-sm" style="margin-left:10px;"
+								onclick="$('#Repair').modal(options);"><span>详情</span></button>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+			<br />
+			<!--零件-->
+			<table class="tblDetail" width="800" border="1" bordercolor="000000" cellpadding="0" cellspacing="0">
+				<tbody>
+					<tr>
+						<td colspan="6" style="border-right: none;width:95%" class="headtr">零件<button
+								onclick="$('#AddComponent').modal(options)" class="btn btn-info btn-sm"
+								style="float: right;"><span>添加</span></button></td>
+					</tr>
+					<tr>
+						<td class="tdDetailHead">名称</td>
+						<td class="tdDetailHead">描述</td>
+						<td class="tdDetailHead">类型</td>
+						<td class="tdDetailHead tdListCenter">故障率详情</td>
+						<td class="tdDetailHead tdListCenter">维保</td>
+						<td class="tdDetailHead tdListCenter">删除</td>
+					</tr>
+					<tr>
+						<td>CT球管</td>
+						<td>CT类CT球管</td>
+						<td>CT球管</td>
+						<td class="tdListCenter"><img src="../img/edit.png" onclick="$('#Component').modal(options)"
+								class="update" /></td>
+						<td class="tdListCenter"><input type="checkbox" checked /></td>
+						<td class="tdListCenter"><img src="../img/delete.png" /></td>
+					</tr>
+					<tr>
+						<td>探测器</td>
+						<td>CT类探测器</td>
+						<td>一般零件</td>
+						<td class="tdListCenter"><img src="../img/edit.png" onclick="$('#Component').modal(options)"
+								class="update" /></td>
+						<td class="tdListCenter"><input type="checkbox" /></td>
+						<td class="tdListCenter"><img src="../img/delete.png" /></td>
+					</tr>
+					<tr>
+						<td>高压发生器</td>
+						<td>高压发生器</td>
+						<td>一般零件</td>
+						<td class="tdListCenter"><img src="../img/edit.png" onclick="$('#Component').modal(options)"
+								class="update" /></td>
+						<td class="tdListCenter"><input type="checkbox" checked /></td>
+						<td class="tdListCenter"><img src="../img/delete.png" /></td>
+					</tr>
+					<tr>
+						<td>高压滑环</td>
+						<td>高压滑环</td>
+						<td>一般零件</td>
+						<td class="tdListCenter"><img src="../img/edit.png" onclick="$('#Component').modal(options)"
+								class="update" /></td>
+						<td class="tdListCenter"><input type="checkbox" /></td>
+						<td class="tdListCenter"><img src="../img/delete.png" /></td>
+					</tr>
+					<tr>
+						<td>其他(床)</td>
+						<td>其他类</td>
+						<td>一般零件</td>
+						<td class="tdListCenter"><img src="../img/edit.png" onclick="$('#Component').modal(options)"
+								class="update" /></td>
+						<td class="tdListCenter"><input type="checkbox" /></td>
+						<td class="tdListCenter"><img src="../img/delete.png" /></td>
+					</tr>
+				</tbody>
+			</table>
+			<br />
+			<!--耗材-->
+			<table class="tblDetail" width="800" border="1" bordercolor="000000" cellpadding="0" cellspacing="0">
+				<tbody>
+					<tr>
+						<td colspan="5" style="border-right: none;width:95%" class="headtr">耗材<button
+								onclick="$('#AddConsumable').modal(options)" class="btn btn-info btn-sm"
+								style="float: right;"><span>添加</span></button></td>
+					</tr>
+					<tr>
+						<td class="tdDetailHead">名称</td>
+						<td class="tdDetailHead">描述</td>
+						<td class="tdDetailHead">类型</td>
+						<td class="tdDetailHead tdListCenter">维保</td>
+						<td class="tdDetailHead tdListCenter">删除</td>
+					</tr>
+					<tr>
+						<td>CT球管</td>
+						<td>CT球管</td>
+						<td>定期</td>
+						<td class="tdListCenter"><input type="checkbox" checked /></td>
+						<td class="tdListCenter"><img src="../img/delete.png" /></td>
+					</tr>
+					<tr>
+						<td>探测器</td>
+						<td>探测器</td>
+						<td>定期</td>
+						<td class="tdListCenter"><input type="checkbox" /></td>
+						<td class="tdListCenter"><img src="../img/delete.png" /></td>
+					</tr>
+					<tr>
+						<td>高压发生器</td>
+						<td>探测器</td>
+						<td>定量</td>
+						<td class="tdListCenter"><input type="checkbox" /></td>
+						<td class="tdListCenter"><img src="../img/delete.png" /></td>
+					</tr>
+					<tr>
+						<td>高压滑环</td>
+						<td>高压滑环</td>
+						<td>定量</td>
+						<td class="tdListCenter"><input type="checkbox" checked /></td>
+						<td class="tdListCenter"><img src="../img/delete.png" /></td>
+					</tr>
+					<tr>
+						<td>其他(床)</td>
+						<td>其他</td>
+						<td>定量</td>
+						<td class="tdListCenter"><input type="checkbox" /></td>
+						<td class="tdListCenter"><img src="../img/delete.png" /></td>
+					</tr>
+				</tbody>
+			</table>
+			<br />
+			<table border="0" width="800" class="tblDetail" style="text-align: center;">
+				<tbody>
+					<tr>
+						<td><button class="btn btn-info"><span>保存</span></button></td>
+						<td><button class="btn btn-info" onclick="window.history.back()"><span>返回</span></button></td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
+
+	<!--维保额外维修费故障率-->
+	<div id="Repair" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+		<div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h6 class="modal-title">维保额外维修费故障率</h6>
+					<button type="button" class="close" data-dismiss="modal" aria-lable="Close"><span class="modal-icon"
+							aria-hidden="true">&times;</span></button>
+				</div>
+					<div class="modal-body">
+					<table class="table" cellspacing="0px" cellpadding="5px">
+						<thead class="thead-light">
+							<tr>
+								<th style="min-width: 100px;" rowspan="2">富士I类</th>
+								<th style="min-width: 100px;" rowspan="2">富士II类简称</th>
+								<th style="min-width: 100px;" rowspan="2">富士II类描述</th>
+								<th style="min-width: 110px;" rowspan="2">故障率计算方式</th>
+								<th style="min-width: 115px;" rowspan="2" onclick="$('#Weibull').modal(options);">韦伯计算</th>
+								<th style="min-width: 100px;" colspan="12">1年故障概率<img src="../img/reduce.png" class="update" /></th>
+								<th style="min-width: 100px;" rowspan="2">2年故障概率<img src="../img/add.png" class="update" /></th>
+								<th style="min-width: 100px;" rowspan="2">3年故障概率<img src="../img/add.png" class="update" /></th>
+								<th style="min-width: 100px;" rowspan="2">4年故障概率<img src="../img/add.png"class="update" /></th>
+								<th style="min-width: 100px;" rowspan="2">5-9年故障概率<img src="../img/add.png"class="update" /></th>
+								<th style="min-width: 100px;" rowspan="2">10年及以上故障概率</th>
+							</tr>
+							<tr>
+								<th>1月</th>
+								<th>2月</th>
+								<th>3月</th>
+								<th>4月</th>
+								<th>5月</th>
+								<th>6月</th>
+								<th>7月</th>
+								<th>8月</th>
+								<th>9月</th>
+								<th>10月</th>
+								<th>11月</th>
+								<th>12月</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td>医用刀类</td>
+								<td>医用刀类</td>
+								<td>医用磁共振</td>
+								<td>
+									<input name="select115" type="radio" checked />手动
+									<input name="select115" type="radio" />韦伯
+								</td>
+								<td><button class="btn btn-outline-info btn-sm"
+										onclick="$('#Weibull').modal(options);">韦伯计算</td>
+								<td><input type="text" value="4.8" /></td>
+								<td><input type="text" value="4.8" /></td>
+								<td><input type="text" value="4.8" /></td>
+								<td><input type="text" value="4.8" /></td>
+								<td><input type="text" value="4.8" /></td>
+								<td><input type="text" value="4.8" /></td>
+								<td><input type="text" value="4.8" /></td>
+								<td><input type="text" value="4.8" /></td>
+								<td><input type="text" value="4.8" /></td>
+								<td><input type="text" value="4.8" /></td>
+								<td><input type="text" value="4.8" /></td>
+								<td><input type="text" value="4.8" /></td>
+								<td><input type="text" value="4.8" /></td>
+								<td><input type="text" value="5" /></td>
+								<td><input type="text" value="6" /></td>
+								<td><input type="text" value="10" /></td>
+								<td><input type="text" value="15" /></td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-info ">保存</button>
+					<button type="button" class="btn btn-secondary " data-dismiss="modal">关闭</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!--添加零件Btn-->
+	<div id="AddComponent" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+		<div class="modal-dialog modal-dialog-centered" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h6 class="modal-title">添加零件</h6>
+					<button type="button" class="close" data-dismiss="modal" aria-lable="Close"><span class="modal-icon"
+							aria-hidden="true">&times;</span></button>
+				</div>
+				<div class="modal-body">
+					<table class="table table-sm  modal-table" style="text-align: left;">
+						<tbody>
+							<tr>
+								<td width="30%" class=""><span class="unrequiredItem">*</span>富士II类:</td>
+								<td width="70%">医用刀类</select>
+								</td>
+							</tr>
+							<tr>
+								<td width="30%" class=""><span class="requiredItem">*</span>简称:</td>
+								<td width="70%"><input type="text" class="input" value="CT机探测器" /></td>
+							</tr>
+							<tr>
+								<td class=""><span class="requiredItem">*</span>描述:</td>
+								<td><input type="text" class="input" value="CT类CT机探测器" /></td>
+							</tr>
+							<tr>
+								<td class=""><span class="requiredItem">*</span>类型:</td>
+								<td><select class="deviceType">
+										<option value="1">重要零件</option>
+										<option value="2">一般零件</option>
+										<option value="3">CT球管</option>
+									</select></td>
+							</tr>
+							<tr>
+								<td class=""><span class="unrequiredItem"></span>标准单价（元）:</td>
+								<td><input type="text" class="input" value="35800" /></td>
+							</tr>
+							<tr>
+								<td class=""><span class="requiredItem">*</span>标准使用量(CT日使用人次):</td>
+								<td><input type="text" class="input" value="200" /></td>
+							</tr>
+							<tr>
+								<td class=""><span class="requiredItem">*</span>CT球管理论寿命秒次:</td>
+								<td><input type="text" class="input" value="300000" /></td>
+							</tr>
+							<tr>
+								<td class=""><span class="requiredItem">*</span>秒次/人:</td>
+								<td><input type="text" class="input" value="4.7" /></td>
+							</tr>
+							<tr>
+								<td class=""><span class="requiredItem">*</span>是否参与估值:</td>
+								<td><input name="select1" type="radio" checked />是
+									<input name="select1" type="radio" />否</td>
+							</tr>
+							<tr>
+								<td class=""><span class="requiredItem">*</span>状态:</td>
+								<td><input name="select2" type="radio" checked />启用
+									<input name="select2" type="radio" />停用</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-info ">保存</button>
+					<button type="button" class="btn btn-secondary " data-dismiss="modal">关闭</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!--零件故障率Btn-->
+	<div id="Component" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+		<div class="modal-dialog modal-blg modal-dialog-centered" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h6 class="modal-title">DR探测器-故障率详情</h6>
+					<button type="button" class="close" data-dismiss="modal" aria-lable="Close"><span class="modal-icon"
+							aria-hidden="true">&times;</span></button>
+				</div>
+				<div class="modal-body">
+					<table class="table" cellspacing="0px" cellpadding="5px">
+						<thead class="thead-light">
+							<tr>
+								<th style="min-width: 100px;" rowspan="2">富士I类</th>
+								<th style="min-width: 100px;" rowspan="2">富士II类简称</th>
+								<th style="min-width: 100px;" rowspan="2">富士II类描述</th>
+								<th style="min-width: 110px;" rowspan="2">故障率计算方式</th>
+								<th style="min-width: 115px;" rowspan="2" onclick="$('#Weibull').modal(options);">韦伯计算</th>
+								<th style="min-width: 100px;" colspan="12">1年故障概率<img src="../img/reduce.png" class="update" /></th>
+								<th style="min-width: 100px;" rowspan="2">2年故障概率<img src="../img/add.png" class="update" /></th>
+								<th style="min-width: 100px;" rowspan="2">3年故障概率<img src="../img/add.png" class="update" /></th>
+								<th style="min-width: 100px;" rowspan="2">4年故障概率<img src="../img/add.png" class="update" /></th>
+								<th style="min-width: 100px;" rowspan="2">5-9年故障概率<img src="../img/add.png" class="update" /></th>
+								<th style="min-width: 100px;" rowspan="2">10年及以上故障概率</th>
+							</tr>
+							<tr>
+								<th>1月</th>
+								<th>2月</th>
+								<th>3月</th>
+								<th>4月</th>
+								<th>5月</th>
+								<th>6月</th>
+								<th>7月</th>
+								<th>8月</th>
+								<th>9月</th>
+								<th>10月</th>
+								<th>11月</th>
+								<th>12月</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td>医用刀类</td>
+								<td>医用刀类</td>
+								<td>医用磁共振</td>
+								<td><input name="select33" type="radio" checked />手动
+									<input name="select33" type="radio" />韦伯
+									<input name="select33" type="radio" />定期&nbsp;<input type="text" style="min-width: 20px;width: 20px;" value="6" />月</td>
+								<td><button class="btn btn-outline-info btn-sm"
+										onclick="$('#Weibull').modal(options);">韦伯计算</td>
+								<td><input type="text" value="4.8" /></td>
+								<td><input type="text" value="4.8" /></td>
+								<td><input type="text" value="4.8" /></td>
+								<td><input type="text" value="4.8" /></td>
+								<td><input type="text" value="4.8" /></td>
+								<td><input type="text" value="4.8" /></td>
+								<td><input type="text" value="4.8" /></td>
+								<td><input type="text" value="4.8" /></td>
+								<td><input type="text" value="4.8" /></td>
+								<td><input type="text" value="4.8" /></td>
+								<td><input type="text" value="4.8" /></td>
+								<td><input type="text" value="4.8" /></td>
+								<td><input type="text" value="4.8" /></td>
+								<td><input type="text" value="5" /></td>
+								<td><input type="text" value="6" /></td>
+								<td><input type="text" value="10" /></td>
+								<td><input type="text" value="15" /></td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-info ">保存</button>
+					<button type="button" class="btn btn-secondary " data-dismiss="modal">关闭</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- 添加耗材 -->
+	<div class="modal fade" id="AddConsumable" tabindex="-1" role="dialog" aria-hidden="true">
+		<div class="modal-dialog  modal-dialog-centered" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h6 class="modal-title" id="userModalLongTitle">添加耗材</h6>
+					<button type="button" class="close" data-dismiss="modal" aria-lable="Close"><span class="modal-icon"
+							aria-hidden="true">&times;</span></button>
+				</div>
+				<div class="modal-body">
+					<table class="table table-sm  modal-table" style="text-align: left;">
+						<tbody>
+							<tr>
+								<td width="40%" class=""><span class="unrequiredItem"></span>富士II类:</td>
+								<td width="60%">医用刀类</td>
+							</tr>
+							<tr>
+								<td width="40%">
+									<span class="requiredItem"></span>简称:</td>
+								<td width="60%"><input type="text" class="input" value="过滤器" /></td>
+							</tr>
+							<tr>
+								<td><span class="requiredItem"></span>描述:</td>
+								<td><input type="text" class="input" value="呼吸机" /></td>
+							</tr>
+							<tr>
+								<td><span class="requiredItem"></span>类型:</td>
+								<td>
+									<select class="deviceType">
+										<option value="1">定期</option>
+										<option value="2">定量</option>
+										<option value="3">小额成本</option>
+									</select>
+								</td>
+							</tr>
+							<tr>
+								<td class=""><span class="requiredItem"></span>更换频率（次/年）:</td>
+								<td><input type="text" class="input" value="2" /></td>
+							</tr>
+							<tr>
+								<td class=""><span class="requiredItem"></span>单次保养耗材成本（元）:</td>
+								<td><input type="text" class="input" value="1000" /></td>
+							</tr>
+							<tr>
+								<td class=""><span class="unrequiredItem"></span>标准单价（元）:</td>
+								<td><input type="text" class="input" value="1600" /></td>
+							</tr>
+							<tr>
+								<td class=""><span class="requiredItem">*</span>是否参与估值:</td>
+								<td><input name="select3" type="radio" checked />是
+									<input name="select3" type="radio" />否</td>
+							</tr>
+							<tr>
+								<td><span class="requiredItem"></span>状态:</td>
+								<td>
+									<input name="select11" type="radio" checked />启用
+									<input name="select11" type="radio" />停用
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-info ">保存</button>
+					<button type="button" class="btn btn-secondary " data-dismiss="modal">关闭</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!--韦伯计算-->
+	<div id="Weibull" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+		<div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h6 class="modal-title">韦伯计算</h6>
+					<button type="button" class="close" data-dismiss="modal" aria-lable="Close"><span class="modal-icon"
+							aria-hidden="true">&times;</span></button>
+				</div>
+				<div class="modal-body">
+					<table class="table" cellspacing="0px" cellpadding="5px">
+						<tbody>
+							<tr>
+								<th class="tdDetailHead" style="min-width: 110px;">月份</th>
+								<th class="tdDetailHead" style="min-width: 60px;">同步1月</th>
+								<th class="tdDetailHead">1月</th>
+								<th class="tdDetailHead">2月</th>
+								<th class="tdDetailHead">3月</th>
+								<th class="tdDetailHead">4月</th>
+								<th class="tdDetailHead">5月</th>
+								<th class="tdDetailHead">6月</th>
+								<th class="tdDetailHead">7月</th>
+								<th class="tdDetailHead">8月</th>
+								<th class="tdDetailHead">9月</th>
+								<th class="tdDetailHead">10月</th>
+								<th class="tdDetailHead">11月</th>
+								<th class="tdDetailHead">12月</th>
+							</tr>
+							<tr>
+								<th>第1年故障概率</th>
+								<td><button class="btn btn-outline-info btn-sm">同步</td>
+								<td><input type="text" value="4.8" /></td>
+								<td><input type="text" value="4.8" /></td>
+								<td><input type="text" value="4.8" /></td>
+								<td><input type="text" value="4.8" /></td>
+								<td><input type="text" value="4.8" /></td>
+								<td><input type="text" value="4.8" /></td>
+								<td><input type="text" value="4.8" /></td>
+								<td><input type="text" value="4.8" /></td>
+								<td><input type="text" value="4.8" /></td>
+								<td><input type="text" value="4.8" /></td>
+								<td><input type="text" value="4.8" /></td>
+								<td><input type="text" value="4.8" /></td>
+							</tr>
+							<tr>
+								<th>第2年故障概率</th>
+								<td><button class="btn btn-outline-info btn-sm">同步</td>
+								<td><input type="text" value="6" /></td>
+								<td><input type="text" value="6" /></td>
+								<td><input type="text" value="6" /></td>
+								<td><input type="text" value="6" /></td>
+								<td><input type="text" value="6" /></td>
+								<td><input type="text" value="6" /></td>
+								<td><input type="text" value="6" /></td>
+								<td><input type="text" value="6" /></td>
+								<td><input type="text" value="6" /></td>
+								<td><input type="text" value="6" /></td>
+								<td><input type="text" value="6" /></td>
+								<td><input type="text" value="6" /></td>
+							</tr>
+							<tr>
+								<th>第3年故障概率</th>
+								<td><button class="btn btn-outline-info btn-sm">同步</td>
+								<td><input type="text" value="6" /></td>
+								<td><input type="text" value="6" /></td>
+								<td><input type="text" value="6" /></td>
+								<td><input type="text" value="6" /></td>
+								<td><input type="text" value="6" /></td>
+								<td><input type="text" value="6" /></td>
+								<td><input type="text" value="6" /></td>
+								<td><input type="text" value="6" /></td>
+								<td><input type="text" value="6" /></td>
+								<td><input type="text" value="6" /></td>
+								<td><input type="text" value="6" /></td>
+								<td><input type="text" value="6" /></td>
+							</tr>
+							<tr>
+								<th>第4年故障概率</th>
+								<td><button class="btn btn-outline-info btn-sm">同步</td>
+								<td><input type="text" value="10" /></td>
+								<td><input type="text" value="10" /></td>
+								<td><input type="text" value="10" /></td>
+								<td><input type="text" value="10" /></td>
+								<td><input type="text" value="10" /></td>
+								<td><input type="text" value="10" /></td>
+								<td><input type="text" value="10" /></td>
+								<td><input type="text" value="10" /></td>
+								<td><input type="text" value="10" /></td>
+								<td><input type="text" value="10" /></td>
+								<td><input type="text" value="10" /></td>
+								<td><input type="text" value="10" /></td>
+							</tr>
+							<tr>
+								<th>第5年故障概率</th>
+								<td><button class="btn btn-outline-info btn-sm">同步</td>
+								<td><input type="text" value="10" /></td>
+								<td><input type="text" value="10" /></td>
+								<td><input type="text" value="10" /></td>
+								<td><input type="text" value="10" /></td>
+								<td><input type="text" value="10" /></td>
+								<td><input type="text" value="10" /></td>
+								<td><input type="text" value="10" /></td>
+								<td><input type="text" value="10" /></td>
+								<td><input type="text" value="10" /></td>
+								<td><input type="text" value="10" /></td>
+								<td><input type="text" value="10" /></td>
+								<td><input type="text" value="10" /></td>
+							</tr>
+							<tr>
+								<th>第6年故障概率</th>
+								<td><button class="btn btn-outline-info btn-sm">同步</td>
+								<td><input type="text" value="15" /></td>
+								<td><input type="text" value="15" /></td>
+								<td><input type="text" value="15" /></td>
+								<td><input type="text" value="15" /></td>
+								<td><input type="text" value="15" /></td>
+								<td><input type="text" value="15" /></td>
+								<td><input type="text" value="15" /></td>
+								<td><input type="text" value="15" /></td>
+								<td><input type="text" value="15" /></td>
+								<td><input type="text" value="15" /></td>
+								<td><input type="text" value="15" /></td>
+								<td><input type="text" value="15" /></td>
+							</tr>
+							<tr>
+								<th>第7年故障概率</th>
+								<td><button class="btn btn-outline-info btn-sm">同步</td>
+								<td><input type="text" value="15" /></td>
+								<td><input type="text" value="15" /></td>
+								<td><input type="text" value="15" /></td>
+								<td><input type="text" value="15" /></td>
+								<td><input type="text" value="15" /></td>
+								<td><input type="text" value="15" /></td>
+								<td><input type="text" value="15" /></td>
+								<td><input type="text" value="15" /></td>
+								<td><input type="text" value="15" /></td>
+								<td><input type="text" value="15" /></td>
+								<td><input type="text" value="15" /></td>
+								<td><input type="text" value="15" /></td>
+							</tr>
+							<tr>
+								<th>第8年故障概率</th>
+								<td><button class="btn btn-outline-info btn-sm">同步</td>
+								<td><input type="text" value="15" /></td>
+								<td><input type="text" value="15" /></td>
+								<td><input type="text" value="15" /></td>
+								<td><input type="text" value="15" /></td>
+								<td><input type="text" value="15" /></td>
+								<td><input type="text" value="15" /></td>
+								<td><input type="text" value="15" /></td>
+								<td><input type="text" value="15" /></td>
+								<td><input type="text" value="15" /></td>
+								<td><input type="text" value="15" /></td>
+								<td><input type="text" value="15" /></td>
+								<td><input type="text" value="15" /></td>
+							</tr>
+							<tr>
+								<th>第9年故障概率</th>
+								<td><button class="btn btn-outline-info btn-sm">同步</td>
+								<td><input type="text" value="15" /></td>
+								<td><input type="text" value="15" /></td>
+								<td><input type="text" value="15" /></td>
+								<td><input type="text" value="15" /></td>
+								<td><input type="text" value="15" /></td>
+								<td><input type="text" value="15" /></td>
+								<td><input type="text" value="15" /></td>
+								<td><input type="text" value="15" /></td>
+								<td><input type="text" value="15" /></td>
+								<td><input type="text" value="15" /></td>
+								<td><input type="text" value="15" /></td>
+								<td><input type="text" value="15" /></td>
+							</tr>
+							<tr>
+								<th>第10年故障概率</th>
+								<td><button class="btn btn-outline-info btn-sm">同步</td>
+								<td><input type="text" value="15" /></td>
+								<td><input type="text" value="15" /></td>
+								<td><input type="text" value="15" /></td>
+								<td><input type="text" value="15" /></td>
+								<td><input type="text" value="15" /></td>
+								<td><input type="text" value="15" /></td>
+								<td><input type="text" value="15" /></td>
+								<td><input type="text" value="15" /></td>
+								<td><input type="text" value="15" /></td>
+								<td><input type="text" value="15" /></td>
+								<td><input type="text" value="15" /></td>
+								<td><input type="text" value="15" /></td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-info ">导入</button>
+					<button type="button" class="btn btn-secondary " data-dismiss="modal">关闭</button>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+<script>
+	var options = {};
+
+	$(function () {
+		$(".requiredItem").html("*");
+		$(".unrequiredItem").html("&nbsp;&nbsp;");
+		$(".requiredItem").css("color", "red");
+	});
+	$("#checkedStatus").click(function () {
+		var s = $("#checkedStatus").is(":checked");
+		if (s) {
+			$(".ystime").css('display', "block");
+			$("#uncheckedStatus").removeAttr("checked");
+		}
+	})
+
+	$("#uncheckedStatus").click(function () {
+		var s = $("#uncheckedStatus").is(":checked");
+		if (s) {
+			$("#checkedStatus").removeAttr("checked");
+			$(".ystime").css("display", "none");
+		}
+	})
+</script>
+
+</html>

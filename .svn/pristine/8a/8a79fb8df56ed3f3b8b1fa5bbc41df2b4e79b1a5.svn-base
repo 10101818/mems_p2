@@ -1,0 +1,784 @@
+﻿@{
+    ViewBag.Title = "Valuation";
+}
+<style>
+    #AmountDetail th, td, #PriceDetail th, td {
+        height: 20px;
+        padding: 1px;
+    }
+
+    #AmountDetail td, #PriceDetail td {
+        text-align: right;
+        padding: 3px;
+    }
+
+    .menu1, .menu2, .menu3 {
+        min-width: 20px;
+        height: 25px;
+        white-space: nowrap;
+    }
+    .menu1 {
+        background-color: #94cf4b;
+    }
+    .menu2 {
+        background-color: #c2e29a;
+    }
+    .menu3 {
+        background-color: #e3f2d1;
+    }
+    .sub td {
+        border-top: solid 1px;
+        border-bottom: solid 1px;
+    }
+    .sumAmount {
+        background-color: #c8d8ef;
+    }
+
+    #resultBtns {
+        display: flex;
+        width: 800px;
+    }
+
+    #resultBtns div {
+        flex: 1;
+        text-align: center;
+    }
+
+    .menu1, .menu2, .menu3, .freezeContent {
+        left: 0;
+        position: sticky;
+    }
+
+    .menu2 {
+        left: 20px;
+    }
+
+    .menu3 {
+        left: 40px;
+    }
+</style>
+
+<!--最终定价表-->
+<div id="PriceDetail" class="resultDialog" style="width:100%;display:none;overflow: auto;">
+    <div class="title freezeContent"> <p>最终定价表</p> </div>
+    <table style="text-align: left;">
+        <thead>
+            <tr>
+                <th colspan="3" rowspan="3" class="menu1" style="border-top: none; background-color: #1b4082; "></th>
+                <th class="headtr" v-bind:colspan="Forecasts.length+1" style="background-color: #1b4082; border-bottom: none; color: white;"><span style="float:right;">元</span></th>
+            </tr>
+            <tr>
+                <th style="text-align: center; color: white; background-color: #41589b;" v-bind:colspan="Forecasts.length"> Forecast </th>
+                <th style="background-color: #1b4082; height: 20px; padding: 1px;"></th>
+            </tr>
+            <!--日期title-->
+            <tr style="text-align: center;">
+                <td v-for="item in Forecasts" style="color: white; background-color: #4985bf; white-space: nowrap; ">{{item.Name}}</td>
+                <th class="sumAmount" style="text-align: center;">小计</th>
+            </tr>
+            <!--成本汇总-->
+            <tr class="sub">
+                <th class="menu1" colspan="3"><b>成本汇总</b></th>
+                <td v-for="item in TotalAmount">{{item}}</td>
+                <td class="sumAmount">{{TotalAmounts}}</td>
+            </tr>
+            <!--固定类-->
+            <tr>
+                <th class="menu1"></th>
+                <th class="menu2" colspan="2">固定类</th>
+                <td v-for="item in FixedAmount">{{item}}</td>
+                <td class="sumAmount">{{FixedAmounts}}</td>
+            </tr>
+            <!--变动类-保养-->
+            <tr>
+                <th class="menu1"></th>
+                <th class="menu2" colspan="2">变动类-保养</th>
+                <td v-for="item in ConsumableAmount">{{item}}</td>
+                <td class="sumAmount">{{ConsumableAmounts}}</td>
+            </tr>
+            <!--变动类:维修-->
+            <tr>
+                <th class="menu1"></th>
+                <th class="menu2" colspan="2">变动类-维修</th>
+                <td v-for="item in RepairAmount">{{item}}</td>
+                <td class="sumAmount">{{RepairAmounts}}</td>
+            </tr>
+            <!--导入期成本-->
+            <tr>
+                <th class="menu1" colspan="3">导入期成本</th>
+                <td v-for="item in Forecasts">{{ImportCost}}</td>
+                <td class="sumAmount">{{ImportCosts}}</td>
+            </tr>
+            <!--总成本-->
+            <tr class="sub">
+                <th class="menu1" colspan="3">总成本</th>
+                <td v-for="item in Amount">{{item}}</td>
+                <td class="sumAmount">{{Amounts}}</td>
+            </tr>
+            <!--边际利润-->
+            <tr>
+                <th class="menu1" colspan="3">边际利润</th>
+                <td v-for="item in ProfitAmount">{{item}}</td>
+                <td class="sumAmount">{{ProfitAmounts}}</td>
+            </tr>
+            <!--边际利润率-->
+            <tr>
+                <th class="menu1"></th>
+                <th class="menu2" colspan="2">边际利润率</th>
+                <td v-for="item in Forecasts">{{ProfitMargins}}%</td>
+                <td class="sumAmount">{{ProfitMargins}}%</td>
+            </tr>
+            <!--安全额-->
+            <tr>
+                <th class="menu1" colspan="3">安全额</th>
+                @*<td v-for="item in SafeAmount">{{item}}</td>*@
+                <td v-for="item in Forecasts">0</td>
+                <td class="sumAmount">{{SafeAmounts}}</td>
+            </tr>
+            <!--报价-->
+            <tr style="background-color: #4f612b !important; color: white;">
+                <th colspan="3" class="menu1" style="background-color: #4f612b !important; color: white;">报价</th>
+                <td v-for="item in Price">{{item}}</td>
+                <td>{{Prices}}</td>
+            </tr>
+        </thead>
+    </table>
+</div>
+<!--成本明细-->
+<div id="AmountDetail" class="resultDialog" style="width:100%;display:none;overflow: auto;">
+    <div class="title freezeContent"> <p>成本明细</p> </div>
+    <table style="text-align: left;">
+        <thead>
+            <tr>
+                <th colspan="3" rowspan="3" class="menu1" style="border-top: none; background-color: #1b4082; "></th>
+                <th class="headtr" v-bind:colspan="Actuals.length + Forecasts.length+1" style="background-color: #1b4082; border-bottom: none; color: white;"><span style="float:right;">元</span></th>
+            </tr>
+            <tr>
+                @*<th style="text-align: center; color: white; background-color: #827c85;" v-bind:colspan="Actuals.length"> Actual </th>*@
+                <th style="text-align: center; color: white; background-color: #41589b;" v-bind:colspan="Forecasts.length"> Forecast </th>
+                <th style="background-color: #1b4082; height: 20px; padding: 1px;"></th>
+            </tr>
+            <!--日期title-->
+            <tr style="text-align: center;">
+                @*<td v-for="item in Actuals" style="color: white; background-color: #c0bec0; white-space: nowrap; ">{{item.Name}}</td>*@
+                <td v-for="item in Forecasts" style="color: white; background-color: #4985bf; white-space: nowrap; ">{{item.Name}}</td>
+                <th class="sumAmount" style="text-align: center;">小计</th>
+            </tr>
+            <!--固定类汇总-->
+            <tr class="sub">
+                <th class="menu1" colspan="3"><b>固定类</b></th>
+                <td v-for="item in FixedAmount">{{item}}</td>
+                <td class="sumAmount">{{FixedAmounts}}</td>
+            </tr>
+            <!--固定类-信息系统使用费-->
+            <tr>
+                <th class="menu1"></th>
+                <th class="menu2" colspan="2">信息系统使用费</th>
+                @*<td v-for="item in Actuals">{{SystemCost}}</td>*@
+                <td v-for="item in Forecasts">{{SystemCost}}</td>
+                <td class="sumAmount">{{SystemCosts}}</td>
+            </tr>
+            <!--固定类-人工费-->
+            <tr>
+                <th class="menu1"></th>
+                <th class="menu2" colspan="2">人工费</th>
+                @*<td v-for="item in Actuals">{{LabourCost.Actual}}</td>*@
+                <td v-for="item in Forecasts">{{LabourCost.Forecast}}</td>
+                <td class="sumAmount">{{LabourCosts}}</td>
+            </tr>
+            <!--固定类-维保费-->
+            <tr>
+                <th class="menu1"></th>
+                <th colspan="2" class="menu2">维保费</th>
+                <td v-for="item in EqptContractAmount">{{item.ContractAmount}}</td>
+                <td class="sumAmount">{{EqptContractAmount.ContractAmounts}}</td>
+            </tr>
+            <!--固定类-备用机成本-->
+            <tr>
+                <th class="menu1"></th>
+                <th class="menu2" colspan="2">备用机成本</th>
+                @*<td v-for="item in Actuals">{{SpareAmount}}</td>*@
+                <td v-for="item in Forecasts">{{SpareAmount}}</td>
+                <td class="sumAmount">{{SpareAmounts}}</td>
+            </tr>
+            <!--变动类:保养 汇总-->
+            <tr class="sub">
+                <th class="menu1" colspan="3">变动类-保养</th>
+                <td v-for="item in Actuals"></td>
+                <td v-for="item in ConsumableAmount.Amount">{{item}}</td>
+                <td class="sumAmount">{{ConsumableAmount.Amounts}}</td>
+            </tr>
+            <!--变动类:保养-耗材类-->
+            <tr>
+                <th class="menu1"></th>
+                <th class="menu2" colspan="2">耗材费</th>
+                <td v-for="item in Actuals"></td>
+                <td v-for="item in ConsumableAmount.Amount">{{item}}</td>
+                <td class="sumAmount">{{ConsumableAmount.Amounts}}</td>
+            </tr>
+            <!--变动类:保养-耗材类-定期-->
+            <tr>
+                <th class="menu1"></th>
+                <th class="menu2"></th>
+                <th class="menu3">定期类</th>
+                <td v-for="item in Actuals"></td>
+                <td v-for="item in ConsumableAmount.RegularConsumableAmount">{{item.Amount}}</td>
+                <td class="sumAmount">{{ConsumableAmount.RegularConsumableAmounts}}</td>
+            </tr>
+            <!--变动类:保养耗材类-定量-->
+            <tr>
+                <th class="menu1"></th>
+                <th class="menu2"></th>
+                <th class="menu3">定量类</th>
+                <td v-for="item in Actuals"></td>
+                <td v-for="item in ConsumableAmount.QuantitativeConsumableAmount">{{item.Amount}}</td>
+                <td class="sumAmount">{{ConsumableAmount.QuantitativeConsumableAmounts}}</td>
+            </tr>
+            <!--变动类:保养-耗材类-小额汇总成本-->
+            <tr>
+                <th class="menu1"></th>
+                <th class="menu2"></th>
+                <th class="menu3">小额汇总成本</th>
+                <td v-for="item in Actuals"></td>
+                <td v-for="item in Forecasts">{{ConsumableAmount.SmallCostConsumable}}</td>
+                <td class="sumAmount">{{ConsumableAmount.SmallCostConsumables}}</td>
+            </tr>
+            <!--变动类:维修-->
+            <tr class="sub">
+                <th class="menu1" colspan="3">变动类-维修</th>
+                <td v-for="item in RepairAmount">{{item}}</td>
+                <td class="sumAmount">{{RepairAmounts}}</td>
+            </tr>
+            <!--变动类:维修-故障零件成本-->
+            <tr>
+                <th class="menu1"></th>
+                <th class="menu2" colspan="2">故障零件成本</th>
+                <td v-for="item in ComponentAmount.ComponentAmount">{{item.Amount}}</td>
+                <td class="sumAmount">{{ComponentAmount.ComponentAmounts}}</td>
+            </tr>
+            <!--变动类:维修-故障零件成本--重点设备-->
+            <tr>
+                <th class="menu1"></th>
+                <th class="menu2"></th>
+                <th class="menu3">重点设备</th>
+                <td v-for="item in ComponentAmount.ImportAmount">{{item.Amount}}</td>
+                <td class="sumAmount">{{ComponentAmount.ImportAmounts}}</td>
+            </tr>
+            <!--变动类:维修-故障零件成本--一般设备-->
+            <tr>
+                <th class="menu1"></th>
+                <th class="menu2"></th>
+                <th class="menu3">一般设备</th>
+                <td v-for="item in ComponentAmount.GeneralAmount">{{item.Amount}}</td>
+                <td class="sumAmount">{{ComponentAmount.GeneralAmounts}}</td>
+            </tr>
+            <!--变动类:维修-外来服务费-->
+            <tr>
+                <th class="menu1"></th>
+                <th class="menu2" colspan="2">外来服务费</th>
+                <td v-for="item in EqptServiceAmount.ServiceAmount">{{item.Repair3partyCost}}</td>
+                <td class="sumAmount">{{EqptServiceAmount.ServiceAmounts}}</td>
+            </tr>
+            <!--变动类:维修-外来服务费--重点设备-->
+            <tr>
+                <th class="menu1"></th>
+                <th class="menu2"></th>
+                <th class="menu3">重点设备</th>
+                <td v-for="item in EqptServiceAmount.ImportEqpt">{{item.Repair3partyCost}}</td>
+                <td class="sumAmount">{{EqptServiceAmount.ImportAmount}}</td>
+            </tr>
+            <!--变动类:维修-外来服务费--一般设备-->
+            <tr>
+                <th class="menu1"></th>
+                <th class="menu2"></th>
+                <th class="menu3">一般设备</th>
+                <td v-for="item in EqptServiceAmount.Eqpt">{{item.Repair3partyCost}}</td>
+                <td class="sumAmount">{{EqptServiceAmount.Amount}}</td>
+            </tr>
+            <tr style="background-color: #4f612b; color: white;">
+                <th colspan="3" class="menu1" style="background-color: #4f612b; color: white;">总计</th>
+                <td v-for="item in TotalAmount">{{item}}</td>
+                <td>{{TotalAmounts}}</td>
+            </tr>
+        </thead>
+    </table>
+</div>
+<br>
+<div id="resultBtns" style="display:none;">
+    <div><button class="btn btn-outline-info btn-sm" onclick="ShowPriceDetail()">最终定价表</button></div>
+    <div><button class="btn btn-outline-info btn-sm amountdetailBtn" onclick="ShowAmountDetail()">成本明细</button></div>
+    <div><button class="btn btn-outline-info btn-sm" onclick="">分析</button></div>
+    <div><button class="btn btn-outline-info btn-sm" onclick="">决策辅助工具</button></div>
+    <div><button class="btn btn-outline-info btn-sm" onclick="">var</button></div>
+</div>
+
+<script>
+    var AmountDetailVue = new Vue({
+        el: "#AmountDetail",
+        data: {
+            Actuals:[],
+            Forecasts: [],
+
+            FixedAmount: [],
+            FixedAmounts: 0,
+            SystemCost: 0,
+            SystemCosts: 0,
+            LabourCost: {},
+            LabourCosts: 0,
+            EqptContractAmount: [],
+            SpareAmount: 0,
+            SpareAmounts: 0,
+            ConsumableAmount: {
+                RegularConsumableAmount: [],
+                RegularConsumableAmounts: 0,
+                QuantitativeConsumableAmount: [],
+                QuantitativeConsumableAmounts: 0,
+                SmallCostConsumable: 0,
+                SmallCostConsumables: 0,
+                Amount: [],
+                Amounts:0,
+            },
+            RepairAmount: [],
+            RepairAmounts: 0,
+            ComponentAmount: {
+                ComponentAmount: [],
+                GeneralAmount: [],
+                ImportAmount:[]
+            },
+            EqptServiceAmount: {
+                ImportEqpt: [],
+                Eqpt: [],
+                ServiceAmount: [],
+            },
+            TotalAmount: [],
+            TotalAmounts: 0,
+        }
+    })
+
+    var PriceDetailVue = new Vue({
+        el: "#PriceDetail",
+        data: {
+            Forecasts: [],
+            TotalAmount: [],
+            TotalAmounts: 0,
+            FixedAmount: [],
+            FixedAmounts: 0,
+            ConsumableAmount: 0,
+            ConsumableAmounts: 0,
+            RepairAmount: [],
+            RepairAmounts: 0,
+            ImportCost: 0,
+            ImportCosts: 0,
+            Amount: [],
+            Amounts: 0,
+            ProfitAmount: [],
+            ProfitAmounts: 0,
+            ProfitMargins: 0,
+            SafeAmount: [],
+            SafeAmounts: 0,
+            Price: [],
+            Prices: 0,
+        }
+    })
+</script>
+<script>
+    $(function () {
+        $("#resultBtns .btn").click(function () {
+            $('#resultBtns .btn').addClass('btn-outline-info');
+            $('#resultBtns .btn').removeClass('btn-info');
+            $(this).removeClass('btn-outline-info');
+            $(this).addClass('btn-info');
+        });
+    })
+    function ShowAmountDetail() {
+        $(".resultDialog").hide();
+        $("#AmountDetail").show();
+        $(".amountdetailBtn").removeClass('btn-outline-info');
+        $(".amountdetailBtn").addClass('btn-info');
+        $("#AmountDetail").scrollLeft(0);
+    }
+
+    function ShowPriceDetail() {
+        $(".resultDialog").hide();
+        $("#PriceDetail").show();
+        $("#PriceDetail").scrollLeft(0);
+    }
+
+    function FreshPriceVue() {
+        PriceDetailVue.TotalAmount = [];
+        PriceDetailVue.TotalAmounts = 0;
+        PriceDetailVue.FixedAmount = [];
+        PriceDetailVue.FixedAmounts = 0;
+        PriceDetailVue.ConsumableAmount = 0;
+        PriceDetailVue.ConsumableAmounts = 0;
+        PriceDetailVue.RepairAmount = [];
+        PriceDetailVue.RepairAmounts = 0;
+        PriceDetailVue.ImportCost = 0;
+        PriceDetailVue.ImportCosts = 0;
+        PriceDetailVue.Amount = [];
+        PriceDetailVue.Amounts = 0;
+        PriceDetailVue.ProfitAmount = [];
+        PriceDetailVue.ProfitAmounts = 0;
+        PriceDetailVue.ProfitMargins = 0;
+        PriceDetailVue.SafeAmount = [];
+        PriceDetailVue.SafeAmounts = 0;
+        PriceDetailVue.Price = [];
+        PriceDetailVue.Prices = 0;
+    }
+
+    function FreshAmountVue() {
+        AmountDetailVue.FixedAmount = [];
+        AmountDetailVue.FixedAmounts = 0;
+        AmountDetailVue.SystemCost = 0;
+        AmountDetailVue.SystemCosts = 0;
+        AmountDetailVue.LabourCost = {};
+        AmountDetailVue.LabourCosts = 0;
+        AmountDetailVue.EqptContractAmount = [];
+        AmountDetailVue.SpareAmount = 0;
+        AmountDetailVue.SpareAmounts = 0;
+        AmountDetailVue.ConsumableAmount = {
+            RegularConsumableAmount: [],
+            RegularConsumableAmounts: 0,
+            QuantitativeConsumableAmount: [],
+            QuantitativeConsumableAmounts: 0,
+            SmallCostConsumable: 0,
+            SmallCostConsumables: 0,
+            Amount: [],
+            Amounts:0,
+        };
+        AmountDetailVue.RepairAmount = [];
+        AmountDetailVue.RepairAmounts = 0;
+        AmountDetailVue.ComponentAmount = {
+            ComponentAmount: [],
+            GeneralAmount: [],
+            ImportAmount:[]
+        };
+        AmountDetailVue.EqptServiceAmount = {
+                ImportEqpt: [],
+                Eqpt: [],
+                ServiceAmount: [],
+        };
+        AmountDetailVue.TotalAmount = [];
+        AmountDetailVue.TotalAmounts = 0;
+    }
+
+    function GetDateList() {
+        $.get('@Url.Action("GetDateList", "Valuation")', function (result) {
+            if (result.ResultCode != "00")
+                processResponseError(result.ResultCode, result.ResultMessage);
+            else {
+                //AmountDetailVue.Actuals = result.Data.Actual;
+                AmountDetailVue.Forecasts = result.Data.Forecast;
+            }
+        })
+    }
+    function RunVal() {
+        if (CheckControl()) return;
+        $('#resultBtns .btn').addClass('btn-outline-info');
+        $('#resultBtns .btn').removeClass('btn-info');
+        let resultDiv = document.querySelector("#resultContainer");
+        resultDiv && resultDiv.parentElement && (resultDiv.style.width = resultDiv.parentElement.offsetWidth - 400 - 60 + "px");
+        GetDateList();
+        RunAmountDetail();
+    }
+    function RunAmountDetail() {
+        FreshAmountVue();
+        SetPageWaiting(true);
+        $.post('@Url.Action("RunVal", "Valuation")', function (result) {
+            SetPageWaiting(false);
+            if (result.ResultCode != "00")
+                processResponseError(result.ResultCode, result.ResultMessage);
+            else {
+                Promise.all([FreshAmountDetail()]).then(function (values) {
+                    FreshPriceDetail();
+                    ShowAmountDetail();
+                    $("#resultBtns").show();
+                });
+            }
+        })
+    }
+
+    function FreshPriceDetail() {
+        FreshPriceVue();
+        PriceDetailVue.Forecasts = AmountDetailVue.Forecasts,
+        PriceDetailVue.TotalAmount = cloneObj(AmountDetailVue.TotalAmount);
+        PriceDetailVue.TotalAmount = PriceDetailVue.TotalAmount.splice(AmountDetailVue.Actuals.length);
+
+        PriceDetailVue.FixedAmount = cloneObj(AmountDetailVue.FixedAmount);
+        PriceDetailVue.FixedAmount = PriceDetailVue.FixedAmount.splice(AmountDetailVue.Actuals.length);
+        
+        PriceDetailVue.ConsumableAmount = AmountDetailVue.ConsumableAmount.Amount;//0
+        PriceDetailVue.RepairAmount = cloneObj(AmountDetailVue.RepairAmount);
+        PriceDetailVue.RepairAmount = PriceDetailVue.RepairAmount.splice(AmountDetailVue.Actuals.length);
+
+        PriceDetailVue.ImportCost = Number((ValuationVue.Control.ImportCost / 12).toFixed(2));//0
+        PriceDetailVue.ImportCosts = ValuationVue.Control.ImportCost * ValuationVue.Control.Years;
+        PriceDetailVue.ProfitMargins = ValuationVue.Control.ProfitMargins;
+
+        for (var i = 0 ; i < AmountDetailVue.Forecasts.length; i++) {
+            PriceDetailVue.TotalAmounts = Number((PriceDetailVue.TotalAmounts + PriceDetailVue.TotalAmount[i]).toFixed(2));
+            PriceDetailVue.FixedAmounts = Number((PriceDetailVue.FixedAmounts + PriceDetailVue.FixedAmount[i]).toFixed(2));
+            PriceDetailVue.ConsumableAmounts = Number((PriceDetailVue.ConsumableAmounts + PriceDetailVue.ConsumableAmount[i]).toFixed(2));
+            PriceDetailVue.RepairAmounts = Number((PriceDetailVue.RepairAmounts + PriceDetailVue.RepairAmount[i]).toFixed(2));
+
+            var amount = Number((PriceDetailVue.TotalAmount[i] + PriceDetailVue.ImportCost).toFixed(2));
+            PriceDetailVue.Amount.push(amount);
+
+            var profit = Number((amount * PriceDetailVue.ProfitMargins / 100).toFixed(2));
+            PriceDetailVue.ProfitAmount.push(profit);
+
+            var price = Number((amount + profit).toFixed(2));
+            PriceDetailVue.Price.push(price);
+        }
+        PriceDetailVue.Amounts = Number((PriceDetailVue.TotalAmounts + PriceDetailVue.ImportCosts).toFixed(2));
+        PriceDetailVue.ProfitAmounts = Number((PriceDetailVue.Amounts * PriceDetailVue.ProfitMargins / 100).toFixed(2));
+        PriceDetailVue.Prices = Number((PriceDetailVue.Amounts + PriceDetailVue.ProfitAmounts).toFixed(2));
+    }
+
+    function FreshAmountDetail() {
+        return new Promise(function (resolve, reject) {
+            Promise.all([FreshFixedAmountDetail(), FreshConsumableAmountDetail(), FreshComponentAmountDetail()]).then(function (values) {
+                GetTotalAmount(); resolve();
+            });
+        })
+    }
+    function FreshFixedAmountDetail() {
+        return new Promise(function (resolve, reject) {
+            Promise.all([GetValSystemCost(), GetValLabourCost(), GetValEqptContractAmount(), GetSpareAmount()]).then(function (values) { GetFixedAmount(); resolve(); });
+        })
+    }
+    function FreshConsumableAmountDetail() {
+        return new Promise(function (resolve, reject) {
+            Promise.all([GetValConsumableAmount(@BusinessObjects.Domain.ConsumableInfo.ConsumableTypes.RegularConsumable), GetValConsumableAmount(@BusinessObjects.Domain.ConsumableInfo.ConsumableTypes.QuantitativeConsumable), GetSmallCostConsumable()]).then(function (values) { GetValConsumableAmounts(); resolve(); });
+        })
+    }
+    function FreshComponentAmountDetail() {
+        return new Promise(function (resolve, reject) {
+            Promise.all([GetValComponentAmount(-1), GetValComponentAmount('@BusinessObjects.Domain.FujiClass2Info.LKPEquipmentType.Import'), GetValComponentAmount(0), GetValEqptServiceAmount(-1), GetValEqptServiceAmount('@BusinessObjects.Domain.FujiClass2Info.LKPEquipmentType.Import'), GetValEqptServiceAmount(0)]).then(function (values) { GetRepairAmount(); resolve(); });
+        })
+    }
+
+    function GetValLabourCost() {
+        return new Promise(function (resolve, reject) {
+            AmountDetailVue.LabourCost.Actual = Number((ValuationVue.Control.AutualEngineer * ValuationVue.ParameterInfo.UnitCost).toFixed(2));
+            AmountDetailVue.LabourCost.Forecast = Number((ValuationVue.Control.ForecastEngineer * ValuationVue.ParameterInfo.UnitCost).toFixed(2));
+
+            AmountDetailVue.LabourCosts = AmountDetailVue.LabourCost.Actual * AmountDetailVue.Actuals.length + AmountDetailVue.LabourCost.Forecast * AmountDetailVue.Forecasts.length;
+            AmountDetailVue.LabourCosts = Number(AmountDetailVue.LabourCosts.toFixed(2));
+
+            resolve();
+        })
+    }
+
+    function GetValSystemCost() {
+        return new Promise(function (resolve, reject) {
+            AmountDetailVue.SystemCost = Number((ValuationVue.ParameterInfo.SystemCost / 12).toFixed(2));
+
+            AmountDetailVue.SystemCosts = AmountDetailVue.SystemCost * (AmountDetailVue.Forecasts.length + AmountDetailVue.Actuals.length);
+            AmountDetailVue.SystemCosts = Number(AmountDetailVue.SystemCosts.toFixed(2));
+
+            resolve();
+        })
+    }
+
+    function GetSpareAmount() {
+        SetPageWaiting(true);
+        return new Promise(function (resolve, reject) {
+            $.get('@Url.Action("GetSpareAmount", "Valuation")', function (result) {
+                resolve();
+                SetPageWaiting(false);
+                if (result.ResultCode != "00")
+                    processResponseError(result.ResultCode, result.ResultMessage);
+                else {
+                    AmountDetailVue.SpareAmount = result.Data;
+
+                    AmountDetailVue.SpareAmounts = AmountDetailVue.SpareAmount * (AmountDetailVue.Forecasts.length + AmountDetailVue.Actuals.length);
+                    AmountDetailVue.SpareAmounts = Number(AmountDetailVue.SpareAmounts.toFixed(2));
+                }
+            })
+        })
+    }
+
+    function GetValEqptContractAmount() {
+        SetPageWaiting(true);
+        return new Promise(function (resolve, reject) {
+            $.get('@Url.Action("GetValEqptContractAmount", "Valuation")', function (result) {
+                resolve();
+                SetPageWaiting(false);
+                if (result.ResultCode != "00")
+                    processResponseError(result.ResultCode, result.ResultMessage);
+                else {
+                    var sum = 0
+                    $.each(result.Data, function (index, item) {
+                        sum += item.ContractAmount
+                    })
+                    sum = Number(sum.toFixed(2));
+
+                    if (result.Data.length == 0)
+                        result.Data = new Array(AmountDetailVue.Actuals.length + AmountDetailVue.Forecasts.length).fill({ ContractAmount: 0 });
+
+                    AmountDetailVue.EqptContractAmount = result.Data;
+                    AmountDetailVue.EqptContractAmount.ContractAmounts = sum;
+                }
+            })
+        })
+    }
+
+    function GetValComponentAmount(eqptType) {
+        SetPageWaiting(true);
+        return new Promise(function (resolve, reject) {
+            $.get('@Url.Action("GetValComponentAmount", "Valuation")', {
+                eqptType: eqptType
+            }, function (result) {
+                resolve();
+                SetPageWaiting(false);
+                if (result.ResultCode != "00")
+                    processResponseError(result.ResultCode, result.ResultMessage);
+                else {
+                    var sum = 0;
+                    $.each(result.Data, function (index, item) {
+                        sum += item.Amount;
+                    })
+                    sum = Number(sum.toFixed(2));
+
+                    if (result.Data.length == 0)
+                        result.Data = new Array(AmountDetailVue.Actuals.length + AmountDetailVue.Forecasts.length).fill({ Amount: 0, });
+
+                    if (eqptType == -1) {
+                        AmountDetailVue.ComponentAmount.ComponentAmount = result.Data;
+                        AmountDetailVue.ComponentAmount.ComponentAmounts = sum;
+                    }
+                    else if (eqptType == '@BusinessObjects.Domain.FujiClass2Info.LKPEquipmentType.Import') {
+                        AmountDetailVue.ComponentAmount.ImportAmount = result.Data;
+                        AmountDetailVue.ComponentAmount.ImportAmounts = sum;
+                    }
+                    else {
+                        AmountDetailVue.ComponentAmount.GeneralAmount = result.Data;
+                        AmountDetailVue.ComponentAmount.GeneralAmounts = sum;
+                    }
+
+                }
+            })
+        })
+    }
+
+    function GetValEqptServiceAmount(eqptType) {
+        SetPageWaiting(true);
+        return new Promise(function (resolve, reject) {
+            $.get('@Url.Action("GetValEqptService", "Valuation")', {
+                eqptType: eqptType
+            }, function (result) {
+                resolve();
+                SetPageWaiting(false);
+                if (result.ResultCode != "00")
+                    processResponseError(result.ResultCode, result.ResultMessage);
+                else {
+                    var sum = 0;
+                    $.each(result.Data, function (index, item) {
+                        sum += item.Repair3partyCost;
+                    })
+                    sum = Number(sum.toFixed(2));
+
+                    if (result.Data.length == 0)
+                        result.Data = new Array(AmountDetailVue.Actuals.length + AmountDetailVue.Forecasts.length).fill({ Repair3partyCost: 0, });
+
+                    if (eqptType == -1) {
+                        AmountDetailVue.EqptServiceAmount.ServiceAmount = result.Data;
+                        AmountDetailVue.EqptServiceAmount.ServiceAmounts = sum;
+                    }
+                    else if (eqptType == '@BusinessObjects.Domain.FujiClass2Info.LKPEquipmentType.Import') {
+                        AmountDetailVue.EqptServiceAmount.ImportEqpt = result.Data;
+                        AmountDetailVue.EqptServiceAmount.ImportAmount = sum;
+                    }
+                    else {
+                        AmountDetailVue.EqptServiceAmount.Eqpt = result.Data;
+                        AmountDetailVue.EqptServiceAmount.Amount = sum;                       
+                    }
+                }
+            })
+        })
+    }
+
+    function GetValConsumableAmount(consumableType) {
+        SetPageWaiting(true);
+        return new Promise(function (resolve, reject) {
+            $.get('@Url.Action("GetValConsumableAmount", "Valuation")', {
+                eqptType: consumableType
+            }, function (result) {
+                resolve();
+                SetPageWaiting(false);
+                if (result.ResultCode != "00")
+                    processResponseError(result.ResultCode, result.ResultMessage);
+                else {
+                    var sum = 0;
+                    $.each(result.Data, function (index, item) {
+                        sum += item.Amount;
+                    })
+                    sum = Number(sum.toFixed(2));
+
+                    if (consumableType == 1) {
+                        AmountDetailVue.ConsumableAmount.RegularConsumableAmount = result.Data;
+                        AmountDetailVue.ConsumableAmount.RegularConsumableAmounts = sum;
+                    }
+                    else if (consumableType == 2) {
+                        AmountDetailVue.ConsumableAmount.QuantitativeConsumableAmount = result.Data;
+                        AmountDetailVue.ConsumableAmount.QuantitativeConsumableAmounts = sum;
+                    }
+                }
+            })
+        })
+    }
+    function GetValConsumableAmounts() {
+        AmountDetailVue.ConsumableAmount.Amount = [];
+
+        for (var i = 0; i < AmountDetailVue.Actuals.length + AmountDetailVue.Forecasts.length; i++) {
+            var amount = AmountDetailVue.ConsumableAmount.RegularConsumableAmount[i].Amount + AmountDetailVue.ConsumableAmount.QuantitativeConsumableAmount[i].Amount + AmountDetailVue.ConsumableAmount.SmallCostConsumable;
+            amount = Number(amount.toFixed(2));
+
+            AmountDetailVue.ConsumableAmount.Amount.push(amount);
+        }
+        var sum = AmountDetailVue.EqptServiceAmount.ServiceAmounts + AmountDetailVue.ComponentAmount.ComponentAmounts;
+        AmountDetailVue.ConsumableAmount.Amounts = Number((AmountDetailVue.ConsumableAmount.RegularConsumableAmounts + AmountDetailVue.ConsumableAmount.QuantitativeConsumableAmounts + AmountDetailVue.ConsumableAmount.SmallCostConsumables).toFixed(2));
+    }
+    function GetSmallCostConsumable() {
+        AmountDetailVue.ConsumableAmount.SmallCostConsumable = ValuationVue.ParameterInfo.SmallConsumableCost;
+        AmountDetailVue.ConsumableAmount.SmallCostConsumables = AmountDetailVue.ConsumableAmount.SmallCostConsumable * (AmountDetailVue.Forecasts.length + AmountDetailVue.Actuals.length);
+        AmountDetailVue.ConsumableAmount.SmallCostConsumables = Number(AmountDetailVue.ConsumableAmount.SmallCostConsumables.toFixed(2));
+    }
+    function GetFixedAmount() {
+        var fixedAmount = [];
+        for (var i = 0; i < AmountDetailVue.Actuals.length + AmountDetailVue.Forecasts.length; i++) {
+            var amount = AmountDetailVue.SystemCost + AmountDetailVue.EqptContractAmount[i].ContractAmount + AmountDetailVue.SpareAmount;
+            amount += i < AmountDetailVue.Actuals.length ? AmountDetailVue.LabourCost.Actual : AmountDetailVue.LabourCost.Forecast;
+
+            amount = Number(amount.toFixed(2));
+            fixedAmount.push(amount);
+        }
+        var sum = AmountDetailVue.SystemCosts + AmountDetailVue.LabourCosts + AmountDetailVue.EqptContractAmount.ContractAmounts + AmountDetailVue.SpareAmounts;
+        AmountDetailVue.FixedAmounts = Number(sum.toFixed(2));
+        AmountDetailVue.FixedAmount = fixedAmount;
+    }
+    function GetRepairAmount() {
+        var repairAmount = []
+        for (var i = 0; i < AmountDetailVue.Actuals.length + AmountDetailVue.Forecasts.length; i++) {
+            var amount = AmountDetailVue.EqptServiceAmount.ServiceAmount[i].Repair3partyCost + AmountDetailVue.ComponentAmount.ComponentAmount[i].Amount;
+            amount = Number(amount.toFixed(2));
+            repairAmount.push(amount);
+        }
+        var sum = AmountDetailVue.EqptServiceAmount.ServiceAmounts + AmountDetailVue.ComponentAmount.ComponentAmounts;
+        AmountDetailVue.RepairAmounts = Number(sum.toFixed(2));
+        AmountDetailVue.RepairAmount = repairAmount;
+    }
+
+    function GetTotalAmount() {
+        var totalAmount = [];
+        for (var i = 0; i < AmountDetailVue.Actuals.length + AmountDetailVue.Forecasts.length; i++) {
+            var amount = AmountDetailVue.FixedAmount[i] + AmountDetailVue.ConsumableAmount.Amount[i] + AmountDetailVue.RepairAmount[i];
+            amount = Number(amount.toFixed(2));
+            totalAmount.push(amount);
+        }
+        var sum = AmountDetailVue.FixedAmounts + AmountDetailVue.ConsumableAmount.Amounts + AmountDetailVue.RepairAmounts;
+        AmountDetailVue.TotalAmounts = Number(sum.toFixed(2));
+        AmountDetailVue.TotalAmount = totalAmount;
+    }
+</script>

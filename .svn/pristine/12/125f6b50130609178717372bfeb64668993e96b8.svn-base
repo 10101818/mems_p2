@@ -1,0 +1,208 @@
+<template>
+	<div class="indexA container">
+		<div class="content">
+			<div class="top">
+				<div class="left box box1">
+					<EventList></EventList>
+				</div>
+				<div class="right box box2">
+					<KpiList></KpiList>
+				</div>
+			</div>
+			<div class="bottom">
+				<div class=" bottom-box ">
+					<p style="font-size:20px;font-weight:bold">
+						<span class="iconfont icon-gongdanliebiao"></span> 待响应
+						<a href="#" style="float: right;font-size:14px;font-weight: normal;" class="linkFile" @click="GoToDispatch(1)">更多...</a>
+					</p>
+					<table class="table " cellspacing="0" cellpadding="5" style="font-size:14px">
+						<thead class="thead-light">
+							<tr>
+								<th style="min-width:150px">派工单编号</th>
+								<th style="min-width:120px">请求编号</th>
+								<th style="min-width:120px">设备系统编号</th>
+								<th style="min-width:150px">设备名称</th>
+								<th style="min-width:150px">派工类型</th>
+								<th style="min-width:100px">紧急程度</th>
+								<th style="min-width:150px">派工日期</th>
+								<th style="min-width:150px">状态</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr v-if="responseingDispatchList.length == 0">
+								<td colspan="10" align="center">暂无数据</td>
+							</tr>
+							<tr v-for="(dispatch,key) in responseingDispatchList" :key="key">
+								<td>
+									<a class="linkFile cursor" href="#" @click="GoToDispatchDetail(dispatch.ID, dispatch.RequestType.ID)">{{dispatch.OID}}</a>
+								</td>
+								<td>{{dispatch.Request.OID}}</td>
+								<td>{{dispatch.Request.EquipmentOID}}</td>
+								<td>{{dispatch.Request.EquipmentName}}</td>
+								<td>{{dispatch.RequestType.Name}}</td>
+								<td>{{dispatch.Urgency.Name}}</td>
+								<td>{{parseAndFormatJsonDate(dispatch.ScheduleDate)}}</td>
+								<td>{{dispatch.Status.Name}}</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+				<div class=" bottom-box ">
+					<p style="font-size:20px;font-weight:bold">
+						<span class="iconfont icon-gongdanliebiao"></span> 待上传
+						<a href="#" style="float: right;font-size:14px;font-weight: normal;" class="linkFile" @click="GoToDispatch(2)">更多...</a>
+					</p>
+					<table class="table " cellspacing="0" cellpadding="5" style="font-size:14px">
+						<thead class="thead-light">
+							<tr>
+								<th style="min-width:150px">派工单编号</th>
+								<th style="min-width:120px">请求编号</th>
+								<th style="min-width:120px">设备系统编号</th>
+								<th style="min-width:150px">设备名称</th>
+								<th style="min-width:150px">派工类型</th>
+								<th style="min-width:100px">紧急程度</th>
+								<th style="min-width:150px">派工日期</th>
+								<th style="min-width:150px">状态</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr v-if="uploadingDispatchList.length == 0">
+								<td colspan="10" align="center">暂无数据</td>
+							</tr>
+							<tr v-for="(dispatch ,key) in uploadingDispatchList" :key="key">
+								<td>
+									<a class="linkFile cursor" href="#" @click="GoToDispatchDetail(dispatch.ID, dispatch.RequestType.ID)">{{dispatch.OID}}</a>
+								</td>
+								<td>{{dispatch.Request.OID}}</td>
+								<td>{{dispatch.Request.EquipmentOID}}</td>
+								<td>{{dispatch.Request.EquipmentName}}</td>
+								<td>{{dispatch.RequestType.Name}}</td>
+								<td>{{dispatch.Urgency.Name}}</td>
+								<td>{{parseAndFormatJsonDate(dispatch.ScheduleDate)}}</td>
+								<td>{{dispatch.Status.Name}}</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+</template>
+<script>
+import {getDispatchByStatus} from '@/api/api'
+import EventList from '../../components/componentEventList'
+import KpiList from '../../components/componentKpiGauge'
+import {parseAndFormatJsonDate} from '@/common/js.DateTime.js'
+import {BASE_URL} from '@/common/common'
+
+	export default {
+		components: {
+			EventList,
+			KpiList,
+		},
+		data() {
+			return {
+				responseingDispatchList:[],
+				uploadingDispatchList:[]
+			}
+		},
+		created() {
+			this.getCurrUserVue()
+			this.getSource();
+		},
+		methods: {
+			GoToDispatch(status){
+				window.location.href = BASE_URL+"/Dispatch/DispatchList?status="+status
+			},
+			GoToDispatchDetail(id,requestType){
+				window.location.href = BASE_URL+"/Dispatch/DispatchResponse?dispatchID="+id+"&requestType="+requestType
+			},
+			parseAndFormatJsonDate(param){
+				return parseAndFormatJsonDate(param)
+			},
+			getCurrUserVue() {
+				if(roleID < 0)
+					window.location.href=BASE_URL+"/Home/Login";
+				else if(roleID == 1)
+					this.$router.push("indexSA");
+				else if(roleID ==2)
+					console.log("ok")
+				else
+					this.$router.push("indexU");
+			},
+			getSource(){
+				var paramDispatchResponse ={
+					currentPage:1,
+					status:1, 
+					urgency:0, 
+					type:0, 
+					filterField:"", 
+					filterText:"", 
+					sortField:"init", 
+					sortDirection:false,
+					self:true
+				}
+				var paramDispatchUpload ={
+					currentPage:1,
+					status:2, 
+					urgency:0, 
+					type:0, 
+					filterField:"", 
+					filterText:"", 
+					sortField:"init", 
+					sortDirection:false,
+					self:true
+				}
+				getDispatchByStatus(paramDispatchResponse).then(res => {
+					this.responseingDispatchList=res.Data.slice(0,5)
+				})
+				getDispatchByStatus(paramDispatchUpload).then(res => {
+					this.uploadingDispatchList=res.Data.slice(0,5)
+				})
+			}
+		}
+	}
+</script>
+<style scoped lang="less">
+  .container {
+	min-width: 1200px;width: 100%;height: 100%;background: #D7E0EE;font-size: .4rem;//overflow: hidden;
+	
+    .content {
+	  padding: .3rem;width: 100%;height: 100%;/*height: calc(100% - 1.6rem);*/
+	  
+      .top {
+		width: 100%;height: 55%;display: flex;
+		
+        .left {width: 55%;}
+        .right {width: 45%;}
+        .box {background: #fff;margin: .15rem;border-radius: .16rem;}
+        .box1 {display: flex;flex-direction: column;}
+        .box2 {position: relative;padding:0 .8rem;}
+	  }
+      .bottom {
+      		width: 100%;// height: 45%;
+      		
+      		.bottom-box{background: #FFF;margin: .15rem;border-radius: .16rem;padding: .2rem .5rem}//width:100%;
+      }
+    }
+  }
+</style>
+<style>
+	p{margin-bottom: .2rem;}
+	
+	/* table */
+	table {border-collapse: collapse;}
+	.table {width: 100%;text-align: left;max-width: 100%;margin-bottom: .1rem;background-color: transparent;font-size:14px}
+	.table td, .table th {padding: .75rem;vertical-align: top;border-top: 1px solid #dee2e6;}
+	.table th {padding: 0.5%;vertical-align: middle;}
+	.table td {padding: 0.4%;vertical-align: middle;height: 40px;}
+	.table thead th {vertical-align: bottom;border-bottom: 2px solid #dee2e6;}
+	.table .thead-light th {color: #495057;background-color: #e9ecef;border-color: #dee2e6;}
+	
+	/* button */
+	.btn {display: inline-block;font-weight: 400;text-align: center;white-space: nowrap;vertical-align: middle;-webkit-user-select: none;-moz-user-select: none;-ms-user-select: none;user-select: none;border: 1px solid transparent;font-size: .3rem;padding: .1rem .2rem;line-height: 1.5;border-radius: .25rem;transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, box-shadow .15s ease-in-out;}
+	.btn-outline-info {color: #17a2b8;background-color: transparent;background-image: none;border-color: #17a2b8;}
+	.btn-outline-info:hover {color: #fff;background-color: #17a2b8;border-color: #17a2b8}
+	.btn-group-sm>.btn, .btn-sm {font-size: .3rem;padding: .05rem .2rem;line-height: 1.5;border-radius: .1rem;}
+	.btn:not(:disabled):not(.disabled) {cursor: pointer;}
+</style>

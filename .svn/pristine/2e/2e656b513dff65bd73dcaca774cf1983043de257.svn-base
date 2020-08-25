@@ -1,0 +1,897 @@
+<template>
+  <div class="container">
+    <div class="b-left">
+      <div class="b-left-top">
+        <div class="b-left-top-content">
+          <div class="chart1-box">
+            <div @click="returnToDashboard()" style="z-index: 10;position: absolute;cursor: pointer;left:0.25rem"><img @click="returnToDashboard()" style="opacity:0.3" width="35px"  src="../../Content/img/back.png"></div>
+            <div class="legend-div"><span class="legend light-blue-border"></span>&nbsp;收入</div>
+            <div class="legend-div legend-expenditure"><span class="legend blue-border"></span>&nbsp;支出</div>
+            <div  class="legend-div legend-loss"><span  class="legend red-border"></span>&nbsp;亏损</div>
+            <div class="list-box1">
+              <div class="list">
+                <div class="total">
+                  <div class=" center-center value">{{numberComma(Math.floor(income/10000))}}</div>
+                  <div class=" center-center text">总收入（万元）</div>
+                </div>
+                <div :class="rate1>0?'status up green':'status down red'">
+                  <div class=" center-center value">
+                    <span>{{Math.abs((rate1*100).toFixed(2))}}%</span>
+                    <span class="iconfont icon-shang"></span>
+                  </div>
+                  <div class=" center-center text">
+                    同比
+                  </div>
+                </div>
+              </div>
+              <div class="list">
+                <div class="total">
+                  <div class=" center-center value">{{numberComma(Math.floor(expense/10000))}}</div>
+                  <div class=" center-center text">总支出（万元）</div>
+                </div>
+                <div  :class="rate2>0?'status up green':'status down red'">
+                  <div class=" center-center value">
+                    <span>{{Math.abs((rate2*100).toFixed(2))}}%</span>
+                    <span class="iconfont icon-shang"></span>
+                  </div>
+                  <div class=" center-center text">
+                    同比
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div id="chart1"></div>
+          </div>
+
+        </div>
+      </div>
+      <div class="b-left-bottom">
+        <div class="b-left-bottom-content">
+          <div class="bottom-detail">
+            <div class="name-lower-box flex-column column-end" >
+              <div class="name-lower">
+                <span >当前位置：</span>
+                <span style="margin-top:5px;color: rgb(55, 65, 74);" :title="currentData.department">{{currentData.department}}</span>
+              </div>
+              <div class="name-lower">
+                <span >当前状态：</span>
+                <span style="margin-top:5px;color: rgb(55, 65, 74);" :title="currentData.status">{{currentData.status}}</span>
+              </div> 
+              <div class="name-lower detail-data detail-img">
+                <img class="img" v-bind:src="base_url+(currentData.url ?('/Documents/Equipment/'+currentData.url): '/Content/img/appearance.png')" alt="无图片">
+              </div>
+            </div>
+            <div class="name-lower-box flex-column column-end" >
+                  <div class="name-lower">
+                <span >安装日期：</span>
+                <span style="margin-top:5px;color: rgb(55, 65, 74);" :title="(!currentData || !currentData.start_time)?'':currentData.start_time.split('T')[0]">{{(!currentData || !currentData.start_time)?'':currentData.start_time.split('T')[0]}}</span>
+              </div>
+              <div class="name-lower">
+                <span >维保状态：</span>
+                <span style="margin-top:5px;color: rgb(55, 65, 74);" :title="currentData.warrantyStatus">{{currentData.warrantyStatus}}</span>
+              </div>
+              <div class="name-lower detail-data detail-po">
+                <div class="" v-for="(list,key) of chart3.list" :key="key">
+                  <span>{{list.item}}</span>
+                  <span>：</span>
+                  <span style="margin-top:5px;color: rgb(55, 65, 74);" :title="list.value" @click="goToRequest(currentData.ID,list.typeId)" class="link">{{list.value}}</span>
+                </div>
+              </div>
+            </div> 
+            <div id="chart3"></div> 
+          </div> 
+          <div class="name" :title="currentData.name.split('?')[0] + ' - ' + currentData.seriesNumber">
+            {{(!currentData || !currentData.seriesNumber ||!currentData.name)?'':(currentData.name.split('?')[0] + ' - ' + currentData.seriesNumber)}}
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="b-right">
+      <div class="b-right-content">
+        <div class="timeline-title" style="font-size: 0.64rem;cursor: auto;line-height: 1.2;">{{timelineTitle}}</div>
+        <div class="b-timeline">
+          <timeline>
+            <timeline-item v-for="(item,key) in timeline" :title="item.date + ' ' + item.event" :key="key" :bg-color="item.color" @click.native="navigateTo(item)">
+			        <p class="timelineP" style="cursor: pointer;">{{item.date}} {{item.event}}</p>
+            </timeline-item>
+          </timeline>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+<script>
+  import {equipments, radar, timeline} from '@/api/api'
+  import G2 from '@antv/g2';
+  import {DataSet} from '@antv/data-set'
+  import {queryOverview, radarData} from '@/api/api'
+  import {getRem,BASE_URL} from '@/common/scripts/common'
+  import EventList from '@/components/componentEventList'
+  import KpiList from '@/components/componentKpiGauge'
+  import {Timeline, TimelineItem, TimelineTitle} from 'vue-cute-timeline'
+
+  export default {
+    components: {
+      EventList,
+      KpiList,
+      Timeline,
+      TimelineItem,
+      TimelineTitle
+    },
+
+    data() {
+      return {
+        base_url:BASE_URL,
+        timelineTitle: '',
+        timeline: [],
+        //name1: this.$route.query.name,
+        id: this.$route.query.id,
+        currentData: {
+          name: '',
+          start_time: ''
+        },
+        name1: '',
+        chart1: {
+          data: [],
+          chart:{},
+        },
+        income: 0.00,
+        incomeLast: 0.00,
+        rate1:0,
+        rate2: 0,
+        expense: 0.00,
+        expenseLast: 0.00,
+        chart3: {
+          data: [],
+          list: [],
+          chart: null,
+        },
+        maxCount: 0,
+        radarTemplate : [{
+            "item": "维修",
+            typeId:1,
+        }, {
+        	"item": "保养",
+            typeId:2,
+        }, {
+        	"item": "强检",
+            typeId:3,
+        }, {
+        	"item": "巡检",
+            typeId:4,
+        }, {
+        	"item": "校准",
+            typeId:5,
+        }],
+        date: ((localStorage.getItem("date"))?new Date(localStorage.getItem("date")) :new Date()),
+      }
+    },
+    computed: {},
+    created() {
+      // this.name2 = this.chart1.data[0].name
+      // this.getqueryOverview()
+      this.getChart1().then(() => {
+        //默认选中第一条数据
+        if(!this.chart1.data.length || this.chart1.data.every(info=> /^null_[0-9]*$/.test(info.name)))
+          this.currentData ={
+            ID:0,
+            name: "",
+            brand: "",
+            model: "",
+            value: "",
+            seriesNumber: "",
+            department: "",
+            start_time: "",
+            status: "",
+            warrantyStatus: "",
+          }
+        else
+          this.currentData = this.chart1.data[0]
+            // 获取chart1之后获取雷达
+          this.renderChart1()
+          this.getChart3().then(() => {
+              this.renderChart3()
+            })
+          // 获取timeline
+          this.getTimeline()
+      })
+    },
+    methods: {
+      refreshAll(){
+          let _this = this
+          _this.chart1 && _this.chart1.chart && Object.keys(_this.chart1.chart).length && !_this.chart1.chart.destroyed && _this.chart1.chart.destroy()
+          _this.chart3 && _this.chart3.chart && Object.keys(_this.chart3.chart).length && !_this.chart3.chart.destroyed && _this.chart3.chart.destroy()
+          this.getChart1().then(() => {
+            //默认选中第一条数据
+            if(!_this.chart1.data.length || _this.chart1.data.every(info=> /^null_[0-9]*$/.test(info.name)))
+              _this.currentData ={
+                ID:0,
+                name: "",
+                brand: "",
+                model: "",
+                value: "",
+                seriesNumber: "",
+                department: "",
+                start_time: "",
+                status: "",
+                warrantyStatus: "",
+              }
+            else
+              _this.currentData = _this.chart1.data[0]
+                // 获取chart1之后获取雷达
+              _this.renderChart1()
+              _this.getChart3().then(() => {
+                  _this.renderChart3()
+                })
+              // 获取timeline
+              _this.getTimeline()
+          })
+      },
+      navigateTo: function(item){
+        if (item.id != 0)
+          window.open(BASE_URL+"/Dispatch/DispatchResponse?dispatchID="+item.id+"&requestType="+item.requestType);
+      },
+      goToRequest:function(id,typeId){
+          window.open(BASE_URL+"/Request/RequestList?equipmentId="+id+"&requestType="+typeId);
+      },
+	  returnToDashboard: function() {
+	  	this.$router.push("indexU").catch(err=>err)
+	  },
+      getChart1() {
+        // this.name1
+        return new Promise(resolve => {
+            equipments({id: this.id,date:this.date}).then(res => {
+                this.chart1.data = []
+              res.Data.map((n, i) => {
+                this.income += n.Incomes;
+                this.expense += n.Expenses;
+                this.incomeLast += n.LastIncomes;
+                this.expenseLast += n.LastExpenses;
+                if(n.Incomes==0 && n.Expenses==0){
+                  return 
+                }
+                this.chart1.data.push(Object.assign({}, n, {
+                  name: n.Name + ' - ' + n.Manufacturer.Name + ' - ' + n.EquipmentCode + '?' + i,
+                  '收入': Number(n.Incomes/10000),
+                  '支出': Number(n.Expenses/10000),
+                  brand: n.Manufacturer.Name,
+                  model: n.EquipmentCode,
+                  value: Number(n.PurchaseAmount/10000),
+                  seriesNumber: n.AssetCode,
+                  department: n.Department.Name,
+                  start_time: n.InstalDate,
+                  status: n.EquipmentStatus.Name,
+                  warrantyStatus: n.WarrantyStatus,
+                }))
+              })
+
+              if(this.chart1.data.length){
+                while( this.chart1.data.length - 5 < 0){
+                  this.chart1.data.push({
+                    name: "null_"+this.chart1.data.length,
+                  })
+                }
+              }
+              this.expenseLast==0?this.rate2=0:this.rate2=(this.expense-this.expenseLast)/this.expenseLast;
+              this.incomeLast==0?this.rate1=0:this.rate1=(this.income-this.incomeLast)/this.incomeLast;
+          resolve()
+          })
+        });
+      },
+      random(lower, upper) {
+        return Math.floor(Math.random() * (upper - lower)) + lower;
+      },
+      getChart3() {
+        let _this = this
+        return new Promise(resolve => {
+          radarData({id: this.currentData.ID,date:this.date}).then(res => {
+            let radar_data = this.radarTemplate;
+            radar_data[0].value = res.Data.Repair || 0;
+            radar_data[1].value = res.Data.Maintain || 0;
+            radar_data[2].value = res.Data.Inspection || 0;
+            radar_data[3].value = res.Data.OnSiteInspection || 0;
+            radar_data[4].value = res.Data.Correcting || 0;
+            let max = 0;
+            for(let i=0; i<radar_data.length; i++){
+              if (max<radar_data[i].value) {
+                max = radar_data[i].value
+              }
+            }
+            _this.maxCount = max;
+            _this.maxTickCount = ((max > 5) ? 5 : ((max < 2) ? 2 : max));
+            _this.chart3.list = radar_data;
+            let _DataSet = DataSet,
+              DataView = _DataSet.DataView;
+            let dv = new DataView().source(_this.chart3.list);
+            dv.transform({
+              type: 'fold',
+              fields: ['value'], // 展开字段集
+              key: 'user', // key字段
+              value: 'score' // value字段
+            });
+            this.chart3.data = dv
+            resolve(dv)
+          })
+        });
+      },
+      itemColor(type) {
+        switch (type) {
+          case 1:
+          case 3:
+            return '#E64340';
+            break;
+          case 4:
+          case 2:
+          case 5:
+            return '#3eaf7c'
+            break;
+          default:
+            return '#f0f0f0'
+            break;
+        }
+      },
+      getTimeline() {
+        timeline({id: this.currentData.ID,date:this.date}).then(res => {
+		  if(this.currentData.ID!=0){
+                    this.timelineTitle = res.Data.Name+' - '+res.Data.EquipmentCode
+          let timelineEvent = res.Data.Dispatches.map((n, i) => {
+            return {
+              date: n.EndDate.split('T')[0],
+              event: n.TimelineDesc,
+              color: this.itemColor(n.RequestType.ID),
+			  id:n.ID,
+			  requestType:n.RequestType.ID,
+            }
+          });
+          this.timeline = timelineEvent
+			}
+			else
+				this.timeline=[]
+        })
+      },
+      renderChart1() {
+        let _this = this
+        let dv = new DataSet.DataView();
+        if(this.chart1.data.every(info=> !info.name))
+          return
+        dv.source(this.chart1.data)
+        .transform({
+          type: 'map',
+          callback: function callback(row) {
+            if(!/^null_[0-9]*$/.test(row['name'])) //待讨论 -4
+              row['支出'] *= -1;
+            return row;
+          }
+        })
+        .transform({
+          type: 'fold',
+          fields: ['收入', '支出'],
+          key: 'opinion',
+          value: 'value',
+          retains: ['name']
+        });
+
+        let colorMap = {
+          '收入': '#86C7E6',
+          '支出': '#1B85E7',
+        };
+        _this.chart1 && _this.chart1.chart && Object.keys(_this.chart1.chart).length && !_this.chart1.chart.destroyed && _this.chart1.chart.destroy()
+        _this.chart1.chart = new G2.Chart({
+          container: 'chart1',
+		  forceFit: _this.chart1.data.length <= 20 ,
+          height: document.querySelector('#chart1').clientHeight,
+		  width: _this.chart1.data.length * 48,
+          padding: [getRem(1.6), 0, 0, 0],
+          // animate: false,
+        });
+        let chart = _this.chart1.chart
+        chart.source(dv);
+        chart.axis(false);
+
+        this.chart1.data.forEach(function (data, dataIndex) {
+
+          if (data['支出'] && data['收入'] && data['支出'] > data['收入']) {
+            // 辅助框
+            chart.guide().regionFilter({
+              top: true, // 指定 giude 是否绘制在 canvas 最上层，默认为 false, 即绘制在最下层
+              start: [dataIndex - .5, -data['收入']], // 辅助框起始位置，值为原始数据值，支持 callback
+              end: [dataIndex + .5, -data['支出']],// 辅助框结束位置，值为原始数据值，支持 callback
+              color: '#E2340D',
+            });
+          }
+          
+            chart.guide().line({
+                top: true,
+                start: [dataIndex - .25, 0], // 辅助框起始位置，值为原始数据值，支持 callback
+                end: [dataIndex + .25, 0],// 辅助框结束位置，值为原始数据值，支持 callback
+                lineStyle: {
+                    stroke: '#3aa0ff',
+                    lineWidth: 1,
+                    lineDash: [2, 2]
+                },
+            });
+        });
+
+
+        chart.tooltip({
+          inPlot: true,
+          useHtml: true,
+          htmlContent: function (title, items) {
+            let data = {};
+            _this.chart1.data.forEach(n => {
+              if (n.name === title) {
+                data = n
+              }
+            })
+            return `<div class="g2-tooltip">
+                    <div class="g2-tooltip-title">${title.split('?')[0]}</div>
+                    <ul class="g2-tooltip-list">
+                      <li class="g2-tooltip-li">设备价值：${_this.numberComma(Math.floor(Number(data.value)))}万</li>
+                      <li class="g2-tooltip-li">型号：${_this.numberComma(data.model)}</li>
+                      <li class="g2-tooltip-li">品牌：${_this.numberComma(data.brand)}</li>
+                      <li class="g2-tooltip-li">收入：${_this.numberComma(Math.floor(Number(data.收入)))}万</li>
+                      <li class="g2-tooltip-li">支出：${_this.numberComma(Math.floor(Number(data.支出)))}万</li>
+                    </ul>
+                  </div>` 
+          }
+        });
+        chart.coord();
+        chart.intervalStack().position('name*value').color('opinion', function (opinion) {
+          return colorMap[opinion];
+        });
+
+        chart.on('click', ev => {
+          let records = chart.getSnapRecords({x: ev.x, y: ev.y});
+          const name = records[0]._origin.name
+          let targetItem = _this.chart1.data.find(function (val) {
+            return val.name === name;
+          })
+          if(  !targetItem.name || /^null_[0-9]*$/.test(targetItem.name)) // 待讨论 -4
+            return
+          _this.currentData = targetItem
+          _this.getChart3().then(()=>{
+              _this.renderChart3()
+            }
+          )
+          _this.getTimeline()
+        });
+        // chart.on('point:mouseenter', ev => {
+        //     toolIndex = data.findIndex(item => item.year == ev.data.point.year)
+        // })
+
+        chart.render();
+      },
+
+      renderChart3() {
+        let _this = this
+        _this.chart3 && _this.chart3.chart && Object.keys(_this.chart3.chart).length && !_this.chart3.chart.destroyed && _this.chart3.chart.destroy()
+        _this.chart3.chart = new G2.Chart({
+          container: 'chart3',
+          forceFit: true,
+          height: document.querySelector('#chart3').clientHeight,
+          padding: [getRem(.5), getRem(.2), 0, getRem(.1)]
+        });
+        _this.chart3.chart.source(_this.chart3.data, {
+          score: {
+            min: 0,
+            max: _this.maxCount,
+            tickCount: _this.maxTickCount  //radar 
+          }
+        });
+        _this.chart3.chart.coord('polar', {
+          radius: 0.6
+        });
+        _this.chart3.chart.axis('item', {
+          line: null,
+          label: {
+            textStyle: {
+              fontSize:getRem(.3) , // 文本大小
+              fontWeight: 'bold', // 文本粗细
+            },
+          },
+          tickLine: null,
+          grid: {
+            lineStyle: {
+              lineDash: null
+            },
+            hideFirstLine: false
+          }
+        });
+        _this.chart3.chart.axis('score', {
+          label: null,
+          line: null,
+          tickLine: null,
+          grid: {
+            type: 'polygon',
+            lineStyle: {
+              lineWidth: getRem(.02),
+              lineDash: null
+            }
+          }
+        });
+        _this.chart3.chart.legend(false)
+        _this.chart3.chart.tooltip({
+          'g2-tooltip': {
+            'background-color': 'rgba(0, 0, 0, 0.7)',
+            color: '#ddd',
+          },
+          itemTpl: '<li style="font-size: .4rem;">次数：{value}</li>'
+        });
+        _this.chart3.chart.line().position('item*score').color('user').size(getRem(.01));
+        _this.chart3.chart.area().position('item*score').color('user');
+        
+        _this.chart3.chart.on('click', ev => {
+            // 获取逼近的点 point 的原始数据集合
+            let records = _this.chart3.chart.getSnapRecords({
+                x: ev.x,
+                y: ev.y
+            });
+            const typeId = records[0]._origin.typeId
+            let item = _this.chart3.list.find(function(val) {
+                return val.typeId == typeId
+            })
+            if(!item || item.id == -1)
+                return
+            this.goToRequest(this.currentData.ID,item.typeId)
+        });
+        _this.chart3.chart.render();
+      }, 
+      numberComma(source, length = 3) {
+        source = String(source).split(".");
+        source[0] = source[0].replace(new RegExp('(\\d)(?=(\\d{' + length + '})+$)', 'ig'), "$1,");
+        return source.join(".");
+      },
+    }
+  }
+</script>
+<style scoped lang="less">
+	
+		/*定义滚动条高宽及背景 高宽分别对应横竖滚动条的尺寸*/
+	::-webkit-scrollbar
+	{
+	    width: 0.32rem;
+	    height: 0.32rem;
+	    background-color: #F5F5F5;
+	}
+	 
+	/*定义滚动条轨道 内阴影+圆角*/
+	::-webkit-scrollbar-track
+	{
+	    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+	    border-radius: 0.2rem;
+	    background-color: #F5F5F5;
+	}
+	 
+	/*定义滑块 内阴影+圆角*/
+	::-webkit-scrollbar-thumb
+	{
+	    border-radius: 0.2rem;
+	    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,.3);
+	}
+	
+  .container {
+    min-width: 1200px;
+    width: 100%;
+    height: 100%;
+    background: #D7E0EE;
+    overflow: hidden;
+    font-size: .4rem;
+    padding: .3rem;
+    display: flex;
+
+    .b-left {
+      width: 50%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+
+      .b-left-top { 
+          height: 50%; 
+          width:100%;
+          padding: .15rem;
+        .b-left-top-content{
+          border-radius: .16rem;
+          height: 100%; 
+          background: #fff;
+
+          .chart1-box {
+            background: #fff;
+            /*flex: 1;*/
+            padding: .5rem;
+            position: relative;
+            border-radius: .16rem;
+            height: 100%;
+
+            .name {
+              position: absolute;
+              font-size: .5rem;
+              font-weight: bold;
+            }
+
+            .legend-expenditure{top: 1rem;}
+            .legend-loss{top: 1.5rem;}
+            .legend-div{
+              position: absolute;
+              left:1.25rem;
+
+              .legend{display: inline-block;}
+              .light-blue-border{border: 5px solid #86C7E6;}
+              .blue-border{border: 5px solid #1B85E7;}
+              .red-border{border: 5px solid #f00000;}
+            }
+
+
+            .list-box1 {
+              position: absolute;
+              right: 0;
+              left: 0;
+              padding-right: .2rem;
+              top: .5rem;
+              display: flex;
+              justify-content: flex-end;
+              z-index: 2;
+
+              .list {
+                display: flex;
+                align-items: baseline;
+                margin-left: .2rem;
+
+                .total {
+                  margin-right: .2rem;
+
+                  .value {
+                    font-weight: bold;
+                    font-size: .6rem;
+                    margin-bottom: .1rem;
+                  }
+
+                  .text {
+                    font-size: .4rem;
+                  }
+                }
+
+                .status {
+
+
+                  .value {
+                    font-weight: bold;
+                    font-size: .6rem;
+                    display: flex;
+                    align-items: baseline;
+                    margin-bottom: .1rem;
+
+                    .iconfont {
+                      font-size: .7rem;
+                    }
+                  }
+
+                  .text {
+                    color: #000;
+                    font-size: .4rem;
+                  }
+
+                    &.up {}
+            
+            &.red{color: #E64340;}
+            &.green{color: #3eaf7c;}
+            
+                    &.down {
+                      
+                      .iconfont {
+                        transform: rotate(180deg);
+                      }
+                    }
+                }
+              }
+            }
+
+            #chart1 {
+              width: 100%;
+              height: 100%;
+                overflow-x: auto;
+                overflow-y: hidden;
+            }
+          }
+        }
+      }
+
+      .b-left-bottom {
+          height: 50%; 
+          width:100%;
+          padding: .15rem;
+        .b-left-bottom-content{
+          border-radius: .16rem;
+          height: 100%;
+          background: #fff;
+          display: flex;
+          position: relative;
+          width:100%;
+          flex-direction: column; 
+
+          .name {
+            position: absolute;
+            left: .5rem;
+            top: .5rem;
+            z-index: 10;
+            // display: flex;
+            // justify-content: flex-start;
+            // align-items: center;
+            // height:20%; 
+            // // padding-left: .5rem;
+            width: 90%;
+            font-size: 0.4rem;
+            font-weight: bold;
+            white-space:nowrap; //强制不换行
+            overflow:hidden; //自动隐藏文字
+            text-overflow: ellipsis; //文字隐藏后添加省略号
+          }
+          .bottom-detail{
+            display: flex;
+            flex-direction: row;
+            align-items: flex-start;
+            height:100%;
+            .flex-column {
+              display: flex;
+              flex-direction: column;
+            }
+            .column-end {justify-content: flex-end;}
+            .column-center {justify-content: center;}
+            .column-end {justify-content: flex-start;}
+            .name-lower-box {
+              width: 35%;
+              height:80%; 
+              display: flex;
+              justify-content: space-around;
+              flex-direction: column;
+              font-size: 0.36rem;
+              padding:1.25rem 0 0 0.7rem;
+
+              .name-lower {
+                white-space:nowrap; //强制不换行
+                overflow:hidden; //自动隐藏文字
+                text-overflow: ellipsis; //文字隐藏后添加省略号 
+                .link:hover{cursor: pointer;}
+              }
+              .detail-data{
+                height: 65%;
+              }
+              .detail-img{
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                .img{max-width: 100%; max-height: 100%;}
+              }
+              .detail-po{display: flex;flex-direction: column;justify-content: space-between;}
+            }
+
+            #chart3 {
+              width: 50%;
+              height: 100%;
+            }
+
+            .list3 {
+              width: 25%;
+              font-weight: bold;
+              display: flex;
+              flex-direction: column;
+              justify-content: center;
+              padding-left: .3rem;
+
+              .item {
+                margin: .3rem 0;
+
+                .title {} 
+                .count {
+                  margin-right: .5rem;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
+    .b-right {
+      width: 50%;
+      height: 100%;
+      padding: .15rem;
+
+      .b-right-content {
+        width: 100%;
+        height: 100%;
+        border-radius: .16rem;
+        background: #fff;
+        padding: .8rem;
+        //overflow-y: auto;
+
+        .b-timeline {
+          width: 100%;
+          height: 95%;
+          overflow-y: auto;
+
+          /deep/ .timeline {
+            margin: 0.5rem 1rem;
+
+            &:after {
+              top: 0rem;
+              height: auto;
+              bottom: .7rem;
+            }
+
+            .timeline-title {
+              font-size: .6rem;
+              font-weight: bold;
+              margin: -.15em 0 .5rem 0;
+              cursor: unset;
+            }
+
+            .timeline-item {
+              margin: 0.5em 0 0 .5rem;
+			  padding-bottom: 0.5em;
+			  border-bottom: 0px dotted;
+            }
+			.timelineP{
+				white-space:nowrap; //强制不换行
+				overflow:hidden; //自动隐藏文字
+				text-overflow: ellipsis; //文字隐藏后添加省略号
+				width: 100%;
+				padding-bottom: 3px;
+			}
+
+            .timeline-circle {
+              top: 0;
+              width: .3rem;
+              height: .3rem;
+              left: -.65rem;
+            }
+
+            .timeline-title-circle {
+              width: 0;
+              height: 0;
+              display: none;
+            }
+          }
+        }
+
+      }
+    }
+
+
+    /deep/ .g2-tooltip {
+      z-index: 99;
+      position: absolute;
+      background-color: rgba(0, 0, 0, 0.7);
+      border-radius: .16rem;
+      color: #ddd;
+	  white-space: nowrap;
+      font-size: .36rem;
+      line-height: 1.2;
+      padding: .24rem .24rem .1rem .24rem;
+      box-shadow: 0 0 .1rem #aeaeae;
+    }
+
+    /deep/ .g2-tooltip-title {
+      font-size: .4rem;
+    }
+
+    /deep/ .g2-tooltip-list {
+      padding: 0;
+      list-style-type: none;
+      margin-top: .2rem;
+
+      .g2-tooltip-li {
+        margin: .2rem 0;
+      }
+    }
+
+    canvas {
+      background: #fff;
+      width: 100%;
+      height: 100%;
+    }
+
+  }
+
+
+</style>
+

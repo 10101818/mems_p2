@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width,initial-scale=1" />
+	<title>填写作业报告</title>
+	<link rel="stylesheet" type="text/css" href="../css/bootstrap.min.css" />
+	<link rel="stylesheet" type="text/css" href="../style.css" />
+	<script src="../js/jquery-1.11.0.js"></script>
+	<script type="text/javascript" src="../js/bootstrap.min.js"></script>
+</head>
+
+<body>
+	<div class="serverDetail" style="width: 1000px;">
+		<div style="font-size:18px;margin-top:3%;"><a class="linkFile" href="#" onclick="window.history.back()">
+				<<返回 </a>
+		</div>
+		<p class="tblTitle">填写作业报告</p>
+
+		<div>
+			<span style="float:right;">选择作业报告类型：<button
+					class="btn btn-link btn-reportType linkFile">通用作业报告</button></span>
+		</div>
+		<!-- 设备信息 -->
+		<table class="" width="1000" border="1px" align="center" cellpadding="6px" cellspacing="0">
+			<tr class="headtr">
+				<td colspan="4">设备基本信息</td>
+			</tr>
+			<tr>
+				<td class="headtd" width="20%">设备系统编号</td>
+				<td width="30%">
+					<label class="disableContent">ZC00000001</label>
+				</td>
+				<td class="headtd" width="20%">资产等级</td>
+				<td width="30%">
+					<label class="disableContent">重要</label>
+				</td>
+			</tr>
+			<tr>
+				<td class="headtd">设备名称</td>
+				<td>
+					<label class="disableContent">彩超</label>
+				</td>
+				<td class="headtd">使用科室</td>
+				<td>
+					<label class="disableContent">磁共振</label>
+				</td>
+			</tr>
+			<tr>
+				<td class="headtd">设备型号</td>
+				<td>
+					<label class="disableContent">HA 710 二郎神</label>
+				</td>
+				<td class="headtd">安装地点</td>
+				<td>
+					<label class="disableContent">磁共振1室</label>
+				</td>
+			</tr>
+			<tr>
+				<td class="headtd">序列号</td>
+				<td>
+					<label class="disableContent">458652552</label>
+				</td>
+				<td class="headtd">保修状况</td>
+				<td>
+					<label class="disableContent">保内</label>
+				</td>
+			</tr>
+			<tr>
+				<td class="headtd">设备厂商</td>
+				<td>
+					<label class="disableContent">飞利浦</label>
+				</td>
+				<td class="headtd">保修范围</td>
+				<td>
+					<label class="disableContent">全保</label>
+				</td>
+			</tr>
+		</table>
+		</br>
+		<!-- <p class="bodyCompoment">请求信息</p> -->
+		<table class="" width="1000" border="1px" align="center" cellpadding="6px" cellspacing="0">
+			<tbody>
+				<tr class="headtr">
+					<td colspan="4">请求详情信息</td>
+				</tr>
+				<tr class="tblList">
+					<td class="tdDetailHead" width="20%">服务申请编号</td>
+					<td colspan="3">
+						<label id="SystemID" class="disableContent">0125632</label>
+					</td>
+				</tr>
+				<tr class="tblList">
+					<td class="tdDetailHead">类型</td>
+					<td>
+						<label class="disableContent">客户请求-维修</label>
+					</td>
+					<td class="tdDetailHead">请求人</td>
+					<td>
+						<label class="disableContent">宋XX</label>
+					</td>
+				</tr>
+				<tr class="tblList">
+					<td class="tdDetailHead">请求状态</td>
+					<td>
+						<label class="disableContent">已分配</label>
+					</td>
+					<td class="tdDetailHead">请求日期</td>
+					<td>
+						<label class="disableContent">2019-03-01 12:03</label>
+					</td>
+				</tr>
+				<tr>
+					<td class="tdDetailHead" width="20%">主题</td>
+					<td width="30%">
+						<label class="disableContent">彩超--维修</label>
+					</td>
+					<td class="tdDetailHead">机器状态</td>
+					<td>
+						<label class="disableContent">正常</label>
+					</td>
+				</tr>
+				<tr class="tblList">
+					<td class="tdDetailHead">请求来源</td>
+					<td colspan="3">
+						<label class="disableContent">客户报修</label>
+					</td>
+				</tr>
+				<tr>
+					<td class="tdDetailHead">故障描述</td>
+					<td colspan="3">
+						<label class="disableContent">系统报错，设备无法启动</label>
+					</td>
+				</tr>
+				<tr class="tblList">
+
+					<td class="tdDetailHead">处理方式</td>
+					<td colspan="3">
+						<label class="disableContent">上门服务</label>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+		</br>
+		<!-- <p class="bodyCompoment">派工单信息</p> -->
+		<table class="" width="1000" border="1" cellpadding="6px" cellspacing="0">
+			<tbody>
+				<tr class="headtr">
+					<td colspan="6">派工单信息</td>
+				</tr>
+				<tr class="tblList">
+					<td class="tdDetailHead" width="20%">派工单编号</td>
+					<td width="30%"><a href="uploadServerInfo.html" class="linkFile">PGD00000001</a></td>
+					<td class="tdDetailHead" width="20%">紧急程度</td>
+					<td width="30%">
+						<label class="disableContent">紧急</label>
+					</td>
+				</tr>
+				<tr>
+					<td class="tdDetailHead">派工类型</td>
+					<td>
+						<label class="disableContent">维修</label>
+					</td>
+					<td class="tdDetailHead">机器状态</td>
+					<td>
+						<label class="disableContent">停机</label>
+					</td>
+				</tr>
+				<tr class="tblList">
+					<td class="tdDetailHead">工程师姓名</td>
+					<td>
+						<label class="disableContent">魏宸园</label>
+					</td>
+					<td class="tdDetailHead">出发时间</td>
+					<td>
+						<label class="disableContent">2019/01/01</label>
+					</td>
+				</tr>
+				<tr class="tblList">
+					<td class="tdDetailHead">备注</td>
+					<td colspan="3">
+						<label class="disableContent"></label>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+		</br>
+		<table class="" width="1000" border="1" cellpadding="6px" cellspacing="0">
+			<tbody>
+				<tr class="tblList">
+					<td colspan="6" class="headtr">作业报告信息</td>
+				</tr>
+				<tr class="tblList">
+					<td class="tdDetailHead" width="20%">作业报告编号</td>
+					<td colspan="3" width="80%">
+						<label id="SystemID" style="color:gray">ZYBG00000001</label>
+					</td>
+				</tr>
+				<tr class="tblList">
+					<td class="tdDetailHead" width="20%">发生频率</td>
+					<td width="30%">
+						<input type="text" value="一直">
+					</td>
+					<td class="tdDetailHead" width="20%">系统状态</td>
+					<td width="30%">
+						<input type="text" value="故障">
+					</td>
+				</tr>
+				<tr class="tblList">
+					<td class="tdDetailHead">错误代码</td>
+					<td><input type="text" value="oxe2135"></td>
+					<td class="tdDetailHead">故障描述</td>
+					<td><input type="text" value="系统无法启动"></td>
+				</tr>
+				<tr class="tblList">
+					<td class="tdDetailHead">分析原因</td>
+					<td colspan="3"><input type="text" style="width:100%"></td>
+				</tr>
+				<tr class="tblList">
+					<td class="tdDetailHead">处理方法</td>
+					<td colspan="3"><input type="text" value="更新球馆" style="width:100%"></td>
+				</tr>
+				<tr class="tblList">
+					<td class="tdDetailHead">作业结果</td>
+					<td colspan="3">
+						<select id="chooseResult" onchange="ChangeResult()">
+							<option>待分配</option>
+							<option>问题升级</option>
+							<option>待第三方支持</option>
+							<option value="4">已解决</option>
+						</select>
+					</td>
+				</tr>
+				<tr id="IsThird" >
+					<td class="tdDetailHead">是否待第三方支持</td>
+					<td colspan="3">
+						<input name="isThird" type="radio" checked>是
+						<input name="isThird" type="radio" >否
+					</td>
+				</tr>
+				<tr>
+					<td class="tdDetailHead">未解决备注</td>
+					<td colspan="3"><input type="text" style="width:100%"></td>
+				</tr>
+				<tr class="tblList">
+					<td class="tdDetailHead">误工说明</td>
+					<td colspan="3"><input type="text" style="width:100%"></td>
+				</tr>
+				<tr class="tblList">
+					<td class="tdDetailHead">附件</td>
+					<td colspan="3">
+						<img src="../img/upload .png" class="update">
+					</td>
+				</tr>
+			</tbody>
+		</table>
+		<br />
+		<!-- 零配件信息 -->
+		<table class="" width="1000" border="1" cellpadding="6px" cellspacing="0">
+			<tr class="tblList">
+				<td colspan="10" class="headtr">材料信息<button class="btn btn-outline-info btn-sm btn-newLpj" style="float: right;">新增</button></td>
+			</tr>
+			<tr>
+				<th rowspan="3" class="tdDetailHead" style="width: 150px;">零配件信息</th>
+				<th rowspan="2" class="tdDetailHead" style="width: 50px;">简称</th>
+				<th colspan="3" class="tdDetailHead" style="text-align:center">新装零配件</th>
+				<th colspan="3" class="tdDetailHead" style="text-align:center">拆卸零配件</th>
+				<th rowspan="2" class="tdDetailHead" style="width: 50px;">移除</th>
+			</tr>
+			<tr>
+				<td class="tdDetailHead">序列号</td>
+				<td class="tdDetailHead">金额(元)</td>
+				<td class="tdDetailHead">附件图</td>
+
+				<td class="tdDetailHead">序列号</td>
+				<td class="tdDetailHead">金额(元)</td>
+				<td class="tdDetailHead">附件图</td>
+			</tr>
+			<tr class="tblList">
+				<td>
+					<label>球馆</label>
+				</td>
+				<td><label>LSMR0000240</label></td>
+				<td>
+					<label>***</label>
+				</td>
+				<td><a class="linkFile" href="#">新装部件</a></td>
+
+				<td><label>LSMR0000243</label></td>
+				<td>
+					<label>***</label>
+				</td>
+				<td><a class="linkFile" href="#">拆下部件</a></td>
+				<td><img src="../img/delete.png"></td>
+			</tr>
+		</table>
+		<!-- 耗材信息 -->
+		<table class="" width="1000" border="1" style="border-top: none;" cellpadding="6px" cellspacing="0">
+			<tr>
+				<th class="tdDetailHead" rowspan="2" style="width: 150px;">耗材信息</th>
+				<th class="tdDetailHead">简称</th>
+				<th class="tdDetailHead">批次号</th>
+				<th class="tdDetailHead">供应商</th>
+				<th class="tdDetailHead">单价（元）</th>
+				<th class="tdDetailHead">数量</th>
+				<th class="tdDetailHead" style="width: 50px;">移除</th>
+			</tr>
+			<tr class="tblList">
+				<td>
+					<label>云母片</label>
+				</td>
+				<td>
+					<label>LSMR0000101</label>
+				</td>
+				<td>
+					<label>飞利浦</label>
+				</td>
+				<td>
+					<label>***</label>
+				</td>
+				<td>
+					<label>3</label>
+				</td>
+				<td><img src="../img/delete.png"></td>
+			</tr>
+		</table>
+		<!-- 外购维修服务 -->
+		<table class="" width="1000" border="1" style="border-top: none;" cellpadding="6px" cellspacing="0">
+			<tr class="tblList">
+				<th class="tdDetailHead" rowspan="2" style="width: 150px;">外购维修服务信息</th>
+				<th class="tdDetailHead">维修服务系统编号</th>
+				<th class="tdDetailHead">服务名称</th>
+				<th class="tdDetailHead">供应商</th>
+				<th class="tdDetailHead">金额（元）</th>
+				<th class="tdDetailHead" style="width: 50px;">移除</th>
+			</tr>
+			<tr class="tblList">
+				<td>
+					<label>WGFW00000001</label>
+				</td>
+				<td>
+					<label>设备1的整机维修</label>
+				</td>
+				<td>
+					<label>飞利浦</label>
+				</td>
+				<td>
+					<label>***</label>
+				</td>
+				<td><img src="../img/delete.png" /></td>
+			</tr>
+		</table>
+		<br />
+		<table width="1000px" style="text-align: center; margin: 20px auto;">
+			<tbody>
+				<tr class="tblList">
+					<td><button class="btn btn-info" onclick="window.history.back()">保存</button></td>
+					<td><button class="btn btn-info" onclick="window.history.back()">提交</button></td>
+					<td><button class="btn btn-info" onclick="window.history.back()">返回</button></td>
+				</tr>
+			</tbody>
+		</table>
+		<!-- 新增零配件 -->
+		<div class="modal fade" id="lpjModalCenter" tabindex="-1" role="dialog" aria-lableledby="lpjModalCenterTitle"
+			aria-hidden="true">
+			<div class="modal-dialog  modal-dialog-centered" role="document">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h6 class="modal-title" id="lpjModalLongTitle">新增</h6>
+						<button type="button" class="close" data-dismiss="modal" aria-lable="Close"><span
+								class="modal-icon" aria-hidden="true">&times;</span></button>
+					</div>
+					<div class="modal-body">
+						<table class="table table-sm  table-input modal-table" style="text-align: left;">
+							<tbody>
+								<tr>
+									<td width="35%"><span class="requiredItem">*</span>选择新增内容:</td>
+									<td width="65%">
+										<select id="choose" onchange="ChangeContant()" style="width: 150px;">
+											<option value="0"></option>
+											<option value="1">零件</option>
+											<option value="2">耗材</option>
+											<option value="3">服务</option>
+										</select>
+									</td>
+								</tr>
+								<tr class="lpj">
+									<td width="35%"><span class="requiredItem">*</span>新装序列号:</td>
+									<td width="65%"><input type="text" style="width: 150px;" placeholder=""/><img src="../img/find.png" class="update" /></td>
+								</tr>								
+								<tr class="lpj">
+									<td><span class="unrequiredItem"></span>新装附件图:</td>
+									<td><img src="../img/upload%20.png" class="update"></td>
+								</tr>
+								
+								<tr class="lpj">
+									<td><span class="requiredItem"></span>拆下序列号:</td>
+									<td><input type="text" style="width: 150px;" placeholder=""/><img src="../img/find.png" class="update"></td>
+								</tr>
+								<tr class="lpj">
+									<td><span class="unrequiredItem"></span>拆下附件图:</td>
+									<td>
+										<img src="../img/upload%20.png" class="update">
+									</td>
+								</tr>
+								<tr class="hc">
+									<td width="35%"><span class="requiredItem">*</span>耗材简称:</td>
+									<td width="65%">
+										<select style="width: 150px;">
+											<option>云母片</option>
+											<option>密封圈</option>
+											<option>氧电池</option>
+											<option>反渗膜（血透）</option>
+										</select>
+									</td>
+								</tr>
+								<tr class="hc">
+									<td width="35%"><span class="requiredItem">*</span>批次号:</td>
+									<td width="65%">
+										<select style="width: 150px;">
+											<option>LSMR0000101</option>
+											<option>LSMR0000102</option>
+											<option>LSMR0000103</option>
+											<option>LSMR0000104</option>
+										</select>
+									</td>
+								</tr>
+								<tr class="hc">
+									<td><span class="requiredItem">*</span>数量:</td>
+									<td><input type="text" style="width: 150px;" /></td>
+								</tr>
+								<tr class="fw">
+									<td width="35%"><span class="requiredItem">*</span>外购维修服务:</td>
+									<td width="65%">
+										<select style="width: 150px;">
+											<option>设备1的整机维修</option>
+										</select>
+									</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-info btn-sm">保存</button>
+						<button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">关闭</button>
+					</div>
+				</div>
+			</div>
+		</div>
+		
+		<!--作业报告类型-->
+		<div class="modal fade" id="reportType" tabindex="-1" role="dialog" aria-lableledby="reportTypeCenterTitle"
+			aria-hidden="true">
+			<div class="modal-dialog  modal-dialog-centered" role="document">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h6 class="modal-title" id="reportTypeLongTitle">选择作业报告类型</h6>
+						<button type="button" class="close" data-dismiss="modal" aria-lable="Close"><span
+								class="modal-icon" aria-hidden="true">&times;</span></button>
+					</div>
+					<div class="modal-body">
+						<table cellspacing="7" cellpadding="0">
+							<tr>
+								<td width="150px"><button class="btn btn-info">通用作业报告</button></td>
+							</tr>
+						</table>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-info btn-sm">保存</button>
+						<button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">关闭</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
+	</div>
+</body>
+<script>
+	function backList() {
+		window.location = "uploadJobInfoLink.html";
+	}
+
+	function back() {
+		window.location = "uploadJobInfoList.html";
+	}
+	var options = {};
+	$(function () {
+			InitContentHide();
+			$("#IsThird").hide();
+		$(".requiredItem").html("*");
+		$(".unrequiredItem").html("&nbsp;&nbsp;");
+		$(".requiredItem").css("color", "red");
+
+		$("#s1").change(function () {
+			if ($(this).val() == -1) {
+				$(".showReport").hide();
+			} else {
+				$(".showReport").show();
+			}
+		})
+		$(".btn-reportType").click(function () {
+			$("#reportType").modal(options);
+		})
+		$(".btn-newLpj").click(function () {
+			$("#lpjModalCenter").modal(options);
+		})
+		$(".btn_newConsumable").click(function () {
+			$("#AddConsumable").modal(options);
+		})
+		$(".btn_newRepairService").click(function () {
+			$("#RepairService").modal(options);
+		})
+	})
+
+	function InitContentHide(){
+		$(".lpj").hide();
+		$(".hc").hide();
+		$(".fw").hide();
+	}
+	function ChangeContant(){
+		var id = $("#choose").val();
+		if(id == 1) 
+		{
+			InitContentHide();
+			$(".lpj").show();
+		}
+		if(id == 2) 
+		{
+			InitContentHide();
+			$(".hc").show();
+		}
+		if(id == 3) 
+		{
+			InitContentHide();
+			$(".fw").show();
+		}
+	}
+
+	function ChangeResult(){
+		var id = $("#chooseResult").val();
+		if(id == 4) $("#IsThird").show();
+		else $("#IsThird").hide();
+	}
+</script>
+
+<style>
+</style>
+
+</html>

@@ -1,0 +1,191 @@
+﻿
+@{
+    ViewBag.Title = "Valuation";
+    Layout = "~/Views/Shared/_SubMain.cshtml";
+}
+<!--决策辅助工具-->
+<div id="ValDecisionAids" style="width:100%;height:100%;" v-cloak>
+    <div class="title freezeContent"><p>决策辅助工具</p></div>
+    <table style="text-align:left;" border="1">
+        <thead>
+            <tr style="color:white;white-space:nowrap;">
+                <th rowspan="2" style="background-color: #1b4082; border:none;">是否在系统中</th>
+                <th rowspan="2" style="background-color: #1b4082; border:none;">资产编号</th>
+                <th rowspan="2" style="background-color: #1b4082; border:none;">名称</th>
+                <th rowspan="2" style="background-color: #1b4082; border:none;">富士II类</th>
+                <th rowspan="2" style="background-color: #1b4082; border:none;">维保分类</th>
+                <th rowspan="2" style="background-color: #1b4082; border:none;">故障设备分类</th>
+                <th rowspan="2" style="background-color: #1b4082; border:none;">故障分类</th>
+                <th rowspan="2" style="background-color: #1b4082; border:none;">未来1年内故障成本</th>
+                <th rowspan="2" style="background-color: #1b4082; border:none;">未来1年内故障外购维修成本</th>
+                <th rowspan="2" style="background-color: #1b4082; border:none;">未来1年内总故障成本</th>
+                <th rowspan="2" style="background-color: #1b4082; border:none;">未来1年全保成本</th>
+                <th rowspan="2" style="background-color: #1b4082; border:none;">未来1年技术保成本</th>
+                <th colspan="2" style="background-color: #4f6328; border:none; text-align:center;">未来1年故障成本-维保成本差异</th>
+            </tr>
+            <tr style="color: white; text-align: center;">
+                <th style="background-color: #4f6328;border:none;">购买全保判断</th>
+                <th style="background-color: #4f6328;border:none;">购买技术保判断</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr v-for="obj in equipments">
+                <td>{{obj.ValEquipment.InSystem?'是':'否'}}</td>
+                <td>{{obj.ValEquipment.Equipment.AssetCode}}</td>
+                <td style="white-space:nowrap;">{{obj.ValEquipment.Equipment.Name}}</td>
+                <td style="border:none;background-color:#dceff3;">{{obj.ValEquipment.Equipment.FujiClass2.Name}}</td>
+                <td style="border:none;background-color:#dceff3;">{{obj.ValEquipment.MaintenanceCategory.Name}}</td>
+                <td style="border:none;background-color:#dceff3;">{{obj.ValEquipment.EquipmentCategory.Name}}</td>
+                <td style="border:none;background-color:#dceff3;">{{obj.ValEquipment.FailureCategory.Name}}</td>
+                <td style="border:none;background-color:#dceff3;text-align:right;">{{Split(obj.FailureCost)}}</td>
+                <td style="border:none;background-color:#dceff3;text-align:right;">{{Split(obj.OutsourcingMaintenanceCost)}}</td>
+                <td style="border:none;background-color:#dceff3;text-align:right;">{{Split(obj.TotalFailureCost)}}</td>
+                <td style="border:none;background-color:#dceff3;text-align:right;">{{Split(obj.WholeGuaranteeCost)}}</td>
+                <td style="border:none;background-color:#dceff3;text-align:right;">{{Split(obj.TechnicalGuaranteeCost)}}</td>
+                <td>
+                    <div v-if="obj.TotalFailureCost && obj.WholeGuaranteeCost">
+                        <img src="~/Content/img/yes.png" class="icon-sm" style="width:16px;height:16px;" v-if="obj.WholeGuaranteeForecast>=10000" />
+                        <img src="~/Content/img/no.png" class="icon-sm" style="width:16px;height:16px;" v-else-if="obj.WholeGuaranteeForecast>= -10000 && obj.WholeGuaranteeForecast < 10000 " />
+                        <img src="~/Content/img/unKnow.png" class="icon-sm" style="width:16px;height:16px;" v-else />
+                        <span style="float: right;"><img src="~/Content/img/asc.png" class="icon-sm" style="width:16px;height:16px;" v-if="obj.WholeGuaranteeForecast<0" />{{Split(Math.abs(obj.WholeGuaranteeForecast))}}</span>
+                    </div>
+                    <div v-else>
+                        <span style="float: right;">-</span>
+                    </div>
+                </td>
+                <td>
+                    <div v-if="obj.OutsourcingMaintenanceCost && obj.TechnicalGuaranteeCost">
+                        <img src="~/Content/img/yes.png" class="icon-sm" style="width:16px;height:16px;" v-if="obj.TechnicalGuaranteeForecast>=10000" />
+                        <img src="~/Content/img/no.png" class="icon-sm" style="width:16px;height:16px;" v-else-if="obj.TechnicalGuaranteeForecast>= -10000 && obj.TechnicalGuaranteeForecast < 10000 " />
+                        <img src="~/Content/img/unKnow.png" class="icon-sm" style="width:16px;height:16px;" v-else />
+                        <span style="float: right;"><img src="~/Content/img/asc.png" class="icon-sm" style="width:16px;height:16px;" v-if="obj.TechnicalGuaranteeForecast<0" />{{Split(Math.abs(obj.TechnicalGuaranteeForecast))}}</span>
+                    </div>
+                    <div v-else>
+                        <span style="float: right;">-</span>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+ 
+<!--维保辅助工具-->
+<script>   
+    var ValDecisionAidsVue = new Vue({
+        el: "#ValDecisionAids",
+        data:function(){
+            return {
+                equipments: [],
+            }
+        },
+        methods:{
+            GetToolData: function () {
+                let _this = this
+                //$.Deferred().resolve({ Data: getData(), ResultCode: "00", ResultMessage: "", TotalPages: 0 }).then(function (result) {
+                $.get("@Url.Action("GetDecisionAidsData", "Valuation")", function (result) {
+                    if (result.ResultCode != "00")
+                        processResponseError(result.ResultCode, result.ResultMessage);
+                    else {
+                        result.Data.map(function (equipment) {
+                            equipment.TotalFailureCost = equipment.FailureCost + equipment.OutsourcingMaintenanceCost
+                            equipment.WholeGuaranteeForecast = equipment.TotalFailureCost - equipment.WholeGuaranteeCost
+                            equipment.TechnicalGuaranteeForecast = equipment.OutsourcingMaintenanceCost - equipment.TechnicalGuaranteeCost
+                            equipment.ValEquipment.MaintenanceCategory = { Name: 'MRI' }
+                            equipment.ValEquipment.EquipmentCategory = { Name: 'MRI' }
+                            equipment.ValEquipment.FailureCategory = { Name: '	重要设备	' }
+                        })
+                        _this.equipments = result.Data
+                    }
+                })
+            }
+        },
+        created: function () {
+            let _this = this
+            this.$nextTick(function () { 
+                _this.GetToolData()
+            })
+        },
+    }) 
+    
+    function Split(str, lenght) { 
+        length = lenght || 3
+        str = String(str).split(".");
+        str[0] = str[0].replace(new RegExp('(\\d)(?=(\\d{' + length + '})+$)', 'ig'), "$1,");
+        return str.join(".");
+    }
+
+
+
+    function getData() {
+        return [
+            {
+                ValEquipment: {
+                    Insystem: true,
+                    Equipment:{
+                        AssetCode: 'LSRM002020900002',
+                        Name: '医用磁共振成像系统',
+                        FujiClass2: { Name: 'NRI' },
+                    },
+                    MaintenanceCategory: { Name: 'MRI' },
+                    EquipmentCategory: { Name: 'MRI' },
+                    FailureCategory: { Name: '	重要设备	' },
+                },
+                FailureCost: Math.floor(Math.random() * (990000 - 100000 + 1)) + 100000,
+                OutsourcingMaintenanceCost: Math.floor(Math.random() * (9999 - 1000 + 1)) + 1000,
+                WholeGuaranteeCost: Math.floor(Math.random() * (990000 - 100000 + 1)) + 100000,
+                TechnicalGuaranteeCost: Math.floor(Math.random() * (990000 - 100000 + 1)) + 100000,
+            },
+            {
+                ValEquipment: {
+                    Insystem: true,
+                    Equipment: {
+                        AssetCode: 'LSRM002020900002',
+                        Name: '医用磁共振成像系统',
+                        FujiClass2: { Name: 'NRI' },
+                    },
+                    MaintenanceCategory: { Name: 'MRI' },
+                    EquipmentCategory: { Name: 'MRI' },
+                    FailureCategory: { Name: '	重要设备	' },
+                },
+                FailureCost: Math.floor(Math.random() * (990000 - 100000 + 1)) + 100000,
+                OutsourcingMaintenanceCost: Math.floor(Math.random() * (9999 - 1000 + 1)) + 1000,
+                WholeGuaranteeCost: Math.floor(Math.random() * (990000 - 100000 + 1)) + 100000,
+                TechnicalGuaranteeCost: Math.floor(Math.random() * (990000 - 100000 + 1)) + 100000,
+            },
+            {
+                ValEquipment: {
+                    Insystem: true,
+                    Equipment: {
+                        AssetCode: 'LSRM002020900002',
+                        Name: '医用磁共振成像系统',
+                        FujiClass2: { Name: 'NRI' },
+                    },
+                    MaintenanceCategory: { Name: 'MRI' },
+                    EquipmentCategory: { Name: 'MRI' },
+                    FailureCategory: { Name: '	重要设备	' },
+                },
+                FailureCost: Math.floor(Math.random() * (990000 - 100000 + 1)) + 100000,
+                OutsourcingMaintenanceCost: Math.floor(Math.random() * (9999 - 1000 + 1)) + 1000,
+                WholeGuaranteeCost: Math.floor(Math.random() * (990000 - 100000 + 1)) + 100000,
+                TechnicalGuaranteeCost: Math.floor(Math.random() * (990000 - 100000 + 1)) + 100000,
+            },
+            {
+                ValEquipment: {
+                    Insystem: true,
+                    Equipment: {
+                        AssetCode: 'LSRM002020900002',
+                        Name: '医用磁共振成像系统',
+                        FujiClass2: { Name: 'NRI' },
+                    },
+                    MaintenanceCategory: { Name: 'MRI' },
+                    EquipmentCategory: { Name: 'MRI' },
+                    FailureCategory: { Name: '	重要设备	' },
+                },
+                FailureCost: Math.floor(Math.random() * (990000 - 100000 + 1)) + 100000,
+                OutsourcingMaintenanceCost: Math.floor(Math.random() * (9999 - 1000 + 1)) + 1000,
+                WholeGuaranteeCost: Math.floor(Math.random() * (990000 - 100000 + 1)) + 100000,
+                TechnicalGuaranteeCost: Math.floor(Math.random() * (990000 - 100000 + 1)) + 100000,
+            },
+        ]
+    }
+</script>

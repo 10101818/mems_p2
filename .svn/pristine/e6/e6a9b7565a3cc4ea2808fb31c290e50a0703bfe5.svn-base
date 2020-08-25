@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title>查看合同页面</title>
+		<link rel="stylesheet" type="text/css" href="../css/bootstrap.min.css" />
+		<link rel="stylesheet" type="text/css" href="../style.css" />
+		<script src="../js/jquery-1.11.0.js"></script>
+		<script type="text/javascript" src="../js/bootstrap.min.js"></script>
+	</head>
+
+	<body>
+		<div style="width: 800px; margin: 0 auto;">
+			<div style="font-size:18px;text-align:left;width: 800px;margin: 10px auto;"><a class="linkFile" href="#" onclick="window.history.back()">
+					<<返回 </a> </div> <h3 align="center">合同详情</h3>
+								<table class="tblDetail" border="1" style="text-align: left; width: 800px; margin: auto;">
+							<tbody>
+								<tr>
+									<td colspan="11" class="headtr">设备信息</td>
+								</tr>
+								<tr class="tdDetailHead">
+									<th width="100px">系统编号</th>
+									<th style="min-width: 50px;">名称</th>
+									<th style="min-width: 50px;">型号</th>
+									<th style="min-width: 60px;">序列号</th>
+									<th style="min-width: 70px;">设备厂商</th>
+									<th width="70px">资产等级</th>
+									<th style="min-width: 70px;">使用科室</th>
+									<th style="min-width: 70px;">安装地点</th>
+								</tr>
+								<tr>
+									<td>ZC00000014</td>
+									<td>呼吸机</td>
+									<td>111</td>
+									<td>21312</td>
+									<td>GE</td>
+									<td>重要</td>
+									<td>放射科</td>
+									<td></td>
+								</tr>
+								<tr>
+									<td>ZC00000015</td>
+									<td>CT机</td>
+									<td>SOMATOM</td>
+									<td>19046</td>
+									<td>爱科凯能</td>
+									<td>重要</td>
+									<td>放射科</td>
+									<td>核磁共振A室</td>
+								</tr>
+							</tbody>
+						</table>
+						<br />
+						<table class="tblDetail" border="1" style="text-align: left;width: 800px;">
+							<tbody>
+								<tr>
+									<td class="tdDetailHead" width="20%"><span class="requiredItem"></span>系统编号:</td>
+									<td width="30%" class="disableContent">HT00000001</td>
+									<td class="tdDetailHead"><span class="unrequiredItem"></span>项目编号:</td>
+									<td class="disableContent">P0123</td>
+								</tr>
+								<tr>
+									<td class="tdDetailHead" width="20%"><span class="requiredItem"></span>合同编号:</td>
+									<td width="30%" class="disableContent">209420124</td>
+									<td class="tdDetailHead"><span class="requiredItem"></span>金额(元):</td>
+									<td class="disableContent">108000</td>
+								</tr>
+								<tr>
+									<td class="tdDetailHead"><span class="requiredItem"></span>名称:</td>
+									<td class="disableContent">某某合同</td>
+									<td class="tdDetailHead"><span class="unrequiredItem"></span>合同状态:</td>
+									<td class="disableContent">生效</td>
+								</tr>
+								<tr>
+									<td class="tdDetailHead"><span class="requiredItem"></span>类型:</td>
+									<td class="disableContent">原厂服务合同
+									</td>
+									<td class="tdDetailHead"><span class="requiredItem"></span>供应商:</td>
+									<td class="disableContent">飞利浦医疗(上海)有限公司
+									</td>
+								</tr>
+								<tr>
+								</tr>
+								<tr>
+									<td class="tdDetailHead"><span class="requiredItem">*</span>起止日期:</td>
+									<td colspan="3" class="disableContent">2018-01-02——2023-01-03</td>
+								</tr>
+								<tr>
+									<td class="tdDetailHead"><span class="requiredItem"></span>服务范围:</td>
+									<td colspan="3" class="disableContent">全保</td>
+								</tr>
+								<tr>
+									<td class="tdDetailHead"><span class="unrequiredItem"></span>备注:</td>
+									<td colspan="3"></td>
+								<tr>
+									<td class="tdDetailHead"><span class="unrequiredItem"></span>附件:</td>
+									<td colspan="3"><a class="linkFile" href="#">某某合同附件</a></td>
+								</tr>
+							</tbody>
+						</table>
+						<br />
+						<!--零件、耗材-->
+						<div id="t2">
+							<table class="tblDetail" width="800" border="1" bordercolor="000000" cellpadding="0" cellspacing="0">
+								<tbody>
+									<tr>
+										<td class="headtr" colspan="6">零件</td>
+									</tr>
+									<tr>
+										<td class="tdDetailHead">简称</td>
+										<td class="tdDetailHead">描述</td>
+										<td class="tdDetailHead">设备系统编号</td>
+										<td class="tdDetailHead">设备资产编号</td>
+										<td class="tdDetailHead">关联设备名称</td>
+									</tr>
+									<tr>
+										<td>CT球管</td>
+										<td>CT球管</td>
+										<td>ZC00000015</td>
+										<td>LSRM002020500006</td>
+										<td>CT机</td>
+									</tr>
+									<tr>
+										<td>探测器</td>
+										<td>探测器</td>
+										<td>ZC00000015</td>
+										<td>LSRM002020500006</td>
+										<td>CT机</td>
+									</tr>
+									<tr>
+										<td>高压发生器</td>
+										<td>高压发生器</td>
+										<td>ZC00000015</td>
+										<td>LSRM002020500006</td>
+										<td>CT机</td>
+									</tr>
+									<tr>
+										<td>高压滑环</td>
+										<td>高压滑环</td>
+										<td>ZC00000015</td>
+										<td>LSRM002020500006</td>
+										<td>CT机</td>
+									</tr>
+									<tr>
+										<td>其他(床)</td>
+										<td>其他</td>
+										<td>ZC00000015</td>
+										<td>LSRM002020500006</td>
+										<td>CT机</td>
+									</tr>
+								</tbody>
+							</table>
+							<br />
+							<table class="tblDetail" width="800" border="1" bordercolor="000000" cellpadding="0" cellspacing="0">
+								<tbody>
+									<tr>
+										<td class="headtr" colspan="6">耗材</td>
+									</tr>
+									<tr>
+										<td class="tdDetailHead">简称</td>
+										<td class="tdDetailHead">描述</td>
+										<td class="tdDetailHead">设备系统编号</td>
+										<td class="tdDetailHead">设备资产编号</td>
+										<td class="tdDetailHead">关联设备名称</td>
+									</tr>
+									<tr>
+										<td>树脂+活性炭</td>
+										<td>树脂</td>
+										<td>ZC00000015</td>
+										<td>LSRM002020500006</td>
+										<td>CT机</td>
+									</tr>
+									<tr>
+										<td>反渗膜（一般）</td>
+										<td>反渗膜</td>
+										<td>ZC00000015</td>
+										<td>LSRM002020500006</td>
+										<td>CT机</td>
+									</tr>
+									<tr>
+										<td>反渗膜（血透）</td>
+										<td>反渗膜（血透）</td>
+										<td>ZC00000015</td>
+										<td>LSRM002020500006</td>
+										<td>CT机</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+						<table border="0" width="800" class="tblDetail" style="text-align: center;">
+							<tbody>
+								<tr>
+									<td><button class="btn btn-info" onclick="window.history.back()"><span>返回</span></button></td>
+								</tr>
+							</tbody>
+						</table>
+			</div>
+			
+	</body>
+
+<script>
+	var options = {};
+	$(function () {
+		$(".addComponent").click(function () {
+			$("#AddComponent").modal(options);
+		})
+		$(".addConsumables").click(function () {
+			$("#AddConsumables").modal(options);
+		})
+	})
+</script>
+</html>

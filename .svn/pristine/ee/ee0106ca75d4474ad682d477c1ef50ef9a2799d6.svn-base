@@ -1,0 +1,612 @@
+-- 系统对象列表
+CREATE TABLE [dbo].[lkpObjectType](
+	[ID] [int] NOT NULL,
+	[TableKey] [varchar](20) NOT NULL,
+	[Prefix] [varchar](10) NOT NULL,
+	[LeadingZeros] [decimal](2,0) NOT NULL,
+	[Description] [nvarchar](20) NOT NULL,
+	CONSTRAINT PK_lkpObjectType PRIMARY KEY ([ID]),
+	CONSTRAINT IX_lkpObjectType UNIQUE NONCLUSTERED ([TableKey]),
+)
+GO
+INSERT INTO [lkpObjectType] VALUES(1,	'Supplier',			'GYS',	8, '供应商')
+INSERT INTO [lkpObjectType] VALUES(2,	'Contract',			'HT',	8, '合同')
+INSERT INTO [lkpObjectType] VALUES(3,	'Equipment',		'ZC',	8, '设备')
+INSERT INTO [lkpObjectType] VALUES(4,	'Request',			'C',	8, '客户请求')
+INSERT INTO [lkpObjectType] VALUES(5,	'Dispatch',			'PGD',	8, '派工单')
+INSERT INTO [lkpObjectType] VALUES(6,	'DispatchJournal',	'FWPZ',	8, '服务凭证')
+INSERT INTO [lkpObjectType] VALUES(7,	'DispatchReport',	'ZYBG',	8, '作业报告')
+INSERT INTO [lkpObjectType] VALUES(8,	'ReportAccessory',	'LPJ',	8, '报告零配件')
+INSERT INTO [lkpObjectType] VALUES(9,	'CustomReport',		'ZB',	8, '自定义报表')
+INSERT INTO [lkpObjectType] VALUES(10,	'Notice',			'GB',	8, '广播')
+INSERT INTO [lkpObjectType] VALUES(11,	'Department',		'KS',	8, '科室')
+INSERT INTO [lkpObjectType] VALUES(12,	'SysAuditLog',		'XTRZ',	8, '日志')
+INSERT INTO [lkpObjectType] VALUES(13,	'Component',		'LJ',	8, '零件')
+INSERT INTO [lkpObjectType] VALUES(14,	'Consumable',		'HC',	8, '耗材')
+INSERT INTO [lkpObjectType] VALUES(15,	'FujiClass1',		'',		8, '富士I类')
+INSERT INTO [lkpObjectType] VALUES(16,	'FujiClass2',		'FJFL',	8, '富士II类')
+INSERT INTO [lkpObjectType] VALUES(17,	'InvComponent',		'LJK',	8, '零件')
+INSERT INTO [lkpObjectType] VALUES(18,	'InvConsumable',	'HCK',	8, '耗材')
+INSERT INTO [lkpObjectType] VALUES(19,	'InvService',		'WGFW',	8, '服务库')
+INSERT INTO [lkpObjectType] VALUES(20,	'InvSpare',			'BYJ',	8, '备用机库')
+INSERT INTO [lkpObjectType] VALUES(21,	'PurchaseOrder',	'CGD',	8, '采购单')
+GO
+
+-- 零件类型
+CREATE TABLE [dbo].[lkpComponentType](
+	[ID] [int] NOT NULL,
+	[Description] [nvarchar](20) NOT NULL,
+	CONSTRAINT PK_lkpComponentType PRIMARY KEY ([ID])
+)
+GO
+INSERT INTO [lkpComponentType] VALUES(1,'重要零件')
+INSERT INTO [lkpComponentType] VALUES(2,'一般零件')
+INSERT INTO [lkpComponentType] VALUES(3,'CT球管')
+GO
+
+-- 耗材类型
+CREATE TABLE [dbo].[lkpConsumableType](
+	[ID] [int] NOT NULL,
+	[Description] [nvarchar](20) NOT NULL,
+	CONSTRAINT PK_lkpConsumableType PRIMARY KEY ([ID])
+)
+GO
+INSERT INTO [lkpConsumableType] VALUES(1,'定期')
+INSERT INTO [lkpConsumableType] VALUES(2,'定量')
+INSERT INTO [lkpConsumableType] VALUES(3,'小额成本')
+GO
+
+-- 采购单状态
+CREATE TABLE [dbo].[lkpPurchaseOrderStatus](
+	[ID] [int] NOT NULL,
+	[Description] [nvarchar](20) NOT NULL,
+	CONSTRAINT PK_lkpPurchaseOrderStatus PRIMARY KEY ([ID])
+)
+GO
+INSERT INTO [lkpPurchaseOrderStatus] VALUES(-1,'终止')
+INSERT INTO [lkpPurchaseOrderStatus] VALUES(1,'新建')
+INSERT INTO [lkpPurchaseOrderStatus] VALUES(2,'待审批')
+INSERT INTO [lkpPurchaseOrderStatus] VALUES(3,'待入库')
+INSERT INTO [lkpPurchaseOrderStatus] VALUES(9,'已完成')
+GO
+
+-- 设备等级
+CREATE TABLE [dbo].[lkpEquipmentType](
+	[ID] [int] NOT NULL,
+	[Description] [nvarchar](20) NOT NULL,
+	CONSTRAINT PK_lkpEquipmentType PRIMARY KEY ([ID])
+)
+GO
+INSERT INTO [lkpEquipmentType] VALUES(1,'重点')
+INSERT INTO [lkpEquipmentType] VALUES(2,'次重点')
+INSERT INTO [lkpEquipmentType] VALUES(3,'一般')
+GO
+
+-- 医院等级
+CREATE TABLE [dbo].[lkpHospitalLevel](
+	[ID] [int] NOT NULL,
+	[Description] [nvarchar](20) NOT NULL,
+	[Factor] [decimal] (5, 2) NOT NULL,
+	CONSTRAINT PK_lkpHospitalLevel PRIMARY KEY ([ID])
+)
+GO
+INSERT INTO [lkpHospitalLevel] VALUES(1,'1级', 0.8)
+INSERT INTO [lkpHospitalLevel] VALUES(2,'2级', 1)
+INSERT INTO [lkpHospitalLevel] VALUES(3,'3级', 1.5)
+GO
+
+-- 故障率计算方式
+CREATE TABLE [dbo].[lkpFaultRateMethod](
+	[ID] [int] NOT NULL,
+	[Description] [nvarchar](20) NOT NULL,
+	CONSTRAINT PK_lkpFaultRateMethod PRIMARY KEY ([ID])
+)
+GO
+INSERT INTO [lkpFaultRateMethod] VALUES(1,'手动')
+INSERT INTO [lkpFaultRateMethod] VALUES(2,'韦伯')
+INSERT INTO [lkpFaultRateMethod] VALUES(3,'定期')
+GO
+
+-- 估价参数
+CREATE TABLE [dbo].[tblValParameter](
+	[CtlFlag] [varchar](3) NOT NULL DEFAULT ('CTL') ,
+	[HospitalLevel] [int] NULL,						-- 医院等级
+	[HospitalFactor] [decimal] (5, 2) NULL,			-- 医院等级系数
+	[SystemCost] [decimal](12, 2) NULL,				-- 信息系统使用费
+	[MonthlyHours] [decimal](12, 2) NULL,			-- 每月工作时长
+	[UnitCost] [decimal](12, 2) NULL,				-- 单位人工成本
+	[SmallConsumableCost] [decimal](12, 2) NULL,	-- 小额成本耗材标准年费用
+)
+GO
+INSERT INTO [tblValParameter](CtlFlag,HospitalLevel) VALUES('CTL',2)
+
+-- 零件定义
+CREATE TABLE [dbo].[tblComponent](
+	[ID] [int] IDENTITY(1,1) NOT NULL,
+	[FujiClass2ID] [int] NOT NULL,				-- 富士II类
+	[Name] [nvarchar](50) NOT NULL,				-- 简称
+	[Description] [nvarchar](200) NOT NULL,		-- 描述
+	[TypeID] [int] NOT NULL,					-- 类型
+	[StdPrice] [decimal](12, 2) NULL,			-- 标准单价
+	[Usage] [int] NULL,							-- 标准使用量
+	[TotalSeconds] [int] NULL,					-- CT球管 理论寿命
+	[SecondsPer] [decimal](12,2) NULL,			-- CT球管 秒次/人
+	[IsIncluded] [bit] NOT NULL,				-- 是否参与估值
+	[IncludeContract] [bit] NOT NULL,			-- 是否维保
+	
+	[MethodID] [int] NULL,						-- 故障率计算方式
+	[LifeTime] [int] NULL,						-- 定期零件更换月 
+	
+	[IsActive] [bit] NOT NULL,					-- 状态 1启用、0停用
+	[AddDate] [datetime] NOT NULL,				-- 添加日期	
+	[UpdateDate] [datetime] NULL,				-- 修改日期	
+	CONSTRAINT PK_tblComponent PRIMARY KEY ([ID]),
+	CONSTRAINT IX_tblComponent UNIQUE NONCLUSTERED ([FujiClass2ID],[Name]),
+)
+GO
+
+-- 耗材定义
+CREATE TABLE [dbo].[tblConsumable](
+	[ID] [int] IDENTITY(1,1) NOT NULL,
+	[FujiClass2ID] [int] NOT NULL,					-- 富士II类
+	[Name] [nvarchar](50) NOT NULL,					-- 简称
+	[Description] [nvarchar](200) NOT NULL,			-- 描述
+	[TypeID] [int] NOT NULL,						-- 类型
+	[ReplaceTimes] [decimal](5, 2) NULL,			-- 更换频率
+	[CostPer] [decimal](12, 2) NULL,				-- 单次保养耗材成本
+	[StdPrice] [decimal](12, 2) NULL,				-- 标准单价
+	[IsIncluded] [bit] NOT NULL,					-- 是否参与估值
+	[IncludeContract] [bit] NOT NULL,				-- 是否维保
+	[IsActive] [bit] NOT NULL,						-- 状态 1启用、0停用
+	[AddDate] [datetime] NOT NULL,					-- 添加日期	
+	[UpdateDate] [datetime] NULL,					-- 修改日期	
+	CONSTRAINT PK_tblConsumable PRIMARY KEY ([ID]),
+	CONSTRAINT IX_tblConsumable UNIQUE NONCLUSTERED ([FujiClass2ID],[Name]),
+)
+GO
+
+-- 富士I类
+CREATE TABLE [dbo].[tblFujiClass1](
+	[ID] [int] IDENTITY(-1,1) NOT NULL,
+	[Name] [nvarchar](50) NOT NULL,						-- 简称
+	[Description] [nvarchar](200) NOT NULL,				-- 描述
+	[AddDate] [datetime] NOT NULL,						-- 添加日期	
+	[UpdateDate] [datetime] NULL,						-- 修改日期	
+	CONSTRAINT PK_tblFujiClass1 PRIMARY KEY ([ID]),
+	CONSTRAINT IX_tblFujiClass1 UNIQUE NONCLUSTERED ([Name]),
+)
+GO
+INSERT INTO [tblFujiClass1] VALUES('其他','其他',GETDATE(),NULL)
+dbcc checkident ("tblFujiClass1",reseed,0)
+
+-- 富士I类设备类型关联表
+CREATE TABLE [dbo].[jctFujiClass1EqpType](
+	[EquipmentType1ID] [varchar](20) NOT NULL,				-- 设备类型I
+	[EquipmentType2ID] [varchar](20) NOT NULL,				-- 设备类型II
+	[FujiClass1ID] [int] NOT NULL,						-- 富士I类ID
+	CONSTRAINT PK_jctFujiClass1EqpType PRIMARY KEY ([EquipmentType1ID],[EquipmentType2ID]),
+)
+GO
+
+-- 富士II类
+CREATE TABLE [dbo].[tblFujiClass2](
+	[ID] [int] IDENTITY(-1,1) NOT NULL,
+	[FujiClass1ID] [int] NOT NULL,						-- 富士I类
+	[Name] [nvarchar](50) NOT NULL,						-- 简称
+	[Description] [nvarchar](200) NOT NULL,				-- 描述
+	
+	[IncludeLabour] [bit] NOT NULL,						-- 是否包含人工费
+	[PatrolTimes] [decimal](12, 2) NOT NULL,			-- 巡检次数
+	[PatrolHours] [decimal](12, 2) NOT NULL,			-- 巡检工时	
+	[MaintenanceTimes] [decimal](12, 2) NOT NULL,		-- 保养次数
+	[MaintenanceHours] [decimal](12, 2) NOT NULL,		-- 保养工时
+	[RepairHours] [decimal](12, 2) NOT NULL,			-- 维修平均工时
+	
+	[IncludeContract] [bit] NOT NULL,					-- 是否包含维保服务费
+	[FullCoveragePtg] [decimal](5, 2) NOT NULL,			-- 全保单价占设备金额百分比
+	[TechCoveragePtg] [decimal](5, 2) NOT NULL,			-- 技术保单价占设备金额百分比
+	
+	[IncludeSpare] [bit] NOT NULL,						-- 是否包含备用机成本
+	[SparePrice] [decimal](12, 2) NOT NULL,				-- 备用机标准单价
+	[SpareRentPtg] [decimal](5, 2) NOT NULL,			-- 月租占标准单价比率
+	
+	[IncludeRepair] [bit] NOT NULL,						-- 是否包含维保额外维修费
+	[Usage] [int] NOT NULL,								-- 使用量
+	[EquipmentType] [int] NOT NULL,						-- 设备等级
+	[RepairComponentCost] [decimal](12, 2) NOT NULL,	-- 单次维修平均零件成本
+	[Repair3partyRatio] [decimal](5, 2) NOT NULL,		-- 工程师无法修复概率
+	[Repair3partyCost] [decimal](12, 2) NOT NULL,		-- 购维修服务平均成本	
+	[RepairCostRatio] [decimal](5, 2) NOT NULL,			-- 故障成本占设备金额比例
+	
+	[MethodID] [int] NOT NULL,							-- 故障率计算方式
+	
+	[AddDate] [datetime] NOT NULL,						-- 添加日期	
+	[UpdateDate] [datetime] NULL,						-- 修改日期	
+	CONSTRAINT PK_tblFujiClass2 PRIMARY KEY ([ID]),
+	CONSTRAINT IX_tblFujiClass2 UNIQUE NONCLUSTERED ([Name]),
+)
+GO
+INSERT INTO [tblFujiClass2] VALUES(-1,'其他','其他',0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,0,0,0,0,1,GETDATE(),NULL)  --3为设备等级一般,1为故障率计算方式手动
+dbcc checkident ("tblFujiClass2",reseed,0)
+
+-- 富士II类设备类型关联表
+CREATE TABLE [dbo].[jctFujiClass2EqpType](
+	[EquipmentType1ID] [varchar](20) NOT NULL,				-- 设备类型I
+	[EquipmentType2ID] [varchar](20) NOT NULL,				-- 设备类型II
+	[FujiClass2ID] [int] NOT NULL,							-- 富士II类ID
+	CONSTRAINT PK_jctFujiClass2EqpType PRIMARY KEY ([EquipmentType1ID],[EquipmentType2ID],[FujiClass2ID]),
+)
+GO
+
+-- 故障率
+CREATE TABLE [dbo].[tblFaultRate](
+	[ObjectTypeID] [int] NOT NULL,						-- 对象类型
+	[ObjectID] [int] NOT NULL,							-- 对象id
+	[Year] [int] NOT NULL,								-- 年份
+	[Month] [int] NOT NULL,								-- 月份
+	[Rate] [decimal](5, 2) NOT NULL,					-- 故障率
+	CONSTRAINT PK_tblFailureRate PRIMARY KEY ([ObjectTypeID],[ObjectID],[Year],[Month]),
+)
+GO
+
+
+-- 作业报告零配件 拷贝现有数据tblReportAccessory
+CREATE TABLE [dbo].[tblReportComponent](
+	[ID] [int] IDENTITY(1,1) NOT NULL,
+	[DispatchReportID] [int] NOT NULL,				-- 关联工作报告编号
+	[ComponentID] [int] NOT NULL,					-- 零件ID
+	[NewSerialCode] [nvarchar](30) NOT NULL,		-- 新装零配件序列号
+	[OldSerialCode] [nvarchar](30) NOT NULL,		-- 拆下零配件序列号
+	CONSTRAINT PK_tblReportComponent PRIMARY KEY ([ID]),
+)
+GO
+
+-- 作业报告耗材
+CREATE TABLE [dbo].[tblReportConsumable](
+	[ID] [int] IDENTITY(1,1) NOT NULL,
+	[DispatchReportID] [int] NOT NULL,			-- 关联工作报告编号
+	[ConsumableID] [int] NOT NULL,				-- 耗材ID
+	[LotNum] [nvarchar](30) NOT NULL,			-- 批次号
+	[Qty] [decimal](12,2) NOT NULL,				-- 数量
+	CONSTRAINT PK_tblReportConsumable PRIMARY KEY ([ID]),
+)
+GO
+
+-- 作业报告服务
+CREATE TABLE [dbo].[tblReportService](
+	[ID] [int] IDENTITY(1,1) NOT NULL,
+	[DispatchReportID] [int] NOT NULL,			-- 关联工作报告编号
+	[ServiceID] [int] NOT NULL,					-- 服务编号
+	CONSTRAINT PK_tblReportService PRIMARY KEY ([ID]),
+)
+GO
+
+
+-- 执行表
+CREATE TABLE [dbo].[tblValControl](
+	[CtlFlag] [varchar](3) NOT NULL DEFAULT ('CTL') ,
+	[UserID] [int] NOT NULL,					-- 执行者
+	[UpdateDate] [datetime] NOT NULL,			-- 更新日期
+	[IsExecuted] [bit] NOT NULL,				-- 是否已执行
+	
+	[EndDate] [datetime] NOT NULL,				-- 运营实际截至月
+	[ContractStartDate] [datetime] NOT NULL,	-- 合同起始月
+	[Years] [int] NOT NULL,						-- 预测年数
+	[HospitalLevel] [int] NOT NULL,				-- 医院等级
+	[HospitalFactor] [decimal] (5, 2) NULL,		-- 医院等级系数
+	[ImportCost] [decimal](12, 2) NOT NULL,		-- 导入期成本
+	[ProfitMargins] [decimal](5, 2) NOT NULL,	-- 边际利润率
+	[RiskRatio] [decimal](5, 2) NOT NULL,		-- 风险控制度
+	[VarAmount] [decimal](5, 2) NOT NULL,		-- var资金金额比例
+	[ComputeEngineer] [int] NOT NULL,			-- 预测工程师数量
+	[ForecastEngineer] [int] NOT NULL,			-- 预定工程师数量
+	[AutualEngineer] [int] NOT NULL,			-- 实绩工程师数量
+	
+	CONSTRAINT PK_tblValControl PRIMARY KEY ([CtlFlag]),
+)
+GO
+
+-- 设备清单执行表(设备中预测所需字段都要加如:资产编号(key)	名称	设备序列号	厂商	科室	富士II类名称(必须有))
+CREATE TABLE [dbo].[tblValEquipment](
+	[InSystem] [bit] NOT NULL,							-- 是否现有
+	[EquipmentID] [int] NOT NULL,						-- 设备ID
+	[AssetCode] [nvarchar](30) NULL,        			-- 医院系统资产编号	
+	[Name] [nvarchar] (30) NOT NULL,					-- 设备名称
+	[SerialCode] [nvarchar](30) NULL,					-- 设备序列号
+	[Manufacturer] [nvarchar](50) NULL,					-- 设备厂商
+	[Department] [nvarchar](20) NULL,					-- 设备科室
+	[FujiClass2ID] [int] NOT NULL,						-- 富士II类
+	[PurchaseAmount] [decimal](10, 2) NOT NULL,			-- 采购金额
+			
+	[CurrentScopeID] [int] NOT NULL,					-- 目前维保种类
+	[NextScopeID] [int] NOT NULL,						-- 下期维保种类
+	[EndDate] [datetime] NULL,							-- 维保到期日
+	
+	[PatrolHours] [decimal](12, 2) NULL,				-- 所需巡检工时
+	[MaintenanceHours] [decimal](12, 2) NULL,			-- 所需保养工时
+	[RepairHours] [decimal](12, 2) NULL,				-- 所需维修工时
+	CONSTRAINT PK_tblValEquipment PRIMARY KEY ([InSystem],[EquipmentID]),
+)
+GO
+
+-- 备用机执行表
+CREATE TABLE [dbo].[tblValSpare](
+	[FujiClass2ID] [int] NOT NULL,				-- 富士II类ID
+	[Price] [decimal](12,2) NOT NULL,			-- 月租租金
+	[QtyEnter] [int] NOT NULL,					-- 月租输入数量
+	[QtyEval] [int] NOT NULL,					-- 月租评估数量
+	CONSTRAINT PK_tblValSpare PRIMARY KEY ([FujiClass2ID]),
+)
+GO
+
+-- 耗材执行表
+CREATE TABLE [dbo].[tblValConsumable](
+	[ConsumableID] [int] NOT NULL,				-- 耗材ID
+	[IncludeContract] [bit] NOT NULL,			-- 是否被维保覆盖
+	CONSTRAINT PK_tblValConsumable PRIMARY KEY ([ConsumableID]),
+)
+GO
+
+-- 零件执行表
+CREATE TABLE [dbo].[tblValComponent](
+	[InSystem] [bit] NOT NULL,					-- 是否现有
+	[EquipmentID] [int] NOT NULL,				-- 设备ID
+	[ComponentID] [int] NOT NULL,				-- 零件ID(若为0时表示整机)
+	[Qty] [int] NOT NULL,						-- 数量/日使用人次
+	[Usage] [int] NULL,							-- 使用量
+	[Seconds] [decimal](12,2) NULL,				-- CT已使用秒次
+	[IncludeContract] [bit] NOT NULL,			-- 以后是否维保
+	CONSTRAINT PK_tblValComponent PRIMARY KEY ([InSystem],[EquipmentID],[ComponentID]),
+)
+GO
+
+CREATE TABLE [dbo].[tblValEqptOutput](
+	[InSystem] [bit] NOT NULL,								-- 是否现有
+	[EquipmentID] [int] NOT NULL,	
+	[Year] [int] NOT NULL,									-- 年份
+	[Month] [int] NOT NULL,									-- 月份
+	[ContractAmount] [decimal](12,2) NOT NULL,				-- 维保金额
+	[Repair3partyCost] [decimal](12,2) NOT NULL,			-- 外购维修服务费金额
+	
+	CONSTRAINT PK_tblValEqptOutput PRIMARY KEY ([InSystem],[EquipmentID],[Year],[Month]),
+)
+GO
+
+CREATE TABLE [dbo].[tblValConsumableOutput](
+	[InSystem] [bit] NOT NULL,							-- 是否现有
+	[EquipmentID] [int] NOT NULL,
+	[Year] [int] NOT NULL,								-- 年份
+	[Month] [int] NOT NULL,								-- 月份
+	[ConsumableID] [int] NOT NULL,
+	[Amount] [decimal](12,2) NOT NULL,
+	
+	CONSTRAINT PK_tblValConsumableOutput PRIMARY KEY ([InSystem],[EquipmentID],[ConsumableID],[Year],[Month]),
+)
+GO
+
+CREATE TABLE [dbo].[tblValComponentOutput](
+	[InSystem] [bit] NOT NULL,							-- 是否现有
+	[EquipmentID] [int] NOT NULL,
+	[ComponentID] [int] NOT NULL,
+	[Year] [int] NOT NULL,									-- 年份
+	[Month] [int] NOT NULL,									-- 月份
+	[Amount] [decimal] (12,2) NOT NULL,						-- 金额
+	
+	CONSTRAINT PK_tblValComponentOutput PRIMARY KEY ([InSystem],[EquipmentID],[ComponentID],[Year],[Month]),
+)
+GO
+
+-- 零件库
+CREATE TABLE [dbo].[tblInvComponent](
+	[ID] [int] IDENTITY(1,1) NOT NULL,
+	[ComponentID] [int] NOT NULL,				-- 零件id
+	[EquipmentID] [int] NOT NULL,				-- 设备id
+	[SerialCode] [nvarchar](30) NOT NULL,		-- 零件序列号
+	[Specification] [nvarchar](50) NOT NULL,	-- 规格
+	[Model] [nvarchar](50) NOT NULL,			-- 型号
+	[SupplierID] [int] NOT NULL,				-- 供应商
+	[Price] [decimal](12,2) NOT NULL,			-- 单价
+	[PurchaseDate] [datetime] NOT NULL,			-- 购入日期
+	[PurchaseID] [int] NULL,					-- 采购单号
+	[Comments] [nvarchar](500) NULL,			-- 备注
+	[AddDate] [datetime] NOT NULL,				-- 添加日期	
+	[UpdateDate] [datetime] NULL,				-- 修改日期		
+	[StatusID] [int] NOT NULL,					-- 状态 1 在库、2 已用、 3 报废
+	CONSTRAINT PK_tblInvComponent PRIMARY KEY ([ID]),
+	CONSTRAINT IX_tblInvComponent UNIQUE NONCLUSTERED ([SerialCode]),
+)
+GO
+CREATE INDEX IX_Component ON [tblInvComponent] ([ComponentID], [StatusID])
+GO
+CREATE INDEX IX_EquipmentID ON [tblInvComponent] ([EquipmentID], [StatusID])
+GO
+CREATE INDEX IX_Purchase ON [tblInvComponent] ([PurchaseID])
+GO
+
+-- 耗材库
+CREATE TABLE [dbo].[tblInvConsumable](
+	[ID] [int] IDENTITY(1,1) NOT NULL,
+	[ConsumableID] [int] NOT NULL,				-- 耗材id	
+	[LotNum] [nvarchar](30) NOT NULL,			-- 批次号
+	[Specification] [nvarchar](50) NOT NULL,	-- 规格
+	[Model] [nvarchar](50) NOT NULL,			-- 型号
+	[SupplierID] [int] NOT NULL,				-- 供应商
+	[Price] [decimal](12,2) NOT NULL,			-- 单价
+	[ReceiveQty] [decimal](12,2) NOT NULL,		-- 入库数量
+	[PurchaseDate] [datetime] NOT NULL,			-- 购入日期
+	[PurchaseID] [int] NULL,					-- 采购单号
+	[Comments] [nvarchar](500) NULL,			-- 备注
+	[AddDate] [datetime] NOT NULL,				-- 添加日期	
+	[AvaibleQty] [decimal](12,2) NOT NULL,		-- 可用数量
+	[UpdateDate] [datetime] NULL,				-- 修改日期
+	CONSTRAINT PK_tblInvConsumable PRIMARY KEY ([ID]),	
+	CONSTRAINT IX_tblInvConsumable UNIQUE NONCLUSTERED ([ConsumableID], [LotNum]),
+)
+GO
+CREATE INDEX IX_Consumable ON [tblInvConsumable] ([ConsumableID], [AvaibleQty])
+GO
+CREATE INDEX IX_Purchase ON [tblInvConsumable] ([PurchaseID])
+GO
+
+-- 服务库
+CREATE TABLE [dbo].[tblInvService](
+	[ID] [int] IDENTITY(1,1) NOT NULL,
+	[FujiClass2ID] [int] NOT NULL,				-- 富士II类
+	[Name] [nvarchar](50) NOT NULL,				-- 服务名称
+	[TotalTimes] [int] NOT NULL,				-- 服务次数
+	[Price] [decimal](12, 2) NOT NULL,			-- 金额
+	[StartDate] [datetime] NOT NULL,			-- 开始日期
+	[EndDate] [datetime] NOT NULL,  			-- 结束日期
+	[SupplierID] [int] NOT NULL,				-- 供应商	
+	[PurchaseID] [int] NULL,					-- 采购单号
+	[PurchaseDate] [datetime] NOT NULL,			-- 购入日期
+	[Comments] [nvarchar](500) NULL,			-- 备注
+	[AddDate] [datetime] NOT NULL,				-- 添加日期	
+	[AvaibleTimes] [int] NOT NULL,				-- 可用服务次数
+	[UpdateDate] [datetime] NULL,				-- 修改日期		
+	CONSTRAINT PK_tblInvService PRIMARY KEY ([ID]),
+	CONSTRAINT IX_tblInvService UNIQUE NONCLUSTERED ([FujiClass2ID], [Name]),
+)
+GO
+CREATE INDEX IX_Purchase ON [tblInvService] ([PurchaseID],[AvaibleTimes])
+GO
+
+-- 备用机库
+CREATE TABLE [dbo].[tblInvSpare](
+	[ID] [int] IDENTITY(1,1) NOT NULL,
+	[FujiClass2ID] [int] NOT NULL,				-- 富士II类id	
+	[SerialCode] [nvarchar](30) NOT NULL,		-- 序列号
+	[Price] [decimal](12,2) NOT NULL,			-- 单价
+	[StartDate] [datetime] NOT NULL,			-- 开始日期
+	[EndDate] [datetime] NOT NULL,				-- 结束日期
+	[AddDate] [datetime] NOT NULL,				-- 添加日期	
+	[UpdateDate] [datetime] NULL,				-- 修改日期		
+	CONSTRAINT PK_tblInvSpare PRIMARY KEY ([ID]),
+	CONSTRAINT IX_tblInvSpare UNIQUE NONCLUSTERED ([FujiClass2ID], [SerialCode],[StartDate]),
+)
+GO
+
+-- 采购单
+CREATE TABLE [dbo].[tblPurchaseOrder](
+	[ID] [int] IDENTITY(1,1) NOT NULL,
+	[UserID] [int] NOT NULL,				-- 请求者
+	[SupplierID] [int] NOT NULL,				-- 供应商
+	[OrderDate] [datetime] NOT NULL,			-- 采购日期
+	[DueDate] [datetime] NOT NULL,				-- 到货日期
+	[Comments] [nvarchar](500) NULL,			-- 备注
+	[StatusID] [int] NOT NULL,					-- 采购单状态
+	[AddDate] [datetime] NOT NULL,				-- 添加日期
+	[UpdateDate] [datetime] NULL,				-- 修改日期
+	
+	CONSTRAINT PK_tblPurchaseOrder PRIMARY KEY ([ID]),
+)
+GO
+CREATE INDEX IX_Status ON [tblPurchaseOrder] ([StatusID])
+GO
+
+-- 采购单-零件关联表
+CREATE TABLE [dbo].[tblPurchaseComponent](
+	[PurchaseID] [int] NOT NULL,				-- 采购单编号
+	[ComponentID] [int] NOT NULL,				-- 零件编号
+	[EquipmentID] [int] NOT NULL,				-- 设备编号
+	[Specification] [nvarchar](50) NOT NULL,	-- 规格
+	[Model] [nvarchar](50) NOT NULL,			-- 型号
+	[Price] [decimal](12,2) NOT NULL,			-- 单价
+	[Qty] [int] NOT NULL,						-- 数量
+	CONSTRAINT PK_tblPurchaseComponent PRIMARY KEY ([PurchaseID],[ComponentID],[EquipmentID]),
+)
+GO
+
+-- 采购单-耗材关联表
+CREATE TABLE [dbo].[tblPurchaseConsumable](
+	[PurchaseID] [int] NOT NULL,				-- 采购单编号
+	[ConsumableID] [int] NOT NULL,				-- 耗材编号
+	[Specification] [nvarchar](50) NOT NULL,	-- 规格
+	[Model] [nvarchar](50) NOT NULL,			-- 型号
+	[Price] [decimal](12,2) NOT NULL,			-- 单价
+	[Qty] [int] NOT NULL,						-- 数量
+	CONSTRAINT PK_tblPurchaseConsumable PRIMARY KEY ([PurchaseID],[ConsumableID]),
+)
+GO
+
+-- 采购单-服务关联表
+CREATE TABLE [dbo].[tblPurchaseService](
+	[PurchaseID] [int] NOT NULL,				-- 采购单编号
+	[FujiClass2ID] [int] NOT NULL,				-- 富士II类编号
+	[Name] [nvarchar](50) NOT NULL,				-- 服务名称
+	[TotalTimes] [int] NOT NULL,				-- 服务次数
+	[Price] [decimal](12, 2) NOT NULL,			-- 金额
+	[StartDate] [datetime] NOT NULL,			-- 开始日期
+	[EndDate] [datetime] NOT NULL,  			-- 结束日期
+	CONSTRAINT PK_tblPurchaseService PRIMARY KEY ([PurchaseID],[FujiClass2ID],[Name]),
+)
+GO
+
+-- not reviewed yet
+
+-- 盘点状态
+CREATE TABLE [dbo].[lkpStockTakeStatus](
+	[ID] [int] NOT NULL,
+	[Description] [nvarchar](20) NOT NULL,
+	CONSTRAINT PK_lkpStockTakeStatus PRIMARY KEY ([ID])
+)
+GO
+INSERT INTO [lkpStockTakeStatus] VALUES(-1,'终止')
+INSERT INTO [lkpStockTakeStatus] VALUES(1,'新建')
+INSERT INTO [lkpStockTakeStatus] VALUES(2,'待盘点')
+INSERT INTO [lkpStockTakeStatus] VALUES(3,'待审批')
+INSERT INTO [lkpStockTakeStatus] VALUES(9,'已结束')
+GO
+
+-- 盘点对象类型
+CREATE TABLE [dbo].[lkpWarehouse](
+	[ID] [int] NOT NULL,
+	[Description] [nvarchar](20) NOT NULL,
+	CONSTRAINT PK_lkpWarehouse PRIMARY KEY ([ID])
+)
+GO
+INSERT INTO [lkpWarehouse] VALUES(1,'零件')
+INSERT INTO [lkpWarehouse] VALUES(2,'耗材')
+INSERT INTO [lkpWarehouse] VALUES(3,'服务库')
+INSERT INTO [lkpWarehouse] VALUES(9,'备用机')
+GO
+
+-- 库存盘点
+CREATE TABLE [dbo].[tblInvStockTake](
+	[ID] [int] IDENTITY(1,1) NOT NULL,
+	[ObjectTypeID] [int] NOT NULL,				-- 盘点对象类型
+	[StockTakeDate] [datetime] NOT NULL,		-- 盘点开始日期
+	[StatusID] [int] NOT NULL,					-- 状态
+	[Comments] [nvarchar](500) NULL,			-- 备注
+	CONSTRAINT PK_tblInvStockTake PRIMARY KEY ([ID]),
+)
+GO
+
+-- 盘点零件
+CREATE TABLE [dbo].[jctStockTakeComponent](
+	[StockTakeID] [int] NOT NULL,				-- 盘点单编号
+	[ComponentID] [int] NOT NULL,				-- 零件id
+	[SerialID] [nvarchar](30) NOT NULL,			-- 序列号
+	[IsLibrary] [bit] NOT NULL,					-- 是否在库
+	CONSTRAINT PK_jctStockTakeComponent PRIMARY KEY ([StockTakeID],[ComponentID]),
+)
+Go
+
+-- 盘点耗材
+CREATE TABLE [dbo].[jctStockTakeConsumable](
+	[StockTakeID] [int] NOT NULL,				-- 盘点单编号
+	[ConsumableID] [int] NOT NULL,				-- 零件id
+	[BatchNum] [nvarchar](30) NOT NULL,			-- 序列号
+	[ActualAmount] [decimal](12,1) NOT NULL,	-- 实际数量
+	CONSTRAINT PK_jctStockTakeConsumable PRIMARY KEY ([StockTakeID],[ConsumableID]),
+)
+Go
+
+-- 盘点备用机
+CREATE TABLE [dbo].[jctStockTakeSpare](
+	[StockTakeID] [int] NOT NULL,				-- 盘点单编号
+	[SpareID] [int] NOT NULL,					-- 备用机id
+	[IsLibrary] [bit] NOT NULL,					-- 是否在库
+	CONSTRAINT PK_jctStockTakeSpare PRIMARY KEY ([StockTakeID],[SpareID]),
+)
+Go

@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?><project name="Untitled Gantt Project" company="" webLink="http://" view-date="2020-04-19" view-index="0" gantt-divider-location="1067" resource-divider-location="300" version="2.8.11" locale="zh_CN">
+    <description/>
+    <view zooming-state="default:4" id="gantt-chart">
+        <field id="tpd3" name="名称" width="293" order="0"/>
+        <field id="tpc0" name="描述" width="590" order="1"/>
+        <field id="tpd4" name="开始日期" width="96" order="2"/>
+        <field id="tpd5" name="结束日期" width="84" order="3"/>
+    </view>
+    <view id="resource-table">
+        <field id="0" name="名称" width="210" order="0"/>
+        <field id="1" name="默认角色" width="86" order="1"/>
+    </view>
+    <!-- -->
+    <calendars>
+        <day-types>
+            <day-type id="0"/>
+            <day-type id="1"/>
+            <default-week id="1" name="default" sun="1" mon="0" tue="0" wed="0" thu="0" fri="0" sat="1"/>
+            <only-show-weekends value="false"/>
+            <overriden-day-types/>
+            <days/>
+        </day-types>
+    </calendars>
+    <tasks empty-milestones="true">
+        <taskproperties>
+            <taskproperty id="tpd0" name="type" type="default" valuetype="icon"/>
+            <taskproperty id="tpd1" name="priority" type="default" valuetype="icon"/>
+            <taskproperty id="tpd2" name="info" type="default" valuetype="icon"/>
+            <taskproperty id="tpd3" name="name" type="default" valuetype="text"/>
+            <taskproperty id="tpd4" name="begindate" type="default" valuetype="date"/>
+            <taskproperty id="tpd5" name="enddate" type="default" valuetype="date"/>
+            <taskproperty id="tpd6" name="duration" type="default" valuetype="int"/>
+            <taskproperty id="tpd7" name="completion" type="default" valuetype="int"/>
+            <taskproperty id="tpd8" name="coordinator" type="default" valuetype="text"/>
+            <taskproperty id="tpd9" name="predecessorsr" type="default" valuetype="text"/>
+            <taskproperty id="tpc0" name="描述" type="custom" valuetype="text"/>
+        </taskproperties>
+        <task id="0" name="mockup确定" color="#8cb6ce" meeting="false" start="2020-04-20" duration="30" complete="0" thirdDate="2020-04-30" thirdDate-constraint="0" expand="true">
+            <depend id="89" type="2" difference="0" hardness="Strong"/>
+            <depend id="90" type="2" difference="0" hardness="Strong"/>
+            <depend id="91" type="2" difference="0" hardness="Strong"/>
+            <depend id="92" type="2" difference="0" hardness="Strong"/>
+            <customproperty taskproperty-id="tpc0" value="与富士一起确定mockup最终稿"/>
+        </task>
+        <task id="87" name="数据定义" color="#8cb6ce" meeting="false" start="2020-06-01" duration="10" complete="0" thirdDate="2020-04-20" thirdDate-constraint="0" expand="true">
+            <task id="89" name="数据定义-零件定义" color="#8cb6ce" meeting="false" start="2020-06-01" duration="10" complete="0" thirdDate="2020-04-29" thirdDate-constraint="0" expand="true">
+                <depend id="94" type="2" difference="0" hardness="Strong"/>
+                <depend id="95" type="2" difference="0" hardness="Strong"/>
+                <customproperty taskproperty-id="tpc0" value="定义零件,字段:简称,描述,类型,供应商,标准单价,状态"/>
+            </task>
+            <task id="90" name="数据定义-耗材定义" color="#8cb6ce" meeting="false" start="2020-06-01" duration="10" complete="0" thirdDate="2020-04-29" thirdDate-constraint="0" expand="true">
+                <depend id="94" type="2" difference="0" hardness="Strong"/>
+                <depend id="95" type="2" difference="0" hardness="Strong"/>
+                <customproperty taskproperty-id="tpc0" value="定义耗材,字段:简称,描述,类型,更换频率,单次保养平均耗材成本,供应商,标准单价,状态"/>
+            </task>
+            <task id="91" name="数据定义-富士类别" color="#8cb6ce" meeting="false" start="2020-06-01" duration="10" complete="0" thirdDate="2020-04-29" thirdDate-constraint="0" expand="true">
+                <depend id="94" type="2" difference="0" hardness="Strong"/>
+                <depend id="95" type="2" difference="0" hardness="Strong"/>
+                <customproperty taskproperty-id="tpc0" value="富士类别关联关系,字段:设备类型I,设备类型II,富士I类,富士II类"/>
+            </task>
+            <task id="92" name="数据定义-富士II类" color="#8cb6ce" meeting="false" start="2020-06-01" duration="10" complete="0" thirdDate="2020-04-29" thirdDate-constraint="0" expand="true">
+                <depend id="94" type="2" difference="0" hardness="Strong"/>
+                <depend id="95" type="2" difference="0" hardness="Strong"/>
+                <customproperty taskproperty-id="tpc0" value="富士II类详情编辑,字段:富士I类,简称,描述,人工费,维保服务费,备用机成本,维保额外维修费,零件,耗材"/>
+            </task>
+        </task>
+        <task id="93" name="资产管理" meeting="false" start="2020-06-15" duration="10" complete="0" expand="true">
+            <task id="94" name="资产管理-设备" color="#8cb6ce" meeting="false" start="2020-06-15" duration="10" complete="0" thirdDate="2020-06-01" thirdDate-constraint="0" expand="true">
+                <customproperty taskproperty-id="tpc0" value="设备详情页面关联零件和耗材,富士分类一类和二类"/>
+            </task>
+            <task id="95" name="资产管理-合同" color="#8cb6ce" meeting="false" start="2020-06-15" duration="10" complete="0" thirdDate="2020-05-11" thirdDate-constraint="0" expand="true">
+                <depend id="98" type="2" difference="0" hardness="Strong"/>
+                <depend id="99" type="2" difference="0" hardness="Strong"/>
+                <depend id="100" type="2" difference="0" hardness="Strong"/>
+                <customproperty taskproperty-id="tpc0" value="合同详情页面关联零件和耗材"/>
+            </task>
+        </task>
+        <task id="97" name="估价模块" meeting="false" start="2020-06-29" duration="50" complete="0" expand="true">
+            <task id="98" name="估价模块-估价参数" color="#8cb6ce" meeting="false" start="2020-06-29" duration="10" complete="0" thirdDate="2020-05-11" thirdDate-constraint="0" expand="true">
+                <customproperty taskproperty-id="tpc0" value="估价参数设置,字段:医院等级,医院等级系数,信息系统使用费,每月工作时长,单位人工成本,小额成本"/>
+            </task>
+            <task id="99" name="估价模块-估价执行(输入条件)" color="#8cb6ce" meeting="false" start="2020-06-29" duration="10" complete="0" thirdDate="2020-06-15" thirdDate-constraint="0" expand="true">
+                <customproperty taskproperty-id="tpc0" value="估价条件,内容:估价前提条件,设备清单,备用机清单,维保对耗材的覆盖情况,零件表,CT球管登记表"/>
+            </task>
+            <task id="100" name="估价模块-估价执行(结果生成)" color="#8cb6ce" meeting="false" start="2020-06-29" duration="10" complete="0" thirdDate="2020-06-15" thirdDate-constraint="0" expand="true">
+                <depend id="78" type="2" difference="0" hardness="Strong"/>
+                <depend id="101" type="2" difference="0" hardness="Strong"/>
+                <depend id="102" type="2" difference="0" hardness="Strong"/>
+                <depend id="107" type="2" difference="0" hardness="Strong"/>
+                <depend id="108" type="2" difference="0" hardness="Strong"/>
+                <depend id="109" type="2" difference="0" hardness="Strong"/>
+                <depend id="110" type="2" difference="0" hardness="Strong"/>
+                <customproperty taskproperty-id="tpc0" value="根据输入条件生成最终定价表和成本明细表,首次以默认值计算"/>
+            </task>
+            <task id="101" name="估价模块-估价执行(预测人工费)" color="#8cb6ce" meeting="false" start="2020-07-13" duration="10" complete="0" thirdDate="2020-06-15" thirdDate-constraint="0" expand="true">
+                <customproperty taskproperty-id="tpc0" value="根据富士II类(人工费),估价前提条件(所需工程师数量),估价模块参数(单位人工成本)计算得出"/>
+            </task>
+            <task id="102" name="估价模块-估价执行(预测维保服务费)" color="#8cb6ce" meeting="false" start="2020-07-13" duration="10" complete="0" thirdDate="2020-06-15" thirdDate-constraint="0" expand="true">
+                <depend id="103" type="2" difference="0" hardness="Strong"/>
+                <customproperty taskproperty-id="tpc0" value="根据富士II类(维保服务费只包括全保和技术保),计算得出"/>
+            </task>
+            <task id="103" name="估价模块-估价执行(预测备用机成本)" color="#8cb6ce" meeting="false" start="2020-07-27" duration="10" complete="0" thirdDate="2020-07-06" thirdDate-constraint="0" expand="true">
+                <depend id="104" type="2" difference="0" hardness="Strong"/>
+                <customproperty taskproperty-id="tpc0" value="根据富士II类(备用机成本),现有设备数量以及故障率参数,计算得出"/>
+            </task>
+            <task id="104" name="估价模块-估价执行(预测维保额外保养费)" color="#8cb6ce" meeting="false" start="2020-08-10" duration="10" complete="0" thirdDate="2020-07-06" thirdDate-constraint="0" expand="true">
+                <depend id="105" type="2" difference="0" hardness="Strong"/>
+                <customproperty taskproperty-id="tpc0" value="根据富士II类(耗材)中无维保的耗材以及耗材定义中&quot;更换频率&quot;,&quot;单次保养平均耗材成本&quot;,计算得出"/>
+            </task>
+            <task id="105" name="估价模块-估价执行(预测维保额外维修费)" color="#8cb6ce" meeting="false" start="2020-08-24" duration="10" complete="0" thirdDate="2020-07-06" thirdDate-constraint="0" expand="true">
+                <customproperty taskproperty-id="tpc0" value="根据富士II类(维保额外维修费,维保服务费中的&quot;维保种类&quot;,零件),计算得出"/>
+            </task>
+        </task>
+        <task id="106" name="库存管理" meeting="false" start="2020-07-13" duration="30" complete="0" expand="true">
+            <task id="107" name="库存管理-零件库" color="#8cb6ce" meeting="false" start="2020-07-13" duration="30" complete="0" thirdDate="2020-08-10" thirdDate-constraint="0" expand="true">
+                <customproperty taskproperty-id="tpc0" value="零件库,字段:系统编号,序列号,简称,描述,类型,关联设备,供应商,单价,购入日期,采购单号,状态"/>
+            </task>
+            <task id="108" name="库存管理-耗材库" color="#8cb6ce" meeting="false" start="2020-07-13" duration="30" complete="0" thirdDate="2020-08-10" thirdDate-constraint="0" expand="true">
+                <customproperty taskproperty-id="tpc0" value="耗材库,字段:系统编号,批次号,简称,描述,供应商,关联设备,富士II类,单价,购入日期,采购单号,数量,状态"/>
+            </task>
+            <task id="109" name="库存管理-外购维修服务库" color="#8cb6ce" meeting="false" start="2020-07-13" duration="30" complete="0" thirdDate="2020-08-10" thirdDate-constraint="0" expand="true">
+                <customproperty taskproperty-id="tpc0" value="外购维修服务库,字段:系统编号,关联设备,服务次数,合同开始时间,合同结束时间,金额,状态"/>
+            </task>
+            <task id="110" name="库存管理-备用机库" color="#8cb6ce" meeting="false" start="2020-07-13" duration="30" complete="0" thirdDate="2020-08-10" thirdDate-constraint="0" expand="true">
+                <customproperty taskproperty-id="tpc0" value="备用机库,字段:系统编号,序列号,月租,富士II类,租用开始日期,租用结束日期"/>
+            </task>
+        </task>
+        <task id="78" name="运营管理-作业报告" color="#8cb6ce" meeting="false" start="2020-07-13" duration="30" complete="0" thirdDate="2020-08-10" thirdDate-constraint="0" expand="true">
+            <depend id="79" type="2" difference="0" hardness="Strong"/>
+            <customproperty taskproperty-id="tpc0" value="作业报告页面添加耗材信息,服务表"/>
+        </task>
+        <task id="79" name="估价模块-估价执行(实绩)" color="#8cb6ce" meeting="false" start="2020-08-24" duration="15" complete="0" thirdDate="2020-06-22" thirdDate-constraint="0" expand="true">
+            <task id="116" name="人工费" meeting="false" start="2020-08-24" duration="15" complete="0" expand="true">
+                <customproperty taskproperty-id="tpc0" value="估价前提条件中&quot;实际工程师数量&quot;*估价参数设置中&quot;每月工作时长&quot;和单位人工成本"/>
+            </task>
+            <task id="118" name="维保费" meeting="false" start="2020-08-24" duration="15" complete="0" expand="true">
+                <customproperty taskproperty-id="tpc0" value="按月分摊系统中录入的合同金额"/>
+            </task>
+            <task id="120" name="备用机成本" meeting="false" start="2020-08-24" duration="15" complete="0" expand="true">
+                <customproperty taskproperty-id="tpc0" value="月统计备用机库中的备用机数量和实际月租金"/>
+            </task>
+            <task id="122" name="维保额外保养费" meeting="false" start="2020-08-24" duration="15" complete="0" expand="true">
+                <customproperty taskproperty-id="tpc0" value="统计保养作业报告中耗材（设备没有合同或者该耗材不覆盖）的金额"/>
+            </task>
+            <task id="124" name="维保额外维修费" meeting="false" start="2020-08-24" duration="15" complete="0" expand="true">
+                <customproperty taskproperty-id="tpc0" value="统计维修作业报告中零件（设备没有合同或者该零件不覆盖）的金额 + 维修作业报告中外购维修服务费"/>
+            </task>
+        </task>
+    </tasks>
+    <resources/>
+    <allocations/>
+    <vacations/>
+    <previous/>
+    <roles roleset-name="Default"/>
+    <roles roleset-name="SoftwareDevelopment"/>
+</project>

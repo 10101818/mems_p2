@@ -1,0 +1,599 @@
+﻿@{
+    ViewBag.Title = "EquipmentList";
+    Layout = "~/Views/Shared/_SubMain.cshtml";
+}
+
+<div id="EquipmentView" v-cloak class="tblDiv">
+    <div>
+        <div><a class="linkFile backPage" href="#" onclick="BackToList()">&lt;&lt;@BusinessObjects.Domain.Constants.BACKLIST</a></div>
+        <div class="title"><p>查看设备</p></div>
+        <div class="tblDiv" style="width:1250px;">
+            <!--设备基本信息-->
+            <div class="radiusOnly">
+                <table class="tblDetail" border="1" cellpadding="0" cellspacing="0" frame="void">
+                    <tbody>
+                        <tr>
+                            <td colspan="6" class="tblName">设备信息</td>
+                        </tr>
+                        <tr>
+                            <th class="tdrequired" width="15px"><span class="required"></span></th>
+                            <th width="189px">系统编号</th>
+                            <td width="289px">
+                                <label>{{EquipmentInfo.OID}}</label>
+                            </td>
+                            <th class="tdrequired" width="15px"><span class="required"></span></th>
+                            <th width="189px">等级</th>
+                            <td width="289px">
+                                <label>{{EquipmentInfo.EquipmentLevel.Name}}</label>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th class="tdrequired" width="15px"><span class="required"></span></th>
+                            <th width="189px">设备名称</th>
+                            <td width="289px">
+                                <label>{{EquipmentInfo.Name}}</label>
+                            </td>
+                            <th class="tdrequired" width="15px"><span class="required"></span></th>
+                            <th>设备类别 (I)</th>
+                            <td>
+                                <label>{{EquipmentInfo.EquipmentClass1.Description}}</label>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th class="tdrequired" width="15px"><span class="required"></span></th>
+                            <th>设备型号</th>
+                            <td>
+                                <label>{{EquipmentInfo.EquipmentCode}}</label>
+                            </td>
+                            <th class="tdrequired" width="15px"><span class="required"></span></th>
+                            <th>	设备类别 (II)</th>
+                            <td>
+                                <label>{{EquipmentInfo.EquipmentClass2.Description}}</label>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th class="tdrequired" width="15px"><span class="required"></span></th>
+                            <th>设备序列号</th>
+                            <td>
+                                <label>{{EquipmentInfo.SerialCode}}</label>
+                            </td>
+                            <th class="tdrequired" width="15px"><span class="required"></span></th>
+                            <th>设备类别 (III)</th>
+                            <td>
+                                <label>{{EquipmentInfo.EquipmentClass3.Description}}</label>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th class="tdrequired" width="15px"><span class="required"></span></th>
+                            <th width="189px">设备厂商</th>
+                            <td width="289px">
+                                <label>{{EquipmentInfo.Manufacturer.Name}}</label>
+                            </td>
+                            <th class="tdrequired" width="15px"><span class="required"></span></th>
+                            <th>分类编码</th>
+                            <td>
+                                <label>{{EquipmentInfo.EquipmentClass1.Code}}{{EquipmentInfo.EquipmentClass2.Code}}{{EquipmentInfo.EquipmentClass3.Code}}</label>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th class="tdrequired" width="15px"><span class="required"></span></th>
+                            <th>标准响应时间(分)</th>
+                            <td>
+                                <label>{{EquipmentInfo.ResponseTimeLength}}</label>
+                            </td>
+                            <th class="tdrequired" width="15px"><span class="required"></span></th>
+                            <th>整包范围</th>
+                            <td>
+                                <label>{{EquipmentInfo.ServiceScope == true ? "是" : "否"}}</label>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th class="tdrequired" width="15px"><span class="required"></span></th>
+                            <th>品牌</th>
+                            <td>
+                                <label>{{EquipmentInfo.Brand}}</label>
+                            </td>
+                            <th class="tdrequired" width="15px"><span class="required"></span></th>
+                            <th>出厂日期</th>
+                            <td width="289px">
+                                <label v-if="EquipmentInfo.ManufacturingDate != ''">{{EquipmentInfo.ManufacturingDate}}</label>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th class="tdrequired" width="15px"><span class="required"></span></th>
+                            <th>备注</th>
+                            <td colspan="4">
+                                <label>{{EquipmentInfo.Comments}}</label>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <br />
+            <!--资产信息-->
+            <div class="radiusOnly">
+                <table class="tblDetail" width="800" border="1" bordercolor="000000" cellpadding="0" cellspacing="0" frame="void">
+                    <tbody>
+                        <tr>
+                            <td colspan="6" class="tblName">资产信息</td>
+                        </tr>
+                        <tr>
+                            <th class="tdrequired" width="15px"><span class="required"></span></th>
+                            <th>固定资产</th>
+                            <td>
+                                <label>{{EquipmentInfo.FixedAsset == true ? "是" : "否"}}</label>
+                            </td>
+                            <th class="tdrequired" width="15px"><span class="required"></span></th>
+                            <th width="189px">资产编号</th>
+                            <td width="289px">
+                                <label>{{EquipmentInfo.AssetCode}}</label>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th class="tdrequired" width="15px"><span class="required"></span></th>
+                            <th>资产等级</th>
+                            <td width="289px">
+                                <label>{{EquipmentInfo.AssetLevel.Name}}</label>
+                            </td>
+                            <th class="tdrequired" width="15px"><span class="required"></span></th>
+                            <th width="189px">折旧年限(年)</th>
+                            <td width="289px">
+                                <label>{{EquipmentInfo.DepreciationYears}}</label>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th class="tdrequired" width="15px"><span class="required"></span></th>
+                            <th width="189px">注册证有效日期</th>
+                            <td width="289px" colspan="4">
+                                <label v-if="EquipmentInfo.ValidityStartDate != ''">{{EquipmentInfo.ValidityStartDate}} - {{EquipmentInfo.ValidityEndDate}}</label>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <br />
+            <!--采购信息-->
+            <div class="radiusOnly">
+                <table class="tblDetail" width="800" border="1" bordercolor="000000" cellpadding="0" cellspacing="0" frame="void">
+                    <tbody>
+                        <tr>
+                            <td colspan="5" class="tblName" style="border-right:none">采购信息</td>
+                            <td style="border-left:none"><button class="btn btn-outline-info btn-sm" style="float:right;" onclick="btnViewContractClicked()"><span>历史合同信息</span></button></td>
+                        </tr>
+                        <tr>
+                            <th class="tdrequired" width="15px"><span class="required"></span></th>
+                            <th width="189px">销售合同名称</th>
+                            <td width="289px">
+                                <label>{{EquipmentInfo.SaleContractName}}</label>
+                            </td>
+                            <th class="tdrequired" width="15px"><span class="required"></span></th>
+                            <th width="189px">经销商</th>
+                            <td width="289px">
+                                <label>{{EquipmentInfo.Supplier.Name}}</label>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th class="tdrequired" width="15px"><span class="required"></span></th>
+                            <th>购入方式</th>
+                            <td>
+                                <label>{{EquipmentInfo.PurchaseWay}}</label>
+                            </td>
+                            <th class="tdrequired" width="15px"><span class="required"></span></th>
+                            <th>采购金额(元)</th>
+                            <td>
+                                <label>{{EquipmentInfo.PurchaseAmount}}</label>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th class="tdrequired" width="15px"><span class="required"></span></th>
+                            <th>采购日期</th>
+                            <td>
+                                <label>{{EquipmentInfo.PurchaseDate}}</label>
+                            </td>
+                            <th class="tdrequired" width="15px"><span class="required"></span></th>
+                            <th>设备产地</th>
+                            <td>
+                                <label>{{EquipmentInfo.IsImport == true ? "进口" : "国产"}}</label>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <br />
+            <!--使用状态-->
+            <div class="radiusOnly">
+                <table class="tblDetail" width="800" border="1" bordercolor="000000" cellpadding="0" cellspacing="0" frame="void">
+                    <tbody>
+                        <tr>
+                            <td colspan="5" class="tblName" style="border-right:none">使用状态</td>
+                            <td style="border-left:none"><button class="btn btn-outline-info btn-sm" style="float:right;" onclick="btnViewRequestClicked()"><span>历史请求信息</span></button></td>
+                        </tr>
+                        <tr>
+                            <th class="tdrequired" width="15px"><span class="required"></span></th>
+                            <th width="189px">使用科室</th>
+                            <td width="289px">
+                                <label>{{EquipmentInfo.Department.Name}}</label>
+                            </td>
+                            <th class="tdrequired" width="15px"><span class="required"></span></th>
+                            <th width="189px">安装地点</th>
+                            <td width="289px">
+                                <label>{{EquipmentInfo.InstalSite}}</label>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th class="tdrequired" width="15px"><span class="required"></span></th>
+                            <th>安装日期</th>
+                            <td width="289px">
+                                <label v-if="EquipmentInfo.InstalDate != ''">{{EquipmentInfo.InstalDate}}</label>
+                            </td>
+                            <th class="tdrequired" width="15px"><span class="required"></span></th>
+                            <th>启用日期</th>
+                            <td width="289px">
+                                <label v-if="EquipmentInfo.UseageDate != ''">{{EquipmentInfo.UseageDate}}</label>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th class="tdrequired" width="15px"><span class="required"></span></th>
+                            <th>验收状态</th>
+                            <td>
+                                <label>{{EquipmentInfo.Accepted == true ? "已验收" : "未验收"}}</label>
+                            </td>
+                            <th class="tdrequired" width="15px"><span class="required"></span></th>
+                            <th>验收时间</th>
+                            <td>
+                                <label>{{EquipmentInfo.AcceptanceDate}}</label>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th class="tdrequired" width="15px"><span class="required"></span></th>
+                            <th>使用状态</th>
+                            <td>
+                                <label>{{EquipmentInfo.UsageStatus.Name}}</label>
+                            </td>
+                            <th class="tdrequired" width="15px"><span class="required"></span></th>
+                            <th>设备状态</th>
+                            <td>
+                                <label>{{EquipmentInfo.EquipmentStatus.Name}}</label>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th class="tdrequired" width="15px"><span class="required"></span></th>
+                            <th>强检标记</th>
+                            <td>
+                                <label>{{EquipmentInfo.MandatoryTestStatus.Name == "" ? "无" : EquipmentInfo.MandatoryTestStatus.Name}} </label>
+                            </td>
+                            <th class="tdrequired" width="15px"><span class="required"></span></th>
+                            <th>维保状态</th>
+                            <td>
+                                <label>{{EquipmentInfo.WarrantyStatus}}</label>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th class="tdrequired" width="15px"><span class="required"></span></th>
+                            <th>强检时间</th>
+                            <td>
+                                <label>{{EquipmentInfo.MandatoryTestDate}}</label>
+                            </td>
+                            <th class="tdrequired" width="15px"><span class="required"></span></th>
+                            <th>巡检周期</th>
+                            <td v-if="EquipmentInfo.PatrolType.Name != ''">
+                                <label>{{EquipmentInfo.PatrolPeriod}}</label>
+                                <label>{{EquipmentInfo.PatrolType.Name}}</label>
+                            </td>
+                            <td v-else>
+                                <label>无巡检</label>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th class="tdrequired" width="15px"><span class="required"></span></th>
+                            <th>召回标记</th>
+                            <td class="inputContent">
+                                <label>{{EquipmentInfo.RecallFlag == true ? "是" : "否"}}</label>
+                            </td>
+                            <th class="tdrequired" width="15px"><span class="required"></span></th>
+                            <th>保养周期</th>
+                            <td v-if="EquipmentInfo.MaintenanceType.Name !=''">
+                                <label>{{EquipmentInfo.MaintenancePeriod}}</label>
+                                <label>{{EquipmentInfo.MaintenanceType.Name}}</label>
+                            </td>
+                            <td v-else>
+                                <label>无保养</label>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th class="tdrequired" width="15px"><span class="required"></span></th>
+                            <th>召回时间</th>
+                            <td width="289px">
+                                <label>{{EquipmentInfo.RecallDate}}</label>
+                            </td>
+                            <th class="tdrequired" width="15px"><span class="required"></span></th>
+                            <th>校准周期</th>
+                            <td v-if="EquipmentInfo.CorrectionType.Name !=''">
+                                <label>{{EquipmentInfo.CorrectionPeriod}}</label>
+                                <label>{{EquipmentInfo.CorrectionType.Name}}</label>
+                            </td>
+                            <td v-else>
+                                <label>无校准</label>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <br />
+            <!--证件-->
+            <div class="radiusOnly" style="border-bottom:none;border-bottom-left-radius:0px;border-bottom-right-radius:0px;">
+                <table class="tblDetail" width="800" style="text-align: left;" border="1" bordercolor="000000" cellpadding="0"
+                       cellspacing="0" frame="void">
+                    <tbody>
+                        <tr>
+                            <td colspan="6" class="tblName">证件</td>
+                        </tr>
+                        <tr>
+                            <th class="tdrequired" width="15px"><span class="required"></span></th>
+                            <th width="189px">销售合同文件</th>
+                            <td width="289px">
+                                <input type="text" class="txtFileName" id="FileSaleContract" style="width:150px;" readonly="readonly" onclick="OpenLocalFile('FileSaleContract')" />
+                                <input type="hidden" id="FileSaleContractPath" />
+                                <input type="hidden" id="FileSaleContractID" />
+                            </td>
+                            <th class="tdrequired" width="15px"><span class="required"></span></th>
+                            <th width="189px">注册证文件</th>
+                            <td width="289px">
+                                <input type="text" class="txtFileName" id="FileRegistration" style="width:150px;" readonly="readonly" onclick="OpenLocalFile('FileRegistration')" />
+                                <input type="hidden" id="FileRegistrationPath" />
+                                <input type="hidden" id="FileRegistrationID" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <th class="tdrequired" width="15px"><span class="required"></span></th>
+                            <th>采购配置清单</th>
+                            <td>
+                                <input type="text" class="txtFileName" id="FilePurchaseDetail" style="width:150px;" readonly="readonly" onclick="OpenLocalFile('FilePurchaseDetail')" />
+                                <input type="hidden" id="FilePurchaseDetailPath" />
+                                <input type="hidden" id="FilePurchaseDetailID" />
+                            </td>
+                            <th class="tdrequired" width="15px"><span class="required"></span></th>
+                            <th>技术文档</th>
+                            <td align="left">
+                                <input type="text" class="txtFileName" id="FileTechDocu" style="width:150px;" readonly="readonly" onclick="OpenLocalFile('FileTechDocu')" />
+                                <input type="hidden" id="FileTechDocuPath" />
+                                <input type="hidden" id="FileTechDocuID" />
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="radiusOnly" style="border-top-left-radius:0px;border-top-right-radius:0px;">
+                <table class="tblDetail" width="800" border="1" bordercolor="000000" cellpadding="0" cellspacing="0" frame="void">
+                    <tbody>
+                        <tr>
+                            <th class="tdrequired" width="15px"><span class="required"></span></th>
+                            <th>设备外观</th>
+                            <th class="tdrequired" width="15px"><span class="required"></span></th>
+                            <th>设备铭牌</th>
+                            <th class="tdrequired" width="15px"><span class="required"></span></th>
+                            <th>设备标签</th>
+                        </tr>
+                        <tr>
+                            <td colspan="2">
+                                <input type="text" class="txtFileName" id="FileConfigLicence" style="width:200px;" readonly="readonly" onclick="OpenLocalFile('FileConfigLicence')" />
+                                <input type="hidden" id="FileConfigLicencePath" />
+                                <input type="hidden" id="FileConfigLicenceID" />
+                                <div style="height: 300px; width: 400px; margin-top: 10px; text-align: center;">
+                                    <img class="FileConfigLicence ImgDialog" style="max-height: 100%; max-width: 100%;" src="" alt="无图片" onclick="ViewPDF('FileConfigLicence')">
+                                </div>
+                            </td>
+                            <td colspan="2">
+                                <input type="text" class="txtFileName" id="FileNameplate" style="width:200px;" readonly="readonly" onclick="OpenLocalFile('FileNameplate')" />
+                                <input type="hidden" id="FileNameplatePath" />
+                                <input type="hidden" id="FileNameplateID" />
+                                <div style="height: 300px; width: 400px; margin-top: 10px; text-align: center;">
+                                    <img class="FileNameplate ImgDialog" style="max-height: 100%; max-width: 100%;" src="" alt="无图片" onclick="ViewPDF('FileNameplate')">
+                                </div>
+                            </td>
+                            <td colspan="2">
+                                <input type="text" class="txtFileName" id="FileLabel" style="width:200px;" readonly="readonly" onclick="OpenLocalFile('FileLabel')" />
+                                <input type="hidden" id="FileLabelPath" />
+                                <input type="hidden" id="FileLabelID" />
+                                <div style="height: 300px; width: 400px; margin-top: 10px; text-align: center;">
+                                    <img class="FileLabel ImgDialog" style="max-height: 100%; max-width: 100%;" src="" alt="无图片" onclick="ViewPDF('FileLabel')">
+                                </div>    
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <br />
+            <div class="radiusOnly">
+                <table class="tblDetail" width="800" border="1" bordercolor="000000" cellpadding="0" cellspacing="0" frame="void">
+                    <tbody>
+                        <tr>
+                            <td colspan="2" width="95%" class="tblName">附件</td>
+                        </tr>
+                        <tr>
+                            <th width="289px">文件名</th>
+                            <th width="65%">备注</th>
+                        </tr>
+                    </tbody>
+                    <tbody id="OtherFilesListBody"></tbody>
+                </table>
+            </div>
+            <br />
+            <table border="0" class="tblDetail" style="text-align: center; margin: 20px auto 5%;width: 800px;">
+                <tbody>
+                    <tr>
+                        <td><button class="btn btn-info" onclick="BackToList()"><span>返回</span></button></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<div class="ui-dialog-content ui-widget-content" id="dialogPreivewImage" tabindex="-1" style="display:none">
+    <div style="height:600px;width:800px;">
+        <img id="imageElement" style="max-height:100%;max-width:100%;" />
+    </div>
+</div>
+<script>
+    var FileArray = new Array();
+
+    $().ready(function () {
+        $("label").css("color","#777");
+        setTimeout(LoadEquipmentInfo(), 100);
+    })
+    function ViewPDF(fieldElementId) {
+        if(CheckFileName4Preview($("#" + fieldElementId).val()) == false) {
+            jAlert("当前文件非图片格式，不可预览","提示");
+            return;
+        }
+        var fileID = $("#" + fieldElementId + "ID").val();
+        window.open('@Url.Action("ViewPDF", "Equipment")' + '?' + $.param({ equipmentID: equipmentVue.EquipmentInfo.ID, fileID: fileID }));
+    }
+
+    function OpenLocalFile(fieldElementId) {
+        if ($("#" + fieldElementId).val() != "")
+            DownloadFile('@BusinessObjects.Domain.ObjectTypes.Equipment', $("#" + fieldElementId + "ID").val());
+    }
+
+    function DisplayOtherFiles(files){
+        var htmlStr = "", objectName = "@BusinessObjects.Domain.ObjectTypes.Equipment";
+        if (files.length > 0) {
+            $("#OtherFilesListBody").empty();
+            $.each(files, function (idx, info) {
+                htmlStr += '<tr>';
+                htmlStr += '  <td><label class="cursor linkFile" readonly="readonly" onclick="DownloadFile(\'' + objectName + '\',' + info.ID + ')">' + info.FileName + '</label></td>';
+                htmlStr += '  <td><label class="tdReadOnly">' + info.FileDesc + '</label></td>';
+                htmlStr += '</tr>';
+            });
+        }
+        $("#OtherFilesListBody").html(htmlStr);
+    }
+
+    function LoadEquipmentInfo() {
+        if ('@ViewBag.Id' == 0) {
+            equipmentVue.SetClassCode();
+            return;
+        }
+        SetPageWaiting(true);
+        $.get('@Url.Action("GetEquipmentByID", "Equipment")', { id: '@ViewBag.Id' }, function (response) {
+            SetPageWaiting(false);
+            if (response.ResultCode != "00") {
+                processResponseError(response.ResultCode, response.ResultMessage);
+            } else {
+                equipmentVue.EquipmentInfo = response.Data;
+                $.each(equipmentVue.EquipmentInfo.EquipmentFile, function (idx, info) {
+                    switch(info.FileType){
+                        case @BusinessObjects.Domain.EquipmentInfo.FileTypes.SaleContract:
+                            $("#FileSaleContract").val(info.FileName);
+                            $("#FileSaleContractID").val(info.ID);
+                            break;
+                        case @BusinessObjects.Domain.EquipmentInfo.FileTypes.Registration:
+                            $("#FileRegistration").val(info.FileName);
+                            $("#FileRegistrationID").val(info.ID);
+                            break;
+                        case @BusinessObjects.Domain.EquipmentInfo.FileTypes.PurchaseDetail:
+                            $("#FilePurchaseDetail").val(info.FileName);
+                            $("#FilePurchaseDetailID").val(info.ID);
+                            break;
+                        case @BusinessObjects.Domain.EquipmentInfo.FileTypes.ConfigLicence:
+                            $("#FileConfigLicence").val(info.FileName);
+                            $("#FileConfigLicenceID").val(info.ID);
+                            $(".FileConfigLicence")[0].src = '@Url.Action("DownloadUploadFile", "UploadFile")' + "?" + $.param({ objectName: '@BusinessObjects.Domain.ObjectTypes.Equipment',id: info.ID });
+                            break;
+                        case @BusinessObjects.Domain.EquipmentInfo.FileTypes.Nameplate:
+                            $("#FileNameplate").val(info.FileName);
+                            $("#FileNameplateID").val(info.ID);
+                            $(".FileNameplate")[0].src = '@Url.Action("DownloadUploadFile", "UploadFile")' + '?' + $.param({ objectName: '@BusinessObjects.Domain.ObjectTypes.Equipment',id: info.ID });
+	                        break;
+	                    case @BusinessObjects.Domain.EquipmentInfo.FileTypes.Label:
+                            $("#FileLabel").val(info.FileName);
+                            $("#FileLabelID").val(info.ID);
+                            $(".FileLabel")[0].src = '@Url.Action("DownloadUploadFile", "UploadFile")' + "?" + $.param({ objectName: '@BusinessObjects.Domain.ObjectTypes.Equipment',id: info.ID });
+                            break;
+                        case @BusinessObjects.Domain.EquipmentInfo.FileTypes.TechDocu:
+                            $("#FileTechDocu").val(info.FileName);
+                            $("#FileTechDocuID").val(info.ID);
+                            break;
+                        case @BusinessObjects.Domain.EquipmentInfo.FileTypes.OtherFile:
+                            FileArray.push(info);
+                            break;
+                        default:
+                            return false;
+                    }
+                });
+                if (!$("#FileConfigLicenceID").val()){
+                    $(".FileConfigLicence")[0].src ='/Content/img/appearance.png';
+                }
+                if (!$("#FileNameplateID").val()){
+                    $(".FileNameplate")[0].src ='/Content/img/plaque.png';
+                }
+                if (!$("#FileLabelID").val()){
+                    $(".FileLabel")[0].src ='/Content/img/label.png';
+                }
+
+                DisplayOtherFiles(FileArray);
+                equipmentVue.EquipmentInfo.ManufacturingDate = parseAndFormatJsonDate(equipmentVue.EquipmentInfo.ManufacturingDate);
+                equipmentVue.EquipmentInfo.ValidityStartDate = parseAndFormatJsonDate(equipmentVue.EquipmentInfo.ValidityStartDate);
+                equipmentVue.EquipmentInfo.ValidityEndDate = parseAndFormatJsonDate(equipmentVue.EquipmentInfo.ValidityEndDate);
+                equipmentVue.EquipmentInfo.PurchaseDate = parseAndFormatJsonDate(equipmentVue.EquipmentInfo.PurchaseDate);
+                equipmentVue.EquipmentInfo.AcceptanceDate = parseAndFormatJsonDate(equipmentVue.EquipmentInfo.AcceptanceDate);
+                equipmentVue.EquipmentInfo.RecallDate = parseAndFormatJsonDate(equipmentVue.EquipmentInfo.RecallDate);
+                equipmentVue.EquipmentInfo.InstalDate = parseAndFormatJsonDate(equipmentVue.EquipmentInfo.InstalDate);
+                equipmentVue.EquipmentInfo.UseageDate = parseAndFormatJsonDate(equipmentVue.EquipmentInfo.UseageDate);
+                equipmentVue.EquipmentInfo.MandatoryTestDate = parseAndFormatJsonDate(equipmentVue.EquipmentInfo.MandatoryTestDate);
+            }
+        });
+    }
+    function BackToList() {
+        window.location = '@Url.Action(ViewBag.ActionName, "Equipment")';
+    }
+
+    function btnViewContractClicked() {
+        window.open('@Url.Action("ContractList", "Contract")' + '?' + $.param({ equipmentId: '@ViewBag.Id'}));
+    }
+
+    function btnViewRequestClicked() {
+        window.open('@Url.Action("RequestList", "Request")' + '?' + $.param({ equipmentId: '@ViewBag.Id'}));
+    }
+</script>
+<script>
+    var equipmentVue = new Vue({
+        el: '#EquipmentView',
+        data: {
+            EquipmentInfo: {
+                ID: 0,
+                EquipmentLevel: {ID:1,},
+                EquipmentClass1: {Code: "00",},
+                EquipmentClass2: {Code: "00",},
+                EquipmentClass2List: [],
+                EquipmentClass3: {Code: "00",},
+                EquipmentClass3List: [],
+                Manufacturer:{},
+                Supplier: {},
+                DepreciationYears:0,
+                IsImport:false,
+                Department: {},
+                AssetLevel:{ID: 1},
+                FixedAsset: true,
+                Accepted: false,
+                PurchaseAmount: 0,
+                Department:{ID: 1,},
+                UsageStatus:{ID: 1,},
+                EquipmentStatus: { ID: 1 },
+                WarrantyStatus:"保外",
+                MandatoryTestStatus: {ID:0,},
+                RecallFlag: false,
+                PatrolPeriod:0,
+                MaintenancePeriod:0,
+                CorrectionPeriod:0,
+                MaintenanceType: { ID: 0 },
+                PatrolType: {ID: 0},
+                CorrectionType: { ID: 0 },
+                EquipmentFile: [],
+                OtherFileArray:[],
+            },
+        },
+    });
+</script>
+
+

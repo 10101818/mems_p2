@@ -1,0 +1,4029 @@
+
+----------------------------------------------------------------------AccidentDao.cs----------------------------------------------------------------------------------------
+using BCWS.BusinessObjects.Aspect;
+using BCWS.BusinessObjects.Domain.Accident;
+using BCWS.BusinessObjects.Util;
+using PostSharp.Extensibility;
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Data.SqlClient;
+using System.Linq;
+using System.Text;
+
+namespace BCWS.BusinessObjects.DataAccess
+{
+    [LoggingAspect(AspectPriority = 1)]
+    [ConnectionAspect(AspectPriority = 2, AttributeTargetTypeAttributes = MulticastAttributes.Public)]
+    public class AccidentDao :BaseDao
+    {
+        #region "tblAccident"
+        public List<AccidentInfo> GetAccidents(int bridgeAreaID, long wreckerShipID, int collisionType, DateTime transactionTimeFrom, DateTime transactionTimeTo, bool calculatedOnly = false)
+        {
+            List<AccidentInfo> accidents = new List<AccidentInfo>();
+
+            sqlStr = "SELECT a.*, up.Name as ProcessUserName, uc.Name as CalculateUserName, s.ShipType, s.ShipDWT FROM tblAccident as a " + 
+                " left join tblShip as s on a.WreckerShipID = s.ShipID" +
+                " left join tblUser as up on a.ProcessUser = up.ID" +
+                " left join tblUser as uc on a.CalculateUser = uc.ID" +
+                " WHERE a.TransTime <= @TransactionTimeTo AND a.BridgeAreaID = @BridgeAreaID ";
+            if (transactionTimeFrom != DateTime.MinValue) sqlStr += " AND a.TransTime >= @TransactionTimeFrom ";
+            if (wreckerShipID >= 0) sqlStr += " AND a.WreckerShipID = " + wreckerShipID;
+            if (collisionType >= 0) sqlStr += " And a.CollisionType = " + collisionType;
+            if (calculatedOnly) sqlStr += " And Calculated = 1 ";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                if (transactionTimeFrom != DateTime.MinValue)
+                {
+                    command.Parameters.Add("@TransactionTimeFrom", SqlDbType.DateTime).Value = transactionTimeFrom;
+                }
+                command.Parameters.Add("@TransactionTimeTo", SqlDbType.DateTime).Value = transactionTimeTo;
+                command.Parameters.Add("@BridgeAreaID", SqlDbType.Int).Value = bridgeAreaID;
+
+                foreach (DataRow dr in GetDataTable(command).Rows)
+                {
+                    accidents.Add(new AccidentInfo(dr));
+                }
+
+                return accidents;
+            }
+        }
+
+        public void AddAccident(AccidentInfo accident)
+        {
+            sqlStr = "INSERT INTO tblAccident (BridgeAreaID, WreckerShipID, TransTime, CollisionType, CapNum1ID, CapNum2ID, PositionX, PositionY , CollisionTheta, Processed)" +
+                    " VALUES (@BridgeAreaID, @WreckerShipID, @TransTime, @CollisionType, @CapNum1ID, @CapNum2ID, @PositionX, @PositionY , @CollisionTheta, 0)";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.Parameters.Add("@BridgeAreaID", SqlDbType.Int).Value = accident.BridgeAreaID;
+                command.Parameters.Add("@WreckerShipID", SqlDbType.BigInt).Value = accident.WreckerShip.ShipID;
+                command.Parameters.Add("@TransTime", SqlDbType.DateTime).Value = accident.TransTime;
+                command.Parameters.Add("@CollisionType", SqlDbType.Int).Value = accident.CollisionType.ID;
+                command.Parameters.Add("@CapNum1ID", SqlDbType.Int).Value = accident.Cap1.CapNumID;
+                command.Parameters.Add("@CapNum2ID", SqlDbType.Int).Value = accident.Cap2.CapNumID;
+                command.Parameters.Add("@PositionX", SqlDbType.Decimal).Value = accident.PositionX;
+                command.Parameters.Add("@PositionY", SqlDbType.Decimal).Value = accident.PositionY;
+                command.Parameters.Add("@CollisionTheta", SqlDbType.Decimal).Value = accident.CollisionTheta;
+
+                command.ExecuteNonQuery();
+            }
+        }
+
+        public void UpdateAccidentCalculated(int accidentId, int calculateUser)
+        {
+            sqlStr = "UPDATE tblAccident SET Calculated = 1, CalculateUser = @CalculateUser, CalculateDate = @CalculateDate WHERE AccidentID = @AccidentID";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.Parameters.Add("@AccidentID", SqlDbType.Int).Value = accidentId;
+                command.Parameters.Add("@CalculateUser", SqlDbType.Int).Value = calculateUser;
+                command.Parameters.Add("@CalculateDate", SqlDbType.DateTime).Value = DateTime.Now;
+
+                command.ExecuteNonQuery();
+            }
+        }
+
+        public void UpdateAccidentProcessed(AccidentInfo accident)
+        {
+            sqlStr = "UPDATE tblAccident SET AccidentCause = @AccidentCause , Processed = 1, ProcessUser = @ProcessUser, ProcessedDate = @ProcessedDate, Comments = @Comments WHERE AccidentID = @AccidentID";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.Parameters.Add("@AccidentID", SqlDbType.Int).Value = accident.AccidentID;
+                command.Parameters.Add("@AccidentCause", SqlDbType.NVarChar).Value = accident.AccidentCause;
+                command.Parameters.Add("@ProcessUser", SqlDbType.Int).Value = accident.ProcessUser;
+                command.Parameters.Add("@Comments", SqlDbType.NVarChar).Value = accident.Comments;
+                command.Parameters.Add("@ProcessedDate", SqlDbType.DateTime).Value = DateTime.Now;
+
+                command.ExecuteNonQuery();
+            }
+        }
+        #endregion
+
+        #region "tblAlert"
+        public List<AlertInfo> GetAlerts(int bridgeAreaID, long wreckerShipID, int collisionType, DateTime transactionTimeFrom, DateTime transactionTimeTo)
+        {
+            List<AlertInfo> alerts = new List<AlertInfo>();
+
+            sqlStr = "SELECT * FROM tblAlert WHERE TransTime <= @TransactionTimeTo AND BridgeAreaID = @BridgeAreaID ";
+            if (transactionTimeFrom != DateTime.MinValue) sqlStr += " AND TransTime >= @TransactionTimeFrom ";
+            if (wreckerShipID >= 0) sqlStr += " AND WreckerShipID = " + wreckerShipID + "";
+            if (collisionType >= 0) sqlStr += " And CollisionType = " + collisionType + "";
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                if (transactionTimeFrom != DateTime.MinValue)
+                {
+                    command.Parameters.Add("@TransactionTimeFrom", SqlDbType.DateTime).Value = transactionTimeFrom;
+                }
+                command.Parameters.Add("@TransactionTimeTo", SqlDbType.DateTime).Value = transactionTimeTo;
+                command.Parameters.Add("@BridgeAreaID", SqlDbType.Int).Value = bridgeAreaID;
+
+                foreach (DataRow dr in GetDataTable(command).Rows)
+                {
+                    alerts.Add(new AlertInfo(dr));
+                }
+
+                return alerts;
+            }
+        }
+
+        public AlertInfo AddAlert(AlertInfo alert)
+        {
+            sqlStr = "INSERT INTO tblAlert (BridgeAreaID, WreckerShipID, TransTime, CollisionType, CapNum1ID, CapNum2ID, PositionX, PositionY, CollisionTheta, AccidentRank)" +
+                    " VALUES (@BridgeAreaID, @WreckerShipID, @TransTime, @CollisionType, @CapNum1ID, @CapNum2ID, @PositionX, @PositionY, @CollisionTheta, @AccidentRank);" +
+                    " SELECT @@IDENTITY";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.Parameters.Add("@BridgeAreaID", SqlDbType.Int).Value = alert.BridgeAreaID;
+                command.Parameters.Add("@WreckerShipID", SqlDbType.BigInt).Value = alert.WreckerShip.ShipID;
+                command.Parameters.Add("@TransTime", SqlDbType.DateTime).Value = alert.TransTime;
+                command.Parameters.Add("@CollisionType", SqlDbType.Int).Value = alert.CollisionType.ID;
+                command.Parameters.Add("@CapNum1ID", SqlDbType.Int).Value = alert.Cap1.CapNumID;
+                command.Parameters.Add("@CapNum2ID", SqlDbType.Int).Value = alert.Cap2.CapNumID;
+                command.Parameters.Add("@PositionX", SqlDbType.Decimal).Value = alert.PositionX;
+                command.Parameters.Add("@PositionY", SqlDbType.Decimal).Value = alert.PositionY;
+                command.Parameters.Add("@CollisionTheta", SqlDbType.Decimal).Value = alert.CollisionTheta;
+                command.Parameters.Add("@AccidentRank", SqlDbType.Int).Value = alert.AccidentRank;
+
+                alert.AlertID = SQLUtil.ConvertInt(command.ExecuteScalar());
+
+                return alert;
+            }
+        }
+
+        public void UpdateAlertEmails(int id, string emails)
+        {
+            sqlStr = "UPDATE tblAlert SET Emails = @Emails WHERE AlertID = @AlertID";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.Parameters.Add("@AlertID", SqlDbType.Int).Value = id;
+                command.Parameters.Add("@Emails", SqlDbType.VarChar).Value = emails;
+                command.ExecuteNonQuery();
+            }
+        }
+
+        public void UpdateAlertPhones(int id, string phones)
+        {
+            sqlStr = "UPDATE tblAlert SET Mobiles = @Mobiles WHERE AlertID = @AlertID";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.Parameters.Add("@AlertID", SqlDbType.Int).Value = id;
+                command.Parameters.Add("@Mobiles", SqlDbType.VarChar).Value = phones;
+                command.ExecuteNonQuery();
+            }
+        }
+        #endregion
+
+        #region "tblAlertReceiver"
+        public List<AlertReceiverInfo> GetAlertReceivers(int bridgeAreaID, string userName = "")
+        {
+            List<AlertReceiverInfo> alertReceiver = new List<AlertReceiverInfo>();
+
+            sqlStr = "SELECT * FROM tblAlertReceiver WHERE BridgeAreaID = @BridgeAreaID" ;
+            if (!string.IsNullOrEmpty(userName)) sqlStr += " AND UPPER(UserName) LIKE @UserName";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.Parameters.Add("@BridgeAreaID", SqlDbType.Int).Value = bridgeAreaID;
+                if (!string.IsNullOrEmpty(userName)) command.Parameters.Add("@UserName", SqlDbType.NVarChar).Value = "%" + userName.ToUpper() + "%";
+
+                foreach (DataRow dr in GetDataTable(command).Rows)
+                {
+                    alertReceiver.Add(new AlertReceiverInfo(dr));
+                }
+
+                return alertReceiver;
+            }
+        }
+
+        public void DeleteAlertReceiver(int id)
+        {
+            sqlStr = "DELETE FROM tblAlertReceiver WHERE ID=@ID";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.Parameters.Add("@ID", SqlDbType.Int).Value = id;
+
+                command.ExecuteNonQuery();
+            }
+        }
+
+        public void AddAlertReceiver(AlertReceiverInfo alertReceiverInfo)
+        {
+            sqlStr = "INSERT INTO tblAlertReceiver (BridgeAreaID, UserName, Telephone, Email) VALUES (@BridgeAreaID, @UserName, @Telephone, @Email)";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.Parameters.Add("@BridgeAreaID", SqlDbType.Int).Value = alertReceiverInfo.BridgeAreaID;
+                command.Parameters.Add("@UserName", SqlDbType.NVarChar).Value = alertReceiverInfo.UserName;
+                command.Parameters.Add("@Telephone", SqlDbType.VarChar).Value = alertReceiverInfo.Telephone;
+                command.Parameters.Add("@Email", SqlDbType.VarChar).Value = alertReceiverInfo.Email;
+
+                command.ExecuteNonQuery();
+            }
+        }
+
+        public void UpdateAlertReceiver(AlertReceiverInfo alertReceiverInfo)
+        {
+            sqlStr = "UPDATE tblAlertReceiver SET UserName = @UserName , Telephone = @Telephone, Email = @Email WHERE ID = @ID";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.Parameters.Add("@ID", SqlDbType.Int).Value = alertReceiverInfo.ID;
+                command.Parameters.Add("@UserName", SqlDbType.NVarChar).Value = alertReceiverInfo.UserName;
+                command.Parameters.Add("@Telephone", SqlDbType.VarChar).Value = alertReceiverInfo.Telephone;
+                command.Parameters.Add("@Email", SqlDbType.VarChar).Value = alertReceiverInfo.Email;
+
+                command.ExecuteNonQuery();
+            }
+        }
+        #endregion
+
+        #region "tblAccidentReport"
+        public AccidentReportInfo GetAccidentReport(int bridgeAreaID, int accidentID)
+        {
+            sqlStr = "SELECT * FROM tblAccidentReport WHERE BridgeAreaID = @BridgeAreaID AND AccidentID = @AccidentID";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.Parameters.Add("@BridgeAreaID", SqlDbType.Int).Value = bridgeAreaID;
+                command.Parameters.Add("@AccidentID", SqlDbType.Int).Value = accidentID;
+
+                DataRow dr = GetDataRow(command);
+                if (dr != null)
+                    return new AccidentReportInfo(dr);
+                else
+                    return null;
+            }
+        }
+
+        public void AddAccidentReport(AccidentReportInfo info)
+        {
+            sqlStr = "INSERT INTO tblAccidentReport (AccidentID, BridgeAreaID, Description, LastEditDate, Exported)" +
+                    " VALUES (@AccidentID, @BridgeAreaID, @Description, @LastEditDate, 0)";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.Parameters.Add("@AccidentID", SqlDbType.Int).Value = info.Accident.AccidentID;
+                command.Parameters.Add("@BridgeAreaID", SqlDbType.Int).Value = info.Accident.BridgeAreaID;
+                command.Parameters.Add("@Description", SqlDbType.NVarChar).Value = info.Description;
+                command.Parameters.Add("@LastEditDate", SqlDbType.DateTime).Value = DateTime.Now;
+
+                command.ExecuteNonQuery();
+            }
+        }
+
+        public void UpdateAccidentReport(AccidentReportInfo info)
+        {
+            sqlStr = "UPDATE tblAccidentReport SET Description = @Description, LastEditDate = @LastEditDate WHERE WHERE BridgeAreaID = @BridgeAreaID AND AccidentID = @AccidentID";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.Parameters.Add("@AccidentID", SqlDbType.Int).Value = info.Accident.AccidentID;
+                command.Parameters.Add("@BridgeAreaID", SqlDbType.Int).Value = info.Accident.BridgeAreaID;
+                command.Parameters.Add("@Description", SqlDbType.NVarChar).Value = info.Description;
+                command.Parameters.Add("@LastEditDate", SqlDbType.DateTime).Value = DateTime.Now;
+
+                command.ExecuteNonQuery();
+            }
+        }
+
+        public void UpdateAccidentReportExported(int bridgeAreaID, int accidentID)
+        {
+            sqlStr = "UPDATE tblAccidentReport SET Exported = 1, ExportDate = @ExportDate WHERE WHERE BridgeAreaID = @BridgeAreaID AND AccidentID = @AccidentID";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.Parameters.Add("@BridgeAreaID", SqlDbType.Int).Value = bridgeAreaID;
+                command.Parameters.Add("@AccidentID", SqlDbType.Int).Value = accidentID;
+                command.Parameters.Add("@ExportDate", SqlDbType.DateTime).Value = DateTime.Now;
+
+                command.ExecuteNonQuery();
+            }
+        }
+        #endregion
+
+        #region "tblAccidentRptElement"
+        public List<AccidentRptElementInfo> GetAccidentRptElements(int bridgeAreaID, int accidentID)
+        {
+            List<AccidentRptElementInfo> infos = new List<AccidentRptElementInfo>();
+
+            sqlStr = "SELECT * FROM tblAccidentRptElement WHERE BridgeAreaID = @BridgeAreaID AND AccidentID = @AccidentID";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.Parameters.Add("@BridgeAreaID", SqlDbType.Int).Value = bridgeAreaID;
+                command.Parameters.Add("@AccidentID", SqlDbType.Int).Value = accidentID;
+
+                using(DataTable dt = GetDataTable(command))
+                {
+                    foreach(DataRow dr in dt.Rows)
+                    {
+                        infos.Add(new AccidentRptElementInfo(dr));
+                    }
+                }
+            }
+
+            return infos;
+        }
+
+        public AccidentRptElementInfo AddAccidentRptElement(AccidentRptElementInfo info)
+        {
+            sqlStr = "INSERT INTO tblAccidentRptElement (AccidentID, BridgeAreaID, Seq, ElementTypeID, ParentID, Title, Content, ReportTypeID, FiniteNodeID, IsBrief, FiniteNodeDirection)" +
+                    " VALUES (@AccidentID, @BridgeAreaID, @Seq, @ElementTypeID, @ParentID, @Title, @Content, @ReportTypeID, @FiniteNodeID, @IsBrief, @FiniteNodeDirection);" +
+                    " SELECT @@IDENTITY";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.Parameters.Add("@Seq", SqlDbType.Int).Value = info.Seq;
+                command.Parameters.Add("@AccidentID", SqlDbType.Int).Value = info.Accident.AccidentID;
+                command.Parameters.Add("@BridgeAreaID", SqlDbType.Int).Value = info.Accident.BridgeAreaID;
+                command.Parameters.Add("@ElementTypeID", SqlDbType.Int).Value = info.ElementTypeID;
+                command.Parameters.Add("@ParentID", SqlDbType.Int).Value =  SQLUtil.ZeroToNull(info.ParentID);
+                command.Parameters.Add("@Title", SqlDbType.NVarChar).Value = SQLUtil.EmptyStringToNull(info.Title);
+                command.Parameters.Add("@Content", SqlDbType.NVarChar).Value = SQLUtil.EmptyStringToNull(info.Content);
+                command.Parameters.Add("@ReportTypeID", SqlDbType.Int).Value = SQLUtil.ZeroToNull(info.ReportTypeID);
+                command.Parameters.Add("@FiniteNodeID", SqlDbType.Int).Value = SQLUtil.ZeroToNull(info.FiniteNodeID);
+                command.Parameters.Add("@IsBrief", SqlDbType.Bit).Value = info.IsBrief;
+                command.Parameters.Add("@FiniteNodeDirection", SqlDbType.Int).Value = info.FiniteNodeDirection;
+
+                info.ID = SQLUtil.ConvertInt(command.ExecuteScalar());
+
+                return info;
+            }
+        }
+
+        public void UpdateAccidentRptElement(AccidentRptElementInfo info)
+        {
+            sqlStr = "Update tblAccidentRptElement SET Seq = @Seq, ElementTypeID= @ElementTypeID, ParentID = @ParentID, Title = @Title, " +
+                    " Content = @Content, ReportTypeID = @ReportTypeID, FiniteNodeID = @FiniteNodeID, FiniteNodeDirection = @FiniteNodeDirection " +
+                    " WHERE ID = @ID";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.Parameters.Add("@Seq", SqlDbType.Int).Value = info.Seq;
+                command.Parameters.Add("@ElementTypeID", SqlDbType.Int).Value = info.ElementTypeID;
+                command.Parameters.Add("@ParentID", SqlDbType.Int).Value = SQLUtil.ZeroToNull(info.ParentID);
+                command.Parameters.Add("@Title", SqlDbType.NVarChar).Value = SQLUtil.EmptyStringToNull(info.Title);
+                command.Parameters.Add("@Content", SqlDbType.NVarChar).Value = SQLUtil.EmptyStringToNull(info.Content);
+                command.Parameters.Add("@ReportTypeID", SqlDbType.Int).Value = SQLUtil.ZeroToNull(info.ReportTypeID);
+                command.Parameters.Add("@FiniteNodeID", SqlDbType.Int).Value = SQLUtil.ZeroToNull(info.FiniteNodeID);
+                command.Parameters.Add("@ID", SqlDbType.Int).Value = info.ID;
+                command.Parameters.Add("@FiniteNodeDirection", SqlDbType.Int).Value = info.FiniteNodeDirection;
+
+                command.ExecuteNonQuery();
+            }
+        }
+
+        public void UpdateAccidentRptElementSeq(int parentId, int seqFrom, int increaseSeq)
+        {
+            sqlStr = "Update tblAccidentRptElement SET Seq = Seq + @Increased " +
+                    " WHERE Seq >= @SeqFrom And";
+
+            if (parentId == 0)
+                sqlStr += " ParentID IS NULL ";
+            else
+                sqlStr += " ParentID = " + parentId;
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.Parameters.Add("@Increased", SqlDbType.Int).Value = increaseSeq;             
+                command.Parameters.Add("@SeqFrom", SqlDbType.Int).Value = seqFrom;
+
+                command.ExecuteNonQuery();
+            }
+        }
+
+        public void UpdateAccidentRptElementSeq4Move(int id, int increaseSeq)
+        {
+            sqlStr = "Update tblAccidentRptElement SET Seq = Seq + @Increased " +
+                    " WHERE ID = @ID";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.Parameters.Add("@Increased", SqlDbType.Int).Value = increaseSeq;
+                command.Parameters.Add("@ID", SqlDbType.Int).Value = id;
+
+                command.ExecuteNonQuery();
+            }
+        }
+
+        public void DeleteAccidentRptElement(int id)
+        {
+            sqlStr = "DELETE FROM tblAccidentRptElement WHERE ID=@ID";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.Parameters.Add("@ID", SqlDbType.Int).Value = id;
+
+                command.ExecuteNonQuery();
+            }
+        }
+
+        public void DeleteAccidentRptElementByParent(int parentId)
+        {
+            sqlStr = "DELETE FROM tblAccidentRptElement WHERE ParentID=@ParentID";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.Parameters.Add("@ParentID", SqlDbType.Int).Value = parentId;
+
+                command.ExecuteNonQuery();
+            }
+        }
+        #endregion
+
+    }
+}
+
+
+--------------------------------------------------------------------------------END----------------------------------------------------------------------------------------
+
+
+----------------------------------------------------------------------BridgeDao.cs----------------------------------------------------------------------------------------
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Data.SqlClient;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using BCWS.BusinessObjects.Domain.BridgeArea;
+using BCWS.BusinessObjects.Util;
+using BCWS.BusinessObjects.Aspect;
+using PostSharp.Extensibility;
+
+namespace BCWS.BusinessObjects.DataAccess
+{
+    [LoggingAspect(AspectPriority = 1)]
+    [ConnectionAspect(AspectPriority = 2, AttributeTargetTypeAttributes = MulticastAttributes.Public)]
+    public class BridgeDao :BaseDao
+    {
+        #region "tblBridgeArea"
+        public List<BridgeAreaInfo> GetBridges()
+        {
+            List<BridgeAreaInfo> bridges = new List<BridgeAreaInfo>();
+
+            sqlStr = "SELECT * FROM tblBridgeArea";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                foreach (DataRow dr in GetDataTable(command).Rows)
+                {
+                    bridges.Add(new BridgeAreaInfo(dr));
+                }
+
+                return bridges;
+            }
+        }
+
+        public BridgeAreaInfo GetBridge(int bridgeAreaID)
+        {
+            sqlStr = "SELECT * FROM tblBridgeArea WHERE BridgeAreaID = @BridgeAreaID ";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.Parameters.Add("@BridgeAreaID", SqlDbType.Int).Value = bridgeAreaID;
+
+                DataRow dr = GetDataRow(command);
+                if (dr != null)
+                    return new BridgeAreaInfo(dr);
+                else
+                    return null;
+            }
+        }
+
+        public void AddBridge(int bridgeAreaID, string bridgeAreaName)
+        {
+            sqlStr = "INSERT INTO tblBridgeArea (BridgeAreaID, BridgeAreaName) VALUES (@BridgeAreaID, @BridgeAreaName)";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.Parameters.Add("@BridgeAreaID", SqlDbType.Int).Value = bridgeAreaID;
+                command.Parameters.Add("@BridgeAreaName", SqlDbType.NVarChar).Value = bridgeAreaName;
+                    
+
+                command.ExecuteNonQuery();
+            }
+        }
+
+        public void AddBridgeGeneralInfo(BridgeAreaInfo bridgeAreaInfo)
+        {
+            sqlStr = "INSERT INTO tblBridgeArea (BridgeAreaID, BridgeAreaName, BkName, BridgeBlueprintDir, BuildingTime, BridgeType, ManagerDepartmentName" +
+            ", TelephoneNumber, InfluenceRoad, InfluenceWaterAera, FoundationType, FEMModelDir) VALUES (@BridgeAreaID, @BridgeAreaName, @BkName" +
+            ", @BridgeBlueprintDir, @BuildingTime, @BridgeType, @ManagerDepartmentName, @TelephoneNumber, @InfluenceRoad, @InfluenceWaterAera, @FoundationType, @FEMModelDir)";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.Parameters.Add("@BridgeAreaID", SqlDbType.Int).Value = bridgeAreaInfo.BridgeAreaID;
+                command.Parameters.Add("@BridgeAreaName", SqlDbType.NVarChar).Value = bridgeAreaInfo.BridgeAreaName;
+                command.Parameters.Add("@BkName", SqlDbType.NVarChar).Value = bridgeAreaInfo.BkName;
+                command.Parameters.Add("@BridgeBlueprintDir", SqlDbType.NVarChar).Value = bridgeAreaInfo.BridgeBlueprintDir;
+                command.Parameters.Add("@BuildingTime", SqlDbType.DateTime).Value = bridgeAreaInfo.BuildingTime;
+                command.Parameters.Add("@BridgeType", SqlDbType.NVarChar).Value = bridgeAreaInfo.BridgeType;
+                command.Parameters.Add("@ManagerDepartmentName", SqlDbType.NVarChar).Value = bridgeAreaInfo.ManagerDepartmentName;
+                command.Parameters.Add("@InfluenceRoad", SqlDbType.NVarChar).Value = bridgeAreaInfo.InfluenceRoad;
+                command.Parameters.Add("@InfluenceWaterAera", SqlDbType.NVarChar).Value = bridgeAreaInfo.InfluenceWaterAera;
+                command.Parameters.Add("@FoundationType", SqlDbType.NVarChar).Value = bridgeAreaInfo.FoundationType;
+                command.Parameters.Add("@FEMModelDir", SqlDbType.NVarChar).Value = bridgeAreaInfo.FEMModelDir;
+                command.Parameters.Add("@TelephoneNumber", SqlDbType.NVarChar).Value = bridgeAreaInfo.TelephoneNumber;
+
+                command.ExecuteNonQuery();
+            }
+        }
+
+        public void UpdateBridgeGeneralInfo(BridgeAreaInfo bridgeAreaInfo)
+        {
+            sqlStr = "UPDATE tblBridgeArea SET BridgeAreaName = @BridgeAreaName, BkName = @BkName , BridgeBlueprintDir = @BridgeBlueprintDir" +
+            ", BuildingTime = @BuildingTime, BridgeType = @BridgeType, ManagerDepartmentName = @ManagerDepartmentName, TelephoneNumber = @TelephoneNumber " +
+            ", InfluenceRoad = @InfluenceRoad, InfluenceWaterAera = @InfluenceWaterAera, FoundationType = @FoundationType, FEMModelDir = @FEMModelDir" +
+            " WHERE BridgeAreaID = @BridgeAreaID";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.Parameters.Add("@BridgeAreaID", SqlDbType.Int).Value = bridgeAreaInfo.BridgeAreaID;
+                command.Parameters.Add("@BridgeAreaName", SqlDbType.NVarChar).Value = bridgeAreaInfo.BridgeAreaName;
+                command.Parameters.Add("@BkName", SqlDbType.NVarChar).Value = bridgeAreaInfo.BkName;
+                command.Parameters.Add("@BridgeBlueprintDir", SqlDbType.NVarChar).Value = bridgeAreaInfo.BridgeBlueprintDir;
+                command.Parameters.Add("@BuildingTime", SqlDbType.DateTime).Value = bridgeAreaInfo.BuildingTime;
+                command.Parameters.Add("@BridgeType", SqlDbType.NVarChar).Value = bridgeAreaInfo.BridgeType;
+                command.Parameters.Add("@ManagerDepartmentName", SqlDbType.NVarChar).Value = bridgeAreaInfo.ManagerDepartmentName;
+                command.Parameters.Add("@InfluenceRoad", SqlDbType.NVarChar).Value = bridgeAreaInfo.InfluenceRoad;
+                command.Parameters.Add("@InfluenceWaterAera", SqlDbType.NVarChar).Value = bridgeAreaInfo.InfluenceWaterAera;
+                command.Parameters.Add("@FoundationType", SqlDbType.NVarChar).Value = bridgeAreaInfo.FoundationType;
+                command.Parameters.Add("@FEMModelDir", SqlDbType.NVarChar).Value = bridgeAreaInfo.FEMModelDir;
+                command.Parameters.Add("@TelephoneNumber", SqlDbType.NVarChar).Value = bridgeAreaInfo.TelephoneNumber;
+                command.ExecuteNonQuery();
+            }
+        }
+
+        public void UpdateBridgeAreaInfo(BridgeAreaInfo bridgeAreaInfo)
+        {
+            sqlStr = "UPDATE tblBridgeArea SET CentralPointLongitude = @CentralPointLongitude, CentralPointLatitude = @CentralPointLatitude, RotateAngle = @RotateAngle " +
+                     ", BridgeAreaPointX = @BridgeAreaPointX, BridgeAreaPointY = @BridgeAreaPointY, ZeroAltitudeZ = @ZeroAltitudeZ, BridgeAreaName = @BridgeAreaName "+
+                     " WHERE BridgeAreaID = @BridgeAreaID";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.Parameters.Add("@BridgeAreaID", SqlDbType.Int).Value = bridgeAreaInfo.BridgeAreaID;
+                command.Parameters.Add("@BridgeAreaName", SqlDbType.NVarChar).Value = bridgeAreaInfo.BridgeAreaName;
+                command.Parameters.Add("@CentralPointLongitude", SqlDbType.Decimal).Value = bridgeAreaInfo.CentralPointLongitude;
+                command.Parameters.Add("@CentralPointLatitude", SqlDbType.Decimal).Value = bridgeAreaInfo.CentralPointLatitude;
+                command.Parameters.Add("@RotateAngle", SqlDbType.Decimal).Value = bridgeAreaInfo.RotateAngle;
+                command.Parameters.Add("@BridgeAreaPointX", SqlDbType.Decimal).Value = bridgeAreaInfo.BridgeAreaPointX;
+                command.Parameters.Add("@BridgeAreaPointY", SqlDbType.Decimal).Value = bridgeAreaInfo.BridgeAreaPointY;
+                command.Parameters.Add("@ZeroAltitudeZ", SqlDbType.Decimal).Value = bridgeAreaInfo.ZeroAltitudeZ;
+                command.ExecuteNonQuery();
+            }
+        }
+        #endregion
+
+        #region "tblBridgeAreaFile"
+        public List<UploadFileInfo> GetBridgeFiles(int bridgeAreaID)
+        {
+            List<UploadFileInfo> files = new List<UploadFileInfo>();
+
+            sqlStr = "SELECT * FROM tblBridgeAreaFile WHERE BridgeAreaID = " + bridgeAreaID + "";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                foreach (DataRow dr in GetDataTable(command).Rows)
+                {
+                    files.Add(new UploadFileInfo(dr));
+                }
+
+                return files;
+            }
+        }
+
+        public UploadFileInfo AddBridgeFile(int bridgeAreaID, UploadFileInfo info)
+        {
+            sqlStr = "INSERT INTO tblBridgeAreaFile (BridgeAreaID,FileName,FileDesc,UploadTime) " +
+                    " VALUES(@BridgeAreaID,@FileName,@FileDesc,@UploadTime);" + 
+                    " SELECT @@IDENTITY";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.Parameters.Add("@BridgeAreaID", SqlDbType.Int).Value = bridgeAreaID;
+                command.Parameters.Add("@FileName", SqlDbType.NVarChar).Value = info.FileName;
+                command.Parameters.Add("@FileDesc", SqlDbType.NVarChar).Value = info.FileDesc;
+                command.Parameters.Add("@UploadTime", SqlDbType.DateTime).Value = info.UploadTime;
+
+                info.ID = SQLUtil.ConvertInt(command.ExecuteScalar());
+
+                return info;
+            }
+        }
+
+        public void DeleteBridgeFile(int id)
+        {
+            sqlStr = "DELETE FROM tblBridgeAreaFile WHERE ID=@ID";
+
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.Parameters.Add("@ID", SqlDbType.Int).Value = id;
+
+                command.ExecuteNonQuery();
+            }
+        }
+        #endregion
+
+        #region "tblRock"
+        public List<RockInfo> GetRocks(int bridgeAreaID, int rockNumID = -1)
+        {
+            List<RockInfo> rocks = new List<RockInfo>();
+
+            sqlStr = "SELECT * FROM tblRock WHERE BridgeAreaID = " + bridgeAreaID + "";
+            if (rockNumID >= 0) sqlStr += " AND RockNumID = " + rockNumID + "";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                foreach (DataRow dr in GetDataTable(command).Rows)
+                {
+                    rocks.Add(new RockInfo(dr));
+                }
+
+                return rocks;
+            }
+        }
+
+        public void ImportRocks(DataTable dt)
+        {
+            sqlStr = "INSERT INTO tblRock (BridgeAreaID,RockNumID,RockCoorZ,RockCoorX,RockCoorY) " +
+                    " VALUES(@BridgeAreaID,@RockNumID,@RockCoorZ,@RockCoorX,@RockCoorY)";
+
+            SqlParameter parameter = null;
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                parameter = command.Parameters.Add("@BridgeAreaID", SqlDbType.Int);
+                parameter.SourceColumn = "BridgeAreaID";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@RockNumID", SqlDbType.Int);
+                parameter.SourceColumn = "RockNumID";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@RockCoorZ", SqlDbType.Decimal);
+                parameter.SourceColumn = "RockCoorZ";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@RockCoorX", SqlDbType.Decimal);
+                parameter.SourceColumn = "RockCoorX";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@RockCoorY", SqlDbType.Decimal);
+                parameter.SourceColumn = "RockCoorY";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                using (SqlDataAdapter da = new SqlDataAdapter())
+                {
+                    da.InsertCommand = command;
+
+                    da.Update(dt);
+                }
+            }
+        }
+
+        public void DeleteRocks(int bridgeAreaID)
+        {
+            sqlStr = "DELETE FROM tblRock WHERE BridgeAreaID=@BridgeAreaID";
+
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.Parameters.Add("@BridgeAreaID", SqlDbType.Int).Value = bridgeAreaID;
+
+                command.ExecuteNonQuery();
+            }
+        }
+        #endregion
+
+        #region "tblBank"
+        public List<BankInfo> GetBanks(int bridgeAreaID, int bankNumID = -1)
+        {
+            List<BankInfo> banks = new List<BankInfo>();
+
+            sqlStr = "SELECT * FROM tblBank WHERE BridgeAreaID = " + bridgeAreaID + "";
+            if (bankNumID >= 0) sqlStr += " AND BankNumID = " + bankNumID + "";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                foreach (DataRow dr in GetDataTable(command).Rows)
+                {
+                    banks.Add(new BankInfo(dr));
+                }
+
+                return banks;
+            }
+
+        }
+
+        public void ImportBanks(DataTable dt)
+        {
+            sqlStr = "INSERT INTO tblBank (BridgeAreaID,BankNumID,BankCoorZ,BankCoorX,BankCoorY) " +
+                    " VALUES(@BridgeAreaID,@BankNumID,@BankCoorZ,@BankCoorX,@BankCoorY)";
+
+            SqlParameter parameter = null;
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                parameter = command.Parameters.Add("@BridgeAreaID", SqlDbType.Int);
+                parameter.SourceColumn = "BridgeAreaID";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@BankNumID", SqlDbType.Bit);
+                parameter.SourceColumn = "BankNumID";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@BankCoorZ", SqlDbType.Decimal);
+                parameter.SourceColumn = "BankCoorZ";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@BankCoorX", SqlDbType.Decimal);
+                parameter.SourceColumn = "BankCoorX";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@BankCoorY", SqlDbType.Decimal);
+                parameter.SourceColumn = "BankCoorY";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                using (SqlDataAdapter da = new SqlDataAdapter())
+                {
+                    da.InsertCommand = command;
+
+                    da.Update(dt);
+                }
+            }
+        }
+
+        public void DeleteBanks(int bridgeAreaID)
+        {
+            sqlStr = "DELETE FROM tblBank WHERE BridgeAreaID=@BridgeAreaID";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.Parameters.Add("@BridgeAreaID", SqlDbType.Int).Value = bridgeAreaID;
+
+                command.ExecuteNonQuery();
+            }
+        }
+        #endregion
+
+        #region "tblCap"
+        public List<CapInfo> GetCaps(int bridgeAreaID, int capNumID = -1, int capTypeID = -1)
+        {
+            List<CapInfo> caps = new List<CapInfo>();
+
+            sqlStr = "SELECT * FROM tblCap WHERE BridgeAreaID = " + bridgeAreaID + "";
+            if (capNumID >= 0) sqlStr += " AND CapNumID = " + capNumID + "";
+            if (capTypeID >= 0) sqlStr += " AND CapTypeID = " + capTypeID + "";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                foreach (DataRow dr in GetDataTable(command).Rows)
+                {
+                    caps.Add(new CapInfo(dr));
+                }
+
+                return caps;
+            }
+        }
+
+        public void ImportCaps(DataTable dt)
+        {
+            sqlStr = "INSERT INTO tblCap (BridgeAreaID,CapNumID,CapTypeID,CentralPointCoorX,CentralPointCoorY,LocCoorTheta, " +
+                    "CornerPointX,CornerPointY,CapNumHeight,HalfLongAxis,HalfShortAxis,ColumeHeight)" +
+                    " VALUES(@BridgeAreaID,@CapNumID,@CapTypeID,@CentralPointCoorX,@CentralPointCoorY,@LocCoorTheta, " +
+                    "@CornerPointX,@CornerPointY,@CapNumHeight,@HalfLongAxis,@HalfShortAxis,@ColumeHeight)";
+
+            SqlParameter parameter = null;
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                parameter = command.Parameters.Add("@BridgeAreaID", SqlDbType.Int);
+                parameter.SourceColumn = "BridgeAreaID";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@CapNumID", SqlDbType.Int);
+                parameter.SourceColumn = "CapNumID";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@CapTypeID", SqlDbType.Int);
+                parameter.SourceColumn = "CapTypeID";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@CentralPointCoorX", SqlDbType.Decimal);
+                parameter.SourceColumn = "CentralPointCoorX";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@CentralPointCoorY", SqlDbType.Decimal);
+                parameter.SourceColumn = "CentralPointCoorY";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@LocCoorTheta", SqlDbType.Decimal);
+                parameter.SourceColumn = "LocCoorTheta";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@CornerPointX", SqlDbType.Float);
+                parameter.SourceColumn = "CornerPointX";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@CornerPointY", SqlDbType.Float);
+                parameter.SourceColumn = "CornerPointY";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@CapNumHeight", SqlDbType.Float);
+                parameter.SourceColumn = "CapNumHeight";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@HalfLongAxis", SqlDbType.Float);
+                parameter.SourceColumn = "HalfLongAxis";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@HalfShortAxis", SqlDbType.Float);
+                parameter.SourceColumn = "HalfShortAxis";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@ColumeHeight", SqlDbType.Float);
+                parameter.SourceColumn = "ColumeHeight";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                using (SqlDataAdapter da = new SqlDataAdapter())
+                {
+                    da.InsertCommand = command;
+
+                    da.Update(dt);
+                }
+            }
+        }
+
+        public void DeleteCaps(int bridgeAreaID)
+        {
+            sqlStr = "DELETE FROM tblCap WHERE BridgeAreaID=@BridgeAreaID";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.Parameters.Add("@BridgeAreaID", SqlDbType.Int).Value = bridgeAreaID;
+
+                command.ExecuteNonQuery();
+            }
+        }
+
+        public List<int> GetCapNum(int bridgeAreaID)
+        {
+            List<int> capNums = new List<int>();
+
+            sqlStr = "SELECT CapNumID FROM tblCap " +
+                     " WHERE BridgeAreaID = @BridgeAreaID " +
+                     " ORDER BY CapNumID";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.Parameters.Add("@BridgeAreaID", SqlDbType.Int).Value = bridgeAreaID;
+                foreach (DataRow dr in GetDataTable(command).Rows)
+                {
+                    capNums.Add(SQLUtil.ConvertInt(dr[0]));
+                }
+
+                return capNums;
+            }
+        }
+        #endregion
+
+        #region "tblLane"
+        public List<LaneInfo> GetLanes(int bridgeAreaID, int laneNumID = -1, int laneType = -1)
+        {
+            List<LaneInfo> lanes = new List<LaneInfo>();
+
+            sqlStr = "SELECT * FROM tblLane WHERE BridgeAreaID = " + bridgeAreaID + "";
+            if (laneNumID >= 0) sqlStr += " AND LaneNumID = " + laneNumID + "";
+            if (laneType >= 0) sqlStr += " AND LaneType = " + laneType + "";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                foreach (DataRow dr in GetDataTable(command).Rows)
+                {
+                    lanes.Add(new LaneInfo(dr));
+                }
+
+                return lanes;
+            }
+        }
+
+        public void ImportLanes(DataTable dt)
+        {
+            sqlStr = "INSERT INTO tblLane (BridgeAreaID,LaneNumID,LaneType,LaneCoorX,LaneCoorY) " +
+                    " VALUES(@BridgeAreaID,@LaneNumID,@LaneType,@LaneCoorX,@LaneCoorY)";
+
+            SqlParameter parameter = null;
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                parameter = command.Parameters.Add("@BridgeAreaID", SqlDbType.Int);
+                parameter.SourceColumn = "BridgeAreaID";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@LaneNumID", SqlDbType.Int);
+                parameter.SourceColumn = "LaneNumID";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@LaneType", SqlDbType.Bit);
+                parameter.SourceColumn = "LaneType";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@LaneCoorX", SqlDbType.Decimal);
+                parameter.SourceColumn = "LaneCoorX";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@LaneCoorY", SqlDbType.Decimal);
+                parameter.SourceColumn = "LaneCoorY";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                using (SqlDataAdapter da = new SqlDataAdapter())
+                {
+                    da.InsertCommand = command;
+
+                    da.Update(dt);
+                }
+            }
+        }
+
+        public void DeleteLanes(int bridgeAreaID)
+        {
+            sqlStr = "DELETE FROM tblLane WHERE BridgeAreaID=@BridgeAreaID";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.Parameters.Add("@BridgeAreaID", SqlDbType.Int).Value = bridgeAreaID;
+
+                command.ExecuteNonQuery();
+            }
+        }
+        #endregion
+
+        #region "tblSpan"
+        public List<SpanInfo> GetSpans(int bridgeAreaID, int capNum1ID = -1, int capNum2ID = -1)
+        {
+            List<SpanInfo> spans = new List<SpanInfo>();
+
+            sqlStr = "SELECT * FROM tblSpan WHERE BridgeAreaID = " + bridgeAreaID + "";
+            if (capNum1ID >= 0) sqlStr += " AND CapNum1ID = " + capNum1ID + "";
+            if (capNum2ID >= 0) sqlStr += " AND CapNum2ID = " + capNum2ID + "";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                foreach (DataRow dr in GetDataTable(command).Rows)
+                {
+                    spans.Add(new SpanInfo(dr));
+                }
+
+                return spans;
+            }
+        }
+
+        public void ImportSpans(DataTable dt)
+        {
+            sqlStr = "INSERT INTO tblSpan (BridgeAreaID,CapNum1ID,CapNum2ID,V1,H1,V2,H2,V3,H3,V4,H4)" +
+                    " VALUES(@BridgeAreaID,@CapNum1ID,@CapNum2ID,@V1,@H1,@V2,@H2,@V3,@H3,@V4,@H4)";
+
+            SqlParameter parameter = null;
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                parameter = command.Parameters.Add("@BridgeAreaID", SqlDbType.Int);
+                parameter.SourceColumn = "BridgeAreaID";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@CapNum1ID", SqlDbType.Int);
+                parameter.SourceColumn = "CapNum1ID";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@CapNum2ID", SqlDbType.Int);
+                parameter.SourceColumn = "CapNum2ID";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@V1", SqlDbType.Decimal);
+                parameter.SourceColumn = "V1";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@H1", SqlDbType.Decimal);
+                parameter.SourceColumn = "H1";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@V2", SqlDbType.Decimal);
+                parameter.SourceColumn = "V2";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@H2", SqlDbType.Decimal);
+                parameter.SourceColumn = "H2";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@V3", SqlDbType.Decimal);
+                parameter.SourceColumn = "V3";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@H3", SqlDbType.Decimal);
+                parameter.SourceColumn = "H3";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@V4", SqlDbType.Decimal);
+                parameter.SourceColumn = "V4";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@H4", SqlDbType.Decimal);
+                parameter.SourceColumn = "H4";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                using (SqlDataAdapter da = new SqlDataAdapter())
+                {
+                    da.InsertCommand = command;
+
+                    da.Update(dt);
+                }
+            }
+        }
+
+        public void DeleteSpans(int bridgeAreaID)
+        {
+            sqlStr = "DELETE FROM tblSpan WHERE BridgeAreaID=@BridgeAreaID";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.Parameters.Add("@BridgeAreaID", SqlDbType.Int).Value = bridgeAreaID;
+
+                command.ExecuteNonQuery();
+            }
+        }
+        #endregion
+    }
+}
+
+
+
+--------------------------------------------------------------------------------END----------------------------------------------------------------------------------------
+
+
+----------------------------------------------------------------------FiniteDao.cs----------------------------------------------------------------------------------------
+using BCWS.BusinessObjects.Aspect;
+using BCWS.BusinessObjects.Domain;
+using BCWS.BusinessObjects.Domain.Finite;
+using BCWS.BusinessObjects.Util;
+using PostSharp.Extensibility;
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Data.SqlClient;
+using System.Linq;
+using System.Text;
+
+namespace BCWS.BusinessObjects.DataAccess
+{
+    [LoggingAspect(AspectPriority = 1)]
+    [ConnectionAspect(AspectPriority = 2, AttributeTargetTypeAttributes = MulticastAttributes.Public)]
+    public class FiniteDao : BaseDao
+    {
+        #region "tblFiniteNode"
+        public void ImportFiniteNodes(DataTable dt)
+        {
+            sqlStr = "INSERT INTO tblFiniteNode (AccidentID,BridgeAreaID,CapNumID,Node,NodeDetail) " +
+                    " VALUES(@AccidentID,@BridgeAreaID,@CapNumID,@Node,@NodeDetail)";
+
+            SqlParameter parameter = null;
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                parameter = command.Parameters.Add("@AccidentID", SqlDbType.Int);
+                parameter.SourceColumn = "AccidentID";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@BridgeAreaID", SqlDbType.Int);
+                parameter.SourceColumn = "BridgeAreaID";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@CapNumID", SqlDbType.Int);
+                parameter.SourceColumn = "CapNumID";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@Node", SqlDbType.Int);
+                parameter.SourceColumn = "Node";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@NodeDetail", SqlDbType.NVarChar);
+                parameter.SourceColumn = "NodeDetail";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                using (SqlDataAdapter da = new SqlDataAdapter())
+                {
+                    da.InsertCommand = command;
+
+                    da.Update(dt);
+                }
+            }
+        }
+
+        public void DeleteFiniteNodes(int bridgeAreaID, int accidentID)
+        {
+            sqlStr = "DELETE FROM tblFiniteNode WHERE AccidentID=@AccidentID AND BridgeAreaID = @BridgeAreaID";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.Parameters.Add("@AccidentID", SqlDbType.Int).Value = accidentID;
+                command.Parameters.Add("@BridgeAreaID", SqlDbType.Int).Value = bridgeAreaID;
+
+                command.ExecuteNonQuery();
+            }
+        }
+
+        public NodeInfo GetNode(int id)
+        {
+            sqlStr = "SELECT * FROM tblFiniteNode WHERE ID = @ID";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.Parameters.Add("@ID", SqlDbType.Int).Value = id;
+
+                DataRow dr = GetDataRow(command);
+                if (dr != null)
+                    return new NodeInfo(dr);
+                else
+                    return null;               
+            }
+        }
+
+        public List<NodeInfo> GetNodes(int bridgeAreaID, int accidentID)
+        {
+            List<NodeInfo> infos = new List<NodeInfo>();
+
+            sqlStr = "SELECT * FROM tblFiniteNode WHERE AccidentID = @AccidentID AND BridgeAreaID = @BridgeAreaID ORDER BY NodeDetail";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.Parameters.Add("@BridgeAreaID", SqlDbType.Int).Value = bridgeAreaID;
+                command.Parameters.Add("@AccidentID", SqlDbType.Int).Value = accidentID;
+
+                using (DataTable dt = GetDataTable(command))
+                {
+                    foreach (DataRow dr in dt.Rows)
+                    {
+                        infos.Add(new NodeInfo(dr));
+                    }
+                }
+            }
+
+            return infos;
+        }
+        #endregion
+
+        #region "tblFiniteElement"
+        public void ImportFiniteElements(DataTable dt)
+        {
+            sqlStr = "INSERT INTO tblFiniteElement (AccidentID,BridgeAreaID,CapNumID,Element,ElementType,ElementDetail) " +
+                    " VALUES(@AccidentID,@BridgeAreaID,@CapNumID,@Element,@ElementType,@ElementDetail)";
+
+            SqlParameter parameter = null;
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                parameter = command.Parameters.Add("@AccidentID", SqlDbType.Int);
+                parameter.SourceColumn = "AccidentID";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@BridgeAreaID", SqlDbType.Int);
+                parameter.SourceColumn = "BridgeAreaID";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@CapNumID", SqlDbType.Int);
+                parameter.SourceColumn = "CapNumID";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@Element", SqlDbType.Int);
+                parameter.SourceColumn = "Element";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@ElementType", SqlDbType.Int);
+                parameter.SourceColumn = "ElementType";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@ElementDetail", SqlDbType.NVarChar);
+                parameter.SourceColumn = "ElementDetail";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                using (SqlDataAdapter da = new SqlDataAdapter())
+                {
+                    da.InsertCommand = command;
+
+                    da.Update(dt);
+                }
+            }
+        }
+
+        public void DeleteFiniteElements(int bridgeAreaID, int accidentID)
+        {
+            sqlStr = "DELETE FROM tblFiniteElement WHERE AccidentID=@AccidentID AND BridgeAreaID = @BridgeAreaID";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.Parameters.Add("@AccidentID", SqlDbType.Int).Value = accidentID;
+                command.Parameters.Add("@BridgeAreaID", SqlDbType.Int).Value = bridgeAreaID;
+
+                command.ExecuteNonQuery();
+            }
+        }
+
+        public ElementInfo GetElement(int id)
+        {
+            sqlStr = "SELECT * FROM tblFiniteElement WHERE ID = @ID";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.Parameters.Add("@ID", SqlDbType.Int).Value = id;
+
+                DataRow dr = GetDataRow(command);
+                if (dr != null)
+                    return new ElementInfo(dr);
+                else
+                    return null;
+            }
+        }
+
+        public List<ElementInfo> GetElements(int bridgeAreaID, int accidentID)
+        {
+            List<ElementInfo> infos = new List<ElementInfo>();
+
+            sqlStr = "SELECT * FROM tblFiniteElement WHERE AccidentID = @AccidentID AND BridgeAreaID = @BridgeAreaID ORDER BY ElementDetail";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.Parameters.Add("@BridgeAreaID", SqlDbType.Int).Value = bridgeAreaID;
+                command.Parameters.Add("@AccidentID", SqlDbType.Int).Value = accidentID;
+
+                using (DataTable dt = GetDataTable(command))
+                {
+                    foreach (DataRow dr in dt.Rows)
+                    {
+                        infos.Add(new ElementInfo(dr));
+                    }
+                }
+            }
+
+            return infos;
+        }
+        #endregion
+
+        #region "tblFiniteImpactForce"
+        public void ImportFiniteImpactForces(DataTable dt)
+        {
+            sqlStr = "INSERT INTO tblFiniteImpactForce (AccidentID,BridgeAreaID,CapNumID,Node,TransTime,Theta,Force) " +
+                    " VALUES(@AccidentID,@BridgeAreaID,@CapNumID,@Node,@TransTime,@Theta,@Force)";
+
+            SqlParameter parameter = null;
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                parameter = command.Parameters.Add("@AccidentID", SqlDbType.Int);
+                parameter.SourceColumn = "AccidentID";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@BridgeAreaID", SqlDbType.Int);
+                parameter.SourceColumn = "BridgeAreaID";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@CapNumID", SqlDbType.Int);
+                parameter.SourceColumn = "CapNumID";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@Node", SqlDbType.Int);
+                parameter.SourceColumn = "Node";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@TransTime", SqlDbType.Float);
+                parameter.SourceColumn = "TransTime";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@Theta", SqlDbType.Decimal);
+                parameter.SourceColumn = "Theta";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@Force", SqlDbType.Float);
+                parameter.SourceColumn = "Force";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                using (SqlDataAdapter da = new SqlDataAdapter())
+                {
+                    da.InsertCommand = command;
+
+                    da.Update(dt);
+                }
+            }
+        }
+
+        public void DeleteFiniteImpactForces(int bridgeAreaID, int accidentID)
+        {
+            sqlStr = "DELETE FROM tblFiniteImpactForce WHERE AccidentID=@AccidentID AND BridgeAreaID = @BridgeAreaID";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.Parameters.Add("@AccidentID", SqlDbType.Int).Value = accidentID;
+                command.Parameters.Add("@BridgeAreaID", SqlDbType.Int).Value = bridgeAreaID;
+
+                command.ExecuteNonQuery();
+            }
+        }
+
+        public Dictionary<double, double> GetImpactForces(int bridgeAreaID, int accidentID, int capNumID, int node)
+        {
+            Dictionary<double, double> dic = new Dictionary<double, double>();
+
+            sqlStr = "SELECT TransTime as TransTime, abs(Force) as Force FROM tblFiniteImpactForce " +
+                " WHERE AccidentID = @AccidentID AND BridgeAreaID = @BridgeAreaID AND CapNumID = @CapNumID AND Node = @Node order by TransTime";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.Parameters.Add("@BridgeAreaID", SqlDbType.Int).Value = bridgeAreaID;
+                command.Parameters.Add("@AccidentID", SqlDbType.Int).Value = accidentID;
+                command.Parameters.Add("@Node", SqlDbType.Int).Value = node;
+                command.Parameters.Add("@CapNumID", SqlDbType.Int).Value = capNumID;
+                foreach (DataRow dr in GetDataTable(command).Rows)
+                {
+                    dic.Add(SQLUtil.ConvertDouble(dr[0]), SQLUtil.ConvertDouble(dr[1]));
+                }
+
+                return dic;
+            }
+        }
+        #endregion
+
+        #region "tblFiniteDisplaceReation"
+        public void ImportFiniteDisplaceReations(DataTable dt)
+        {
+            sqlStr = "INSERT INTO tblFiniteDisplaceReation (AccidentID,BridgeAreaID,CapNumID,Node,TransTime,DisplacementsTypeID,DisplacementX,DisplacementY) " +
+                    " VALUES(@AccidentID,@BridgeAreaID,@CapNumID,@Node,@TransTime,@DisplacementsTypeID,@DisplacementX,@DisplacementY)";
+
+            SqlParameter parameter = null;
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                parameter = command.Parameters.Add("@AccidentID", SqlDbType.Int);
+                parameter.SourceColumn = "AccidentID";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@BridgeAreaID", SqlDbType.Int);
+                parameter.SourceColumn = "BridgeAreaID";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@CapNumID", SqlDbType.Int);
+                parameter.SourceColumn = "CapNumID";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@Node", SqlDbType.Int);
+                parameter.SourceColumn = "Node";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@TransTime", SqlDbType.Float);
+                parameter.SourceColumn = "TransTime";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@DisplacementsTypeID", SqlDbType.Int);
+                parameter.SourceColumn = "DisplacementsTypeID";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@DisplacementX", SqlDbType.Float);
+                parameter.SourceColumn = "DisplacementX";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@DisplacementY", SqlDbType.Float);
+                parameter.SourceColumn = "DisplacementY";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                using (SqlDataAdapter da = new SqlDataAdapter())
+                {
+                    da.InsertCommand = command;
+
+                    da.Update(dt);
+                }
+            }
+        }
+
+        public void DeleteFiniteDisplaceReations(int bridgeAreaID, int accidentID)
+        {
+            sqlStr = "DELETE FROM tblFiniteDisplaceReation WHERE AccidentID=@AccidentID AND BridgeAreaID = @BridgeAreaID";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.Parameters.Add("@AccidentID", SqlDbType.Int).Value = accidentID;
+                command.Parameters.Add("@BridgeAreaID", SqlDbType.Int).Value = bridgeAreaID;
+
+                command.ExecuteNonQuery();
+            }
+        }
+
+        public Dictionary<double, double> GetDisplaceReations(int bridgeAreaID, int accidentID, int capNumID, int node, int typeID, string direction)
+        {
+            Dictionary<double, double> dic = new Dictionary<double, double>();
+
+            sqlStr = "SELECT TransTime as TransTime, Displacement{0} as Displacement FROM tblFiniteDisplaceReation " +
+                " WHERE AccidentID = @AccidentID AND BridgeAreaID = @BridgeAreaID AND CapNumID = @CapNumID AND Node = @Node AND DisplacementsTypeID = @DisplacementsTypeID order by TransTime";
+
+            sqlStr = string.Format(sqlStr, direction);
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.Parameters.Add("@BridgeAreaID", SqlDbType.Int).Value = bridgeAreaID;
+                command.Parameters.Add("@AccidentID", SqlDbType.Int).Value = accidentID;
+                command.Parameters.Add("@Node", SqlDbType.Int).Value = node;
+                command.Parameters.Add("@DisplacementsTypeID", SqlDbType.Int).Value = typeID;
+                command.Parameters.Add("@CapNumID", SqlDbType.Int).Value = capNumID;
+                foreach (DataRow dr in GetDataTable(command).Rows)
+                {
+                    dic.Add(SQLUtil.ConvertDouble(dr[0]), SQLUtil.ConvertDouble(dr[1]));
+                }
+
+                return dic;
+            }
+        }
+
+        public Dictionary<string, double> GetMaxDisplaceReations(int bridgeAreaID, int accidentID, int typeID, string direction)
+        {
+            Dictionary<string, double> dic = new Dictionary<string, double>();
+
+            sqlStr = "SELECT n.NodeDetail as Node, max(abs(Displacement{0})) as Displacement FROM tblFiniteDisplaceReation as d" +
+                " join tblFiniteNode as n on n.Node = d.Node and n.AccidentID = d.AccidentID and n.BridgeAreaID = d.BridgeAreaID and n.CapNumID = d.CapNumID " +
+                " WHERE d.AccidentID = @AccidentID AND d.BridgeAreaID = @BridgeAreaID AND d.DisplacementsTypeID = @DisplacementsTypeID " +
+                " group by n.NodeDetail order by n.NodeDetail";
+
+            sqlStr = string.Format(sqlStr, direction);
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.Parameters.Add("@BridgeAreaID", SqlDbType.Int).Value = bridgeAreaID;
+                command.Parameters.Add("@AccidentID", SqlDbType.Int).Value = accidentID;
+                command.Parameters.Add("@DisplacementsTypeID", SqlDbType.Int).Value = typeID;
+                foreach (DataRow dr in GetDataTable(command).Rows)
+                {
+                    dic.Add(SQLUtil.TrimNull(dr[0]), SQLUtil.ConvertDouble(dr[1]));
+                }
+
+                return dic;
+            }
+        }
+        #endregion
+
+        #region "tblFiniteInternalMomentReation"
+        public void ImportFiniteInternalMomentReations(DataTable dt)
+        {
+            sqlStr = "INSERT INTO tblFiniteInternalMomentReation (AccidentID,BridgeAreaID,CapNumID,Element,TransTime,InternalMomentX,InternalMomentY,RelativeRotationX,RelativeRotationY) " +
+                    " VALUES(@AccidentID,@BridgeAreaID,@CapNumID,@Element,@TransTime,@InternalMomentX,@InternalMomentY,@RelativeRotationX,@RelativeRotationY)";
+
+            SqlParameter parameter = null;
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                parameter = command.Parameters.Add("@AccidentID", SqlDbType.Int);
+                parameter.SourceColumn = "AccidentID";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@BridgeAreaID", SqlDbType.Int);
+                parameter.SourceColumn = "BridgeAreaID";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@CapNumID", SqlDbType.Int);
+                parameter.SourceColumn = "CapNumID";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@Element", SqlDbType.Int);
+                parameter.SourceColumn = "Element";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@TransTime", SqlDbType.Float);
+                parameter.SourceColumn = "TransTime";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@InternalMomentX", SqlDbType.Int);
+                parameter.SourceColumn = "InternalMomentX";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@InternalMomentY", SqlDbType.Float);
+                parameter.SourceColumn = "InternalMomentY";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@RelativeRotationX", SqlDbType.Float);
+                parameter.SourceColumn = "RelativeRotationX";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@RelativeRotationY", SqlDbType.Float);
+                parameter.SourceColumn = "RelativeRotationY";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                using (SqlDataAdapter da = new SqlDataAdapter())
+                {
+                    da.InsertCommand = command;
+
+                    da.Update(dt);
+                }
+            }
+        }
+
+        public void DeleteFiniteInternalMomentReations(int bridgeAreaID, int accidentID)
+        {
+            sqlStr = "DELETE FROM tblFiniteInternalMomentReation WHERE AccidentID=@AccidentID AND BridgeAreaID = @BridgeAreaID";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.Parameters.Add("@AccidentID", SqlDbType.Int).Value = accidentID;
+                command.Parameters.Add("@BridgeAreaID", SqlDbType.Int).Value = bridgeAreaID;
+
+                command.ExecuteNonQuery();
+            }
+        }
+
+        public Dictionary<string, double> GetMaxInternalMomentReations(int bridgeAreaID, int accidentID, string direction, int elementType)
+        {
+            Dictionary<string, double> dic = new Dictionary<string, double>();
+
+            sqlStr = "SELECT e.ElementDetail as Element, max(abs(InternalMoment{0})) as InternalMoment FROM tblFiniteInternalMomentReation as i" +
+                " join tblFiniteElement as e on e.Element = i.Element AND e.AccidentID = i.AccidentID AND e.BridgeAreaID = i.BridgeAreaID AND e.CapNumID = i.CapNumID AND (e.ElementType = @ElementType OR e.ElementType = 0) " +
+                " WHERE i.AccidentID = @AccidentID AND i.BridgeAreaID = @BridgeAreaID group by e.ElementDetail order by e.ElementDetail";
+
+            sqlStr = string.Format(sqlStr, direction);
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.Parameters.Add("@BridgeAreaID", SqlDbType.Int).Value = bridgeAreaID;
+                command.Parameters.Add("@AccidentID", SqlDbType.Int).Value = accidentID;
+                command.Parameters.Add("@ElementType", SqlDbType.Int).Value = elementType;
+                foreach (DataRow dr in GetDataTable(command).Rows)
+                {
+                    dic.Add(SQLUtil.TrimNull(dr[0]), SQLUtil.ConvertDouble(dr[1]));
+                }
+
+                return dic;
+            }
+        }
+
+        public Dictionary<double, double> GetInternalMomentReations(int bridgeAreaID, int accidentID, int capNumID, int element, string direction)
+        {
+            Dictionary<double, double> dic = new Dictionary<double, double>();
+
+            sqlStr = "SELECT TransTime as TransTime, InternalMoment{0} as InternalMoment FROM tblFiniteInternalMomentReation as i " +
+                " WHERE i.AccidentID = @AccidentID AND i.BridgeAreaID = @BridgeAreaID AND i.CapNumID = @CapNumID AND i.Element = @Element order by i.TransTime";
+
+            sqlStr = string.Format(sqlStr, direction);
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.Parameters.Add("@BridgeAreaID", SqlDbType.Int).Value = bridgeAreaID;
+                command.Parameters.Add("@AccidentID", SqlDbType.Int).Value = accidentID;
+                command.Parameters.Add("@Element", SqlDbType.Int).Value = element;
+                command.Parameters.Add("@CapNumID", SqlDbType.Int).Value = capNumID;
+                foreach (DataRow dr in GetDataTable(command).Rows)
+                {
+                    dic.Add(SQLUtil.ConvertDouble(dr[0]), SQLUtil.ConvertDouble(dr[1]));
+                }
+
+                return dic;
+            }
+        }
+
+        public List<ValuePairInfo> GetMomentRotations(int bridgeAreaID, int accidentID, int capNumID, int element, string direction)
+        {
+            List<ValuePairInfo> list = new List<ValuePairInfo>();
+
+            sqlStr = "SELECT RelativeRotation{0} as RelativeRotation, InternalMoment{0} as InternalMoment FROM tblFiniteInternalMomentReation" +
+                    " WHERE AccidentID = @AccidentID AND BridgeAreaID = @BridgeAreaID AND CapNumID = @CapNumID AND Element = @Element";
+
+            sqlStr = string.Format(sqlStr, direction);
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.Parameters.Add("@BridgeAreaID", SqlDbType.Int).Value = bridgeAreaID;
+                command.Parameters.Add("@AccidentID", SqlDbType.Int).Value = accidentID;
+                command.Parameters.Add("@Element", SqlDbType.Int).Value = element;
+                command.Parameters.Add("@CapNumID", SqlDbType.Int).Value = capNumID;
+                foreach (DataRow dr in GetDataTable(command).Rows)
+                {
+                    list.Add(new ValuePairInfo(SQLUtil.ConvertDouble(dr[0]), SQLUtil.ConvertDouble(dr[1])));
+                }
+
+                return list;
+            }
+        }
+        #endregion
+    }
+}
+
+
+
+--------------------------------------------------------------------------------END----------------------------------------------------------------------------------------
+
+
+----------------------------------------------------------------------MomemtDao.cs----------------------------------------------------------------------------------------
+using BCWS.BusinessObjects.Aspect;
+using BCWS.BusinessObjects.Domain.Momemts;
+using BCWS.BusinessObjects.Util;
+using PostSharp.Extensibility;
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Data.SqlClient;
+using System.Linq;
+using System.Text;
+
+namespace BCWS.BusinessObjects.DataAccess
+{
+    [LoggingAspect(AspectPriority = 1)]
+    [ConnectionAspect(AspectPriority = 2, AttributeTargetTypeAttributes = MulticastAttributes.Public)]
+    public class MomemtDao : BaseDao
+    {
+        #region "Momemt"
+        public List<MomemtInfo> GetMomemts(bool calculatedOnly = false)
+        {
+            List<MomemtInfo> momemts = new List<MomemtInfo>();
+
+            sqlStr = "SELECT m.*, up.Name as ProcessUserName, ul.Name as CalculateUserName, uc.Name as CreateUserName FROM tblMomemtsEvaluate as m " +
+                     " LEFT JOIN tblUser as uc on m.CreateUser = uc.ID" +
+                     " LEFT JOIN tblUser as ul on m.CalculateUser = ul.ID" +
+                     " LEFT JOIN tblUser as up on m.ProcessUser = up.ID";
+
+            if (calculatedOnly) sqlStr += " WHERE Calculated = 1 ";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                foreach (DataRow dr in GetDataTable(command).Rows)
+                {
+                    momemts.Add(new MomemtInfo(dr));
+                }
+
+                return momemts;
+            }
+        }
+
+        public void AddMomemt(MomemtInfo momemtInfo)
+        {
+            sqlStr = "INSERT INTO tblMomemtsEvaluate (BridgeAreaID, FromDate, ToDate, Purpose, Comments, CreateDate, CreateUser) " +
+                    " VALUES (@BridgeAreaID, @FromDate, @ToDate, @Purpose, @Comments, @CreateDate, @CreateUser)";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.Parameters.Add("@BridgeAreaID", SqlDbType.Int).Value = momemtInfo.BridgeAreaID;
+                command.Parameters.Add("@FromDate", SqlDbType.DateTime).Value = momemtInfo.FromDate;
+                command.Parameters.Add("@ToDate", SqlDbType.DateTime).Value = momemtInfo.ToDate;
+                command.Parameters.Add("@Purpose", SqlDbType.NVarChar).Value = momemtInfo.Purpose;
+                command.Parameters.Add("@Comments", SqlDbType.NVarChar).Value = momemtInfo.Comments;
+                command.Parameters.Add("@CreateDate", SqlDbType.DateTime).Value = DateTime.Now;
+                command.Parameters.Add("@CreateUser", SqlDbType.Int).Value = momemtInfo.CreateUser.ID;
+
+                command.ExecuteNonQuery();
+            }
+        }
+
+        public void UpdateMomemt(MomemtInfo momemtInfo)
+        {
+            sqlStr = "UPDATE tblMomemtsEvaluate SET FromDate = @FromDate, ToDate = @ToDate , Purpose = @Purpose, Comments = @Comments " +
+                     " WHERE ID = @ID";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.Parameters.Add("@ID", SqlDbType.Int).Value = momemtInfo.ID;
+                command.Parameters.Add("@FromDate", SqlDbType.DateTime).Value = momemtInfo.FromDate;
+                command.Parameters.Add("@ToDate", SqlDbType.DateTime).Value = momemtInfo.ToDate;
+                command.Parameters.Add("@Purpose", SqlDbType.NVarChar).Value = momemtInfo.Purpose;
+                command.Parameters.Add("@Comments", SqlDbType.NVarChar).Value = momemtInfo.Comments;
+                command.ExecuteNonQuery();
+            }
+        }
+
+        public void UpdateMomemtCalculated(int momemtId, int calculateUser)
+        {
+            sqlStr = "UPDATE tblMomemtsEvaluate SET Calculated = 1, CalculateUser = @CalculateUser, CalculateDate = @CalculateDate WHERE ID = @ID";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.Parameters.Add("@ID", SqlDbType.Int).Value = momemtId;
+                command.Parameters.Add("@CalculateUser", SqlDbType.Int).Value = calculateUser;
+                command.Parameters.Add("@CalculateDate", SqlDbType.DateTime).Value = DateTime.Now;
+
+                command.ExecuteNonQuery();
+            }
+        }
+
+        public void UpdateMomemtProcessed(MomemtInfo momemtInfo)
+        {
+            sqlStr = "UPDATE tblMomemtsEvaluate SET Conclusion = @Conclusion , Processed = 1, ProcessUser = @ProcessUser, ProcessedDate = @ProcessedDate WHERE ID = @ID";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.Parameters.Add("@ID", SqlDbType.Int).Value = momemtInfo.ID;
+                command.Parameters.Add("@Conclusion", SqlDbType.NVarChar).Value = momemtInfo.Conclusion;
+                command.Parameters.Add("@ProcessUser", SqlDbType.Int).Value = momemtInfo.ProcessUser.ID;
+                command.Parameters.Add("@ProcessedDate", SqlDbType.DateTime).Value = DateTime.Now;
+
+                command.ExecuteNonQuery();
+            }
+        }
+        #endregion
+
+        #region "Collision"
+        public void ImportCollisionProbabilitys(DataTable dt)
+        {
+            sqlStr = "INSERT INTO tblCollisionProbability (MomemtID,BridgeAreaID,CapNumID,Type,Probability) " +
+                    " VALUES(@MomemtID,@BridgeAreaID,@CapNumID,@Type,@Probability)";
+
+            SqlParameter parameter = null;
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                parameter = command.Parameters.Add("@MomemtID", SqlDbType.Int);
+                parameter.SourceColumn = "MomemtID";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@BridgeAreaID", SqlDbType.Int);
+                parameter.SourceColumn = "BridgeAreaID";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@CapNumID", SqlDbType.Int);
+                parameter.SourceColumn = "CapNumID";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@Type", SqlDbType.Int);
+                parameter.SourceColumn = "Type";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@Probability", SqlDbType.Decimal);
+                parameter.SourceColumn = "Probability";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                using (SqlDataAdapter da = new SqlDataAdapter())
+                {
+                    da.InsertCommand = command;
+
+                    da.Update(dt);
+                }
+            }
+        }
+
+        public void DeleteCollisionProbabilitys(int bridgeAreaID, int momemtID)
+        {
+            sqlStr = "DELETE FROM tblCollisionProbability WHERE MomemtID=@MomemtID AND BridgeAreaID = @BridgeAreaID";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.Parameters.Add("@MomemtID", SqlDbType.Int).Value = momemtID;
+                command.Parameters.Add("@BridgeAreaID", SqlDbType.Int).Value = bridgeAreaID;
+
+                command.ExecuteNonQuery();
+            }
+        }
+
+        public List<int> GetCapNum4Collision(int momemtID, int bridgeAreaID)
+        {
+            List<int> capNums = new List<int>();
+
+            sqlStr = "SELECT DISTINCT CapNumID FROM tblCollisionProbability " +
+                     " WHERE MomemtID = @MomemtID AND BridgeAreaID = @BridgeAreaID " +
+                     " ORDER BY CapNumID";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.Parameters.Add("@MomemtID", SqlDbType.Int).Value = momemtID;
+                command.Parameters.Add("@BridgeAreaID", SqlDbType.Int).Value = bridgeAreaID;
+                foreach (DataRow dr in GetDataTable(command).Rows)
+                {
+                    capNums.Add(SQLUtil.ConvertInt(dr[0]));
+                }
+
+                return capNums;
+            }
+        }
+
+        public List<CollisionProbabilityInfo> GetCollisionProbabilitys(int momemtID, int bridgeAreaID)
+        {
+            List<CollisionProbabilityInfo> infos = new List<CollisionProbabilityInfo>();
+
+            sqlStr = "SELECT * FROM tblCollisionProbability " +
+                     " WHERE MomemtID = @MomemtID AND BridgeAreaID = @BridgeAreaID " +
+                     " ORDER BY CapNumID";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.Parameters.Add("@MomemtID", SqlDbType.Int).Value = momemtID;
+                command.Parameters.Add("@BridgeAreaID", SqlDbType.Int).Value = bridgeAreaID;
+                foreach (DataRow dr in GetDataTable(command).Rows)
+                {
+                    infos.Add(new CollisionProbabilityInfo(dr));
+                }
+
+                return infos;
+            }
+        }
+        #endregion
+
+        #region "Collapse"
+        public void ImportCollapseProbabilitys(DataTable dt)
+        {
+            sqlStr = "INSERT INTO tblCollapseProbability (MomemtID,BridgeAreaID,CapNumID,Type,Probability) " +
+                    " VALUES(@MomemtID,@BridgeAreaID,@CapNumID,@Type,@Probability)";
+
+            SqlParameter parameter = null;
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                parameter = command.Parameters.Add("@MomemtID", SqlDbType.Int);
+                parameter.SourceColumn = "MomemtID";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@BridgeAreaID", SqlDbType.Int);
+                parameter.SourceColumn = "BridgeAreaID";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@CapNumID", SqlDbType.Int);
+                parameter.SourceColumn = "CapNumID";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@Type", SqlDbType.Int);
+                parameter.SourceColumn = "Type";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@Probability", SqlDbType.Decimal);
+                parameter.SourceColumn = "Probability";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                using (SqlDataAdapter da = new SqlDataAdapter())
+                {
+                    da.InsertCommand = command;
+
+                    da.Update(dt);
+                }
+            }
+        }
+
+        public void DeleteCollapseProbabilitys(int bridgeAreaID, int momemtID)
+        {
+            sqlStr = "DELETE FROM tblCollapseProbability WHERE MomemtID=@MomemtID AND BridgeAreaID = @BridgeAreaID";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.Parameters.Add("@MomemtID", SqlDbType.Int).Value = momemtID;
+                command.Parameters.Add("@BridgeAreaID", SqlDbType.Int).Value = bridgeAreaID;
+
+                command.ExecuteNonQuery();
+            }
+        }
+
+        public List<int> GetCapNum4Collapse(int momemtID, int bridgeAreaID)
+        {
+            List<int> capNums = new List<int>();
+
+            sqlStr = "SELECT DISTINCT CapNumID FROM tblCollapseProbability " +
+                     " WHERE MomemtID = @MomemtID AND BridgeAreaID = @BridgeAreaID " +
+                     " ORDER BY CapNumID";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.Parameters.Add("@MomemtID", SqlDbType.Int).Value = momemtID;
+                command.Parameters.Add("@BridgeAreaID", SqlDbType.Int).Value = bridgeAreaID;
+                foreach (DataRow dr in GetDataTable(command).Rows)
+                {
+                    capNums.Add(SQLUtil.ConvertInt(dr[0]));
+                }
+
+                return capNums;
+            }
+        }
+
+        public List<CollapseProbabilityInfo> GetCollapseProbabilitys(int momemtID, int bridgeAreaID)
+        {
+            List<CollapseProbabilityInfo> infos = new List<CollapseProbabilityInfo>();
+
+            sqlStr = "SELECT * FROM tblCollapseProbability " +
+                     " WHERE MomemtID = @MomemtID AND BridgeAreaID = @BridgeAreaID " +
+                     " ORDER BY CapNumID";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.Parameters.Add("@MomemtID", SqlDbType.Int).Value = momemtID;
+                command.Parameters.Add("@BridgeAreaID", SqlDbType.Int).Value = bridgeAreaID;
+                foreach (DataRow dr in GetDataTable(command).Rows)
+                {
+                    infos.Add(new CollapseProbabilityInfo(dr));
+                }
+
+                return infos;
+            }
+        }
+        #endregion
+
+        #region "tblMomemtRptElement"
+        public List<MomemtRptElementInfo> GetMomemtRptElements(int bridgeAreaID, int momemtID)
+        {
+            List<MomemtRptElementInfo> infos = new List<MomemtRptElementInfo>();
+
+            sqlStr = "SELECT * FROM tblMomemtRptElement WHERE BridgeAreaID = @BridgeAreaID AND MomemtID = @MomemtID";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.Parameters.Add("@BridgeAreaID", SqlDbType.Int).Value = bridgeAreaID;
+                command.Parameters.Add("@MomemtID", SqlDbType.Int).Value = momemtID;
+
+                using (DataTable dt = GetDataTable(command))
+                {
+                    foreach (DataRow dr in dt.Rows)
+                    {
+                        infos.Add(new MomemtRptElementInfo(dr));
+                    }
+                }
+            }
+
+            return infos;
+        }
+
+        public MomemtRptElementInfo AddMomemtRptElement(MomemtRptElementInfo info)
+        {
+            sqlStr = "INSERT INTO tblMomemtRptElement (MomemtID, BridgeAreaID, Seq, ElementTypeID, ParentID, Title, Content, ReportTypeID, IsBrief)" +
+                    " VALUES (@MomemtID, @BridgeAreaID, @Seq, @ElementTypeID, @ParentID, @Title, @Content, @ReportTypeID, @IsBrief);" +
+                    " SELECT @@IDENTITY";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.Parameters.Add("@Seq", SqlDbType.Int).Value = info.Seq;
+                command.Parameters.Add("@MomemtID", SqlDbType.Int).Value = info.Momemt.ID;
+                command.Parameters.Add("@BridgeAreaID", SqlDbType.Int).Value = info.Momemt.BridgeAreaID;
+                command.Parameters.Add("@ElementTypeID", SqlDbType.Int).Value = info.ElementTypeID;
+                command.Parameters.Add("@ParentID", SqlDbType.Int).Value = SQLUtil.ZeroToNull(info.ParentID);
+                command.Parameters.Add("@Title", SqlDbType.NVarChar).Value = SQLUtil.EmptyStringToNull(info.Title);
+                command.Parameters.Add("@Content", SqlDbType.NVarChar).Value = SQLUtil.EmptyStringToNull(info.Content);
+                command.Parameters.Add("@ReportTypeID", SqlDbType.Int).Value = SQLUtil.ZeroToNull(info.ReportTypeID);
+                command.Parameters.Add("@IsBrief", SqlDbType.Bit).Value = info.IsBrief;
+
+                info.ID = SQLUtil.ConvertInt(command.ExecuteScalar());
+
+                return info;
+            }
+        }
+
+        public void UpdateMomemtRptElement(MomemtRptElementInfo info)
+        {
+            sqlStr = "Update tblMomemtRptElement SET Seq = @Seq, ElementTypeID= @ElementTypeID, ParentID = @ParentID, Title = @Title, " +
+                    " Content = @Content, ReportTypeID = @ReportTypeID " +
+                    " WHERE ID = @ID";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.Parameters.Add("@Seq", SqlDbType.Int).Value = info.Seq;
+                command.Parameters.Add("@ElementTypeID", SqlDbType.Int).Value = info.ElementTypeID;
+                command.Parameters.Add("@ParentID", SqlDbType.Int).Value = SQLUtil.ZeroToNull(info.ParentID);
+                command.Parameters.Add("@Title", SqlDbType.NVarChar).Value = SQLUtil.EmptyStringToNull(info.Title);
+                command.Parameters.Add("@Content", SqlDbType.NVarChar).Value = SQLUtil.EmptyStringToNull(info.Content);
+                command.Parameters.Add("@ReportTypeID", SqlDbType.Int).Value = SQLUtil.ZeroToNull(info.ReportTypeID);
+                command.Parameters.Add("@ID", SqlDbType.Int).Value = info.ID;
+
+                command.ExecuteNonQuery();
+            }
+        }
+
+        public void UpdateMomemtRptElementSeq(int parentId, int seqFrom, int increaseSeq)
+        {
+            sqlStr = "Update tblMomemtRptElement SET Seq = Seq + @Increased " +
+                    " WHERE Seq >= @SeqFrom And";
+
+            if (parentId == 0)
+                sqlStr += " ParentID IS NULL ";
+            else
+                sqlStr += " ParentID = " + parentId;
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.Parameters.Add("@Increased", SqlDbType.Int).Value = increaseSeq;
+                command.Parameters.Add("@SeqFrom", SqlDbType.Int).Value = seqFrom;
+
+                command.ExecuteNonQuery();
+            }
+        }
+
+        public void UpdateMomemtRptElementSeq4Move(int id, int increaseSeq)
+        {
+            sqlStr = "Update tblMomemtRptElement SET Seq = Seq + @Increased " +
+                    " WHERE ID = @ID";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.Parameters.Add("@Increased", SqlDbType.Int).Value = increaseSeq;
+                command.Parameters.Add("@ID", SqlDbType.Int).Value = id;
+
+                command.ExecuteNonQuery();
+            }
+        }
+
+        public void DeleteMomemtRptElement(int id)
+        {
+            sqlStr = "DELETE FROM tblMomemtRptElement WHERE ID=@ID";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.Parameters.Add("@ID", SqlDbType.Int).Value = id;
+
+                command.ExecuteNonQuery();
+            }
+        }
+
+        public void DeleteMomemtRptElementByParent(int parentId)
+        {
+            sqlStr = "DELETE FROM tblMomemtRptElement WHERE ParentID=@ParentID";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.Parameters.Add("@ParentID", SqlDbType.Int).Value = parentId;
+
+                command.ExecuteNonQuery();
+            }
+        }
+        #endregion
+    }
+}
+
+
+
+--------------------------------------------------------------------------------END----------------------------------------------------------------------------------------
+
+
+----------------------------------------------------------------------ShipDao.cs----------------------------------------------------------------------------------------
+using BCWS.BusinessObjects.Aspect;
+using BCWS.BusinessObjects.Domain.Ship;
+using BCWS.BusinessObjects.Domain.Report;
+using BCWS.BusinessObjects.Util;
+using PostSharp.Extensibility;
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Data.SqlClient;
+using System.Linq;
+using System.Text;
+
+namespace BCWS.BusinessObjects.DataAccess
+{
+    [LoggingAspect(AspectPriority = 1)]
+    [ConnectionAspect(AspectPriority = 2, AttributeTargetTypeAttributes = MulticastAttributes.Public)]
+    public class ShipDao : BaseDao
+    {
+        #region "tblShip"
+        public List<ShipInfo> GetShips(int bridgeAreaID, long shipID, int shipType, DateTime entertimeFrom, DateTime entertimeTo, DateTime lefttimeFrom, DateTime lefttimeTo)
+        {
+            List<ShipInfo> ships = new List<ShipInfo>();
+
+            sqlStr = "SELECT * FROM tblShip WHERE BridgeAreaID = @BridgeAreaID And StatusID = 0 ";
+            if (entertimeFrom != DateTime.MinValue) sqlStr += " AND Entertime >= @EntertimeFrom ";
+            if (entertimeTo != DateTime.MaxValue) sqlStr += " AND Entertime <= @EntertimeTo ";
+            if (lefttimeFrom != DateTime.MinValue) sqlStr += " AND (Lefttime >= @LefttimeFrom or Entertime >= @LefttimeFrom) ";
+            if (lefttimeTo != DateTime.MaxValue) sqlStr += " AND Lefttime <= @LefttimeTo ";
+            if (shipID >= 0) sqlStr += " AND ShipID = " + shipID + " ";
+            if (shipType >= 0) sqlStr += " And ShipType = " + shipType + "";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.Parameters.Add("@BridgeAreaID", SqlDbType.Int).Value = bridgeAreaID;
+                if (entertimeFrom != DateTime.MinValue) command.Parameters.Add("@EntertimeFrom", SqlDbType.DateTime).Value = entertimeFrom;
+                if (entertimeTo != DateTime.MaxValue)  command.Parameters.Add("@EntertimeTo", SqlDbType.DateTime).Value = entertimeTo;
+                if (lefttimeFrom != DateTime.MinValue) command.Parameters.Add("@LefttimeFrom", SqlDbType.DateTime).Value = lefttimeFrom;
+                if (lefttimeTo != DateTime.MaxValue)  command.Parameters.Add("@LefttimeTo", SqlDbType.DateTime).Value = lefttimeTo;
+                
+                foreach (DataRow dr in GetDataTable(command).Rows)
+                {
+                    ships.Add(new ShipInfo(dr));
+                }
+
+                return ships;
+            }
+        }
+
+        public List<ShipStatByTimeTypeInfo> GetShipStatistics(int bridgeAreaID, DateTime entertimeFrom, DateTime entertimeTo, int minutes)
+        {
+            List<ShipStatByTimeTypeInfo> data = new List<ShipStatByTimeTypeInfo>();
+
+            sqlStr = "SELECT DateAdd(minute, @Minutes * (DateDiff(minute, @EntertimeFrom, Entertime) / @Minutes), @EntertimeFrom) As Time, ShipType, COUNT(ShipID) as Count " + 
+                     " FROM tblShip " + 
+                     " WHERE BridgeAreaID = @BridgeAreaID And StatusID = 0 AND Entertime BETWEEN @EntertimeFrom AND @EntertimeTo " +
+                     " GROUP BY DateAdd(minute, @Minutes * (DateDiff(minute, @EntertimeFrom, Entertime) / @Minutes), @EntertimeFrom), ShipType" +
+                     " ORDER BY DateAdd(minute, @Minutes * (DateDiff(minute, @EntertimeFrom, Entertime) / @Minutes), @EntertimeFrom), ShipType";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.Parameters.Add("@BridgeAreaID", SqlDbType.Int).Value = bridgeAreaID;
+                command.Parameters.Add("@EntertimeFrom", SqlDbType.DateTime).Value = entertimeFrom;
+                command.Parameters.Add("@EntertimeTo", SqlDbType.DateTime).Value = entertimeTo;
+                command.Parameters.Add("@Minutes", SqlDbType.Int).Value = minutes;
+
+                ShipStatByTimeTypeInfo info = null;
+                foreach (DataRow dr in GetDataTable(command).Rows)
+                {
+                    info = new ShipStatByTimeTypeInfo();
+                    info.Time = SQLUtil.ConvertDateTime(dr["Time"]);
+                    info.ShipType = SQLUtil.ConvertInt(dr["ShipType"]);
+                    info.Count = SQLUtil.ConvertInt(dr["Count"]);
+
+                    data.Add(info);
+                }
+
+                return data;
+            }
+        }
+
+        public ShipInfo GetShip(int bridgeAreaID, long shipID)
+        {
+            sqlStr = "SELECT * FROM tblShip WHERE BridgeAreaID = @BridgeAreaID AND ShipID = @ShipID";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.Parameters.Add("@BridgeAreaID", SqlDbType.Int).Value = bridgeAreaID;
+                command.Parameters.Add("@ShipID", SqlDbType.BigInt).Value = shipID;
+
+                DataRow dr = GetDataRow(command);
+                if (dr != null)
+                    return new ShipInfo(dr);
+                else
+                    return null;
+            }
+        }
+
+        public void AddShip(ShipInfo shipInfo)
+        {
+            sqlStr = "INSERT INTO tblShip (BridgeAreaID, ShipID, Entertime, ShipType, ShipDWT, ForeshipHight, Draft, MastHeight, ShipLenth, ShipWidth, DirectionX, StatusID) " +
+            "VALUES (@BridgeAreaID, @ShipID, @Entertime, @ShipType, @ShipDWT, @ForeshipHight, @Draft, @MastHeight, @ShipLenth, @ShipWidth, @DirectionX, @StatusID)";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.Parameters.Add("@BridgeAreaID", SqlDbType.Int).Value = shipInfo.BridgeAreaID;
+                command.Parameters.Add("@ShipID", SqlDbType.BigInt).Value = shipInfo.ShipID;
+                command.Parameters.Add("@Entertime", SqlDbType.DateTime).Value = shipInfo.Entertime;
+                command.Parameters.Add("@ShipType", SqlDbType.Int).Value = shipInfo.ShipType.ID;
+                command.Parameters.Add("@ShipDWT", SqlDbType.Float).Value = shipInfo.ShipDWT;
+                command.Parameters.Add("@ForeshipHight", SqlDbType.Float).Value = shipInfo.ForeshipHight;
+                command.Parameters.Add("@Draft", SqlDbType.Float).Value = shipInfo.Draft;
+                command.Parameters.Add("@MastHeight", SqlDbType.Float).Value = shipInfo.MastHeight;
+                command.Parameters.Add("@ShipLenth", SqlDbType.Float).Value = shipInfo.ShipLenth;
+                command.Parameters.Add("@ShipWidth", SqlDbType.Float).Value = shipInfo.ShipWidth;
+                command.Parameters.Add("@DirectionX", SqlDbType.Bit).Value = shipInfo.DirectionX;
+                command.Parameters.Add("@StatusID", SqlDbType.Int).Value = shipInfo.StatusID;
+
+                command.ExecuteNonQuery();
+            }
+        }
+
+        public void UpdateShip4LeftTime(int bridgeAreaID, long shipID, DateTime lefttime, int statusID)
+        {
+            sqlStr = "UPDATE tblShip SET Lefttime = @Lefttime, StatusID = @StatusID WHERE ShipID = @ShipID And BridgeAreaID = @BridgeAreaID";
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.Parameters.Add("@BridgeAreaID", SqlDbType.Int).Value = bridgeAreaID;
+                command.Parameters.Add("@ShipID", SqlDbType.BigInt).Value = shipID;
+                command.Parameters.Add("@Lefttime", SqlDbType.DateTime).Value = lefttime;
+                command.Parameters.Add("@StatusID", SqlDbType.Int).Value = statusID;
+
+                command.ExecuteNonQuery();
+            }
+        }
+        #endregion
+
+        #region "tblShipTrack"
+        public List<TrackInfo> GetTracks(int bridgeAreaID, long shipID, DateTime transactionTimeFrom, DateTime transactionTimeTo)
+        {
+            List<TrackInfo> tracks = new List<TrackInfo>();
+
+            sqlStr = "SELECT * FROM tblShipTrack WHERE TrackTime <= @TransactionTimeTo AND BridgeAreaID = @BridgeAreaID ";
+            if (transactionTimeFrom != DateTime.MinValue) sqlStr += " AND TrackTime >= @TransactionTimeFrom ";
+            if (shipID >= 0) sqlStr += " AND ShipID = " + shipID;
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.Parameters.Add("@BridgeAreaID", SqlDbType.Int).Value = bridgeAreaID;
+                if (transactionTimeFrom != DateTime.MinValue)
+                {
+                    command.Parameters.Add("@TransactionTimeFrom", SqlDbType.DateTime).Value = transactionTimeFrom;
+                }
+                command.Parameters.Add("@TransactionTimeTo", SqlDbType.DateTime).Value = transactionTimeTo;
+
+                foreach (DataRow dr in GetDataTable(command).Rows)
+                {
+                    tracks.Add(new TrackInfo(dr));
+                }
+
+                return tracks;
+            }
+        }
+
+        public TrackInfo GetLastTrackByShipID(int bridgeAreaID, long shipID)
+        {
+            sqlStr = "SELECT top(1) * FROM tblShipTrack WHERE BridgeAreaID = @BridgeAreaID AND ShipID = @ShipID Order By TrackTime desc";
+            
+
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                command.Parameters.Add("@BridgeAreaID", SqlDbType.Int).Value = bridgeAreaID;
+                command.Parameters.Add("@ShipID", SqlDbType.BigInt).Value = shipID;
+
+                DataRow dr = GetDataRow(command);
+                if (dr != null)
+                    return new TrackInfo(dr);
+                else
+                    return null;
+            }
+        }
+
+        public void ImportTracks(DataTable dt)
+        {
+            sqlStr = "INSERT INTO tblShipTrack (BridgeAreaID, ShipID, TrackTime, ShipCoorX, ShipCoorY, ShipVectorX, ShipVectorY, Theta) " +
+            "VALUES (@BridgeAreaID, @ShipID, @TrackTime, @ShipCoorX, @ShipCoorY, @ShipVectorX, @ShipVectorY, @Theta)";
+
+            SqlParameter parameter = null;
+            using (SqlCommand command = ConnectionUtil.GetCommand(sqlStr))
+            {
+                parameter = command.Parameters.Add("@BridgeAreaID", SqlDbType.Int);
+                parameter.SourceColumn = "BridgeAreaID";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@ShipID", SqlDbType.BigInt);
+                parameter.SourceColumn = "ShipID";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@TrackTime", SqlDbType.DateTime);
+                parameter.SourceColumn = "TrackTime";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@ShipCoorX", SqlDbType.Decimal);
+                parameter.SourceColumn = "ShipCoorX";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@ShipCoorY", SqlDbType.Decimal);
+                parameter.SourceColumn = "ShipCoorY";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@ShipVectorX", SqlDbType.Float);
+                parameter.SourceColumn = "ShipVectorX";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@ShipVectorY", SqlDbType.Float);
+                parameter.SourceColumn = "ShipVectorY";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                parameter = command.Parameters.Add("@Theta", SqlDbType.Decimal);
+                parameter.SourceColumn = "Theta";
+                parameter.SourceVersion = DataRowVersion.Original;
+
+                using (SqlDataAdapter da = new SqlDataAdapter())
+                {
+                    da.InsertCommand = command;
+
+                    da.Update(dt);
+                }
+            }
+        }
+        #endregion
+    }
+}
+
+
+--------------------------------------------------------------------------------END----------------------------------------------------------------------------------------
+
+
+----------------------------------------------------------------------XceedUtil.cs----------------------------------------------------------------------------------------
+using BCWS.BusinessObjects.DataAccess;
+using BCWS.BusinessObjects.Domain.Accident;
+using BCWS.BusinessObjects.Domain.Finite;
+using BCWS.BusinessObjects.Domain.Momemts;
+using BCWS.BusinessObjects.Manager;
+using BCWS.BusinessObjects.Util;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Windows.Forms;
+using Xceed.Words.NET;
+
+namespace BCWSDesktop.Util
+{
+    public static class XceedUtil
+    {
+        public static FiniteDao finiteDao = new FiniteDao();
+        public static ShipDao shipDao = new ShipDao();
+        public static BridgeDao bridgeDao = new BridgeDao();
+        public static MomemtDao momemtDao = new MomemtDao();
+
+        private static string AppFolder = System.AppDomain.CurrentDomain.BaseDirectory;
+        private static string StyleBridgeName = "BridgeName";
+        private static string StyleDateAndStation = "DateAndStation";
+        private static string StyleBody = "Body";
+        private static string StyleImgDes = "ImgDes";
+        private static string StyleReportDetail = "ReportDetail";
+        private static string StyleReportFooter = "ReportFooter";
+        private static string SystemName = "桥梁防撞预警系统";
+
+        public static void CreateDoc(string fileName, List<AccidentRptElementInfo> seqInfos, AccidentInfo selectedAccident, string userName)
+        {
+            using (DocX document = DocX.Create(fileName))
+            {
+                // The path to a template document,
+                string templatePath = Path.Combine(AppFolder, "Template.docx");
+                
+                // Apply a template to the document based on a path.
+                document.ApplyTemplate(templatePath, false);
+
+                // Add a title
+                var p1 = document.InsertParagraph();
+                p1.Append((string.Format("{0}{1}年{2}月{3}日船撞事件", SessionInfo.selectedBridge.BridgeAreaName, DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day)));
+                p1.StyleName = StyleBridgeName;
+
+                var p2 = document.InsertParagraph();
+                p2.Append("桥梁状态评估报告");
+                p2.StyleName = "ReportTitle";
+
+                var p3 = document.InsertParagraph();
+                p3.Append(string.Format("{0}管理处", SessionInfo.selectedBridge.BridgeAreaName));
+                p3.StyleName = StyleDateAndStation;
+
+                var p4 = document.InsertParagraph();
+                p4.Append(string.Format("{0}年{1}月{2}日", DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day));
+                p4.StyleName = StyleDateAndStation;
+
+                var p5 = document.InsertParagraph();
+                p5.Append(string.Format("桥 梁 名 称：{0}", SessionInfo.selectedBridge.BridgeAreaName));
+                p5.StyleName = StyleReportDetail;
+
+                var p14 = document.InsertParagraph();
+                p14.Append(string.Format("撞 击 事 件：{0}年{1}月{2}日撞击事件", DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day));
+                p14.StyleName = StyleReportDetail;
+                p14.SpacingAfter(100d);
+
+                var p6 = document.InsertParagraph();
+                p6.Append(string.Format("桥 梁 管 理 单 位：{0}", SessionInfo.selectedBridge.ManagerDepartmentName));
+                p6.StyleName = StyleReportDetail;
+
+                var p7 = document.InsertParagraph();
+                p7.Append(string.Format("报 告 生 成 软 件：{0} {1}", SystemName, System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString()));
+                p7.StyleName = StyleReportDetail;
+
+                var p8 = document.InsertParagraph();
+                p8.Append(string.Format("报 告 修 改 人：{0}", userName));
+                p8.StyleName = StyleReportDetail;
+
+                var p9 = document.InsertParagraph();
+                p9.Append(string.Format("报 告 生 成 时 间：{0}年{1}月{2}日", DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day));
+                p9.StyleName = StyleReportDetail;
+                p9.SpacingAfter(100d);
+
+                var p10 = document.InsertParagraph();
+                p10.Append(string.Format("报 告 推 送："));
+                p10.StyleName = StyleReportDetail;
+                p10.InsertPageBreakAfterSelf();
+
+                document.AddHeaders();
+                document.AddFooters();
+                document.DifferentFirstPage = true;
+
+                var oddFooter = document.Footers.Odd;
+                var p11 = oddFooter.InsertParagraph();
+                p11.Append(string.Format("{0}管理处                                                       ", SessionInfo.selectedBridge.BridgeAreaName));
+                p11.Append("-").AppendPageNumber(PageNumberFormat.normal);
+                p11.Append("-");
+                p11.StyleName = StyleReportFooter;
+                p11.InsertHorizontalLine(HorizontalBorderPosition.top, "single", 6, 1, "auto");
+
+                var oddHeader = document.Headers.Odd;
+                var p13 = oddHeader.InsertParagraph();
+                p13.Append(string.Format("{0}{1}年{2}月{3}日船撞事件                            桥梁状态评估报告", SessionInfo.selectedBridge.BridgeAreaName, DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day));
+                p13.StyleName = StyleReportFooter;
+                p13.InsertHorizontalLine(HorizontalBorderPosition.bottom, "single", 6, 1, "auto");
+
+                document.InsertParagraph("目录").StyleName = StyleBridgeName;
+                document.InsertTableOfContents("", TableOfContentsSwitches.O | TableOfContentsSwitches.U | TableOfContentsSwitches.Z | TableOfContentsSwitches.H, StyleBody);
+
+                document.InsertSection();
+                
+                for (int i = 0; i < seqInfos.Count; i++)
+                {
+                    if (seqInfos[i].ElementTypeID == AccidentRptElementInfo.ElementType.Paragraph || seqInfos[i].ElementTypeID == AccidentRptElementInfo.ElementType.Section || seqInfos[i].ElementTypeID == AccidentRptElementInfo.ElementType.stanzas)
+                    {
+                        AddParagraph(seqInfos[i], document);
+                    }
+                    else if (seqInfos[i].ElementTypeID == AccidentRptElementInfo.ElementType.Chart)
+                    {
+                        AddChart(seqInfos[i], selectedAccident, document);
+                    }
+                    else if (seqInfos[i].ElementTypeID == AccidentRptElementInfo.ElementType.Table)
+                    {
+                        AddTable(seqInfos[i], selectedAccident, document);
+                    }
+                    else if (seqInfos[i].ElementTypeID == AccidentRptElementInfo.ElementType.Picture)
+                    {
+                        AddPicture(seqInfos[i], document);
+                    }
+                }
+
+                // Save this document to disk.
+                document.Save();
+                UIUtil.ShowInfo("导出事故报告成功", "导出");
+            }
+        }
+
+        public static void AddParagraph(AccidentRptElementInfo seqInfo, DocX document)
+        {
+            if (seqInfo.IsBrief == true)
+            {
+                string templateCommonPath = Path.Combine(AppFolder, "BridgeDescription.docx");
+                using (DocX document1 = DocX.Load(templateCommonPath))
+                {
+                    document.InsertDocument(document1);
+                }
+            }
+            else
+            {
+                if (seqInfo.Title != "")
+                {
+                    // Insert a Paragraph into this document.
+                    var p = document.InsertParagraph();
+
+                    // Append some text and add formatting.
+                    p.Append(seqInfo.Title);
+                    if (seqInfo.ElementTypeID == AccidentRptElementInfo.ElementType.Paragraph)
+                        p.StyleName = "Heading1";
+                    else if (seqInfo.ElementTypeID == AccidentRptElementInfo.ElementType.Section)
+                        p.StyleName = "Heading2";
+                    else if (seqInfo.ElementTypeID == AccidentRptElementInfo.ElementType.stanzas)
+                        p.StyleName = "Heading3";
+                }
+                // Insert another Paragraph into this document.
+                if (seqInfo.Content != "" && seqInfo.Content != null)
+                {
+                    var p2 = document.InsertParagraph();
+
+                    // Append some text and add formatting.
+                    p2.Append(seqInfo.Content);
+                    p2.StyleName = StyleBody;
+                }
+            }
+        }
+
+        public static void AddChart(AccidentRptElementInfo seqInfo, AccidentInfo selectedAccident, DocX document)
+        {
+            if (seqInfo.ReportTypeID == 0) return;
+            // Create the data.
+            Dictionary<double, double> nodes = null;
+            Dictionary<string, double> maxNodes = null;
+            string seriesName = null;
+            string direction = null;
+            int elementType = 0;
+            if (seqInfo.FiniteNodeDirection == AccidentRptElementInfo.Direction.X)
+            {
+                direction = AccidentRptElementInfo.Direction.GetDesc(AccidentRptElementInfo.Direction.X);
+                elementType = ElementType.X;
+            }
+            else
+            {
+                direction = AccidentRptElementInfo.Direction.GetDesc(AccidentRptElementInfo.Direction.Y);
+                elementType = ElementType.Y;
+            }
+            if (seqInfo.ReportTypeID == AccidentRptElementInfo.ReportType.MaxDisplace || seqInfo.ReportTypeID == AccidentRptElementInfo.ReportType.MaxInternalMoment)
+            {
+                if (seqInfo.ReportTypeID == AccidentRptElementInfo.ReportType.MaxDisplace)
+                {
+                    maxNodes = finiteDao.GetMaxDisplaceReations(SessionInfo.selectedBridge.BridgeAreaID, selectedAccident.AccidentID, 0, direction);
+                    seriesName = string.Format("{0}方向节点最大位移", direction);
+                }
+                else if (seqInfo.ReportTypeID == AccidentRptElementInfo.ReportType.MaxInternalMoment)
+                {
+                    maxNodes = finiteDao.GetMaxInternalMomentReations(SessionInfo.selectedBridge.BridgeAreaID, selectedAccident.AccidentID, direction, elementType);
+                    seriesName = string.Format("{0}方向单元最大弯矩", direction);
+                }
+                List<string> maxKey = new List<string>();
+                List<double> maxValue = new List<double>();
+
+                if (maxNodes.Count != 0)
+                {
+                    foreach (KeyValuePair<string, double> node in maxNodes)
+                    {
+                        maxKey.Add(node.Key);
+                        maxValue.Add(node.Value);
+                    }
+                    // Create a line chart.
+                    var c = new BarChart();
+                    c.BarDirection = BarDirection.Column;
+                    c.AddLegend(ChartLegendPosition.TopRight, false);
+                    // Create and add series
+                    var s1 = new Series(seriesName);
+
+                    s1.Bind(maxKey, maxValue);
+                    c.AddSeries(s1);
+
+                    // Insert chart into document
+                    document.InsertChart(c);
+                }
+            }
+            else if (seqInfo.ReportTypeID == AccidentRptElementInfo.ReportType.ImpactForce || seqInfo.ReportTypeID == AccidentRptElementInfo.ReportType.DisplaceReation || seqInfo.ReportTypeID == AccidentRptElementInfo.ReportType.InternalMomentReation)
+            {
+                NodeInfo nodeInfo = finiteDao.GetNode(seqInfo.FiniteNodeID);
+                ElementInfo elementInfo = finiteDao.GetElement(seqInfo.FiniteNodeID);
+
+                if (seqInfo.ReportTypeID == AccidentRptElementInfo.ReportType.ImpactForce)
+                {
+                    nodes = finiteDao.GetImpactForces(SessionInfo.selectedBridge.BridgeAreaID, selectedAccident.AccidentID, nodeInfo.CapNumID, nodeInfo.Node);
+                    seriesName = "节点撞击力";
+                }
+                else if (seqInfo.ReportTypeID == AccidentRptElementInfo.ReportType.DisplaceReation)
+                {
+                    nodes = finiteDao.GetDisplaceReations(SessionInfo.selectedBridge.BridgeAreaID, selectedAccident.AccidentID, nodeInfo.CapNumID, nodeInfo.Node, 0, direction);
+                    seriesName = string.Format("{0}方向节点位移", direction);
+                }
+                else if (seqInfo.ReportTypeID == AccidentRptElementInfo.ReportType.InternalMomentReation)
+                {
+                    nodes = finiteDao.GetInternalMomentReations(SessionInfo.selectedBridge.BridgeAreaID, selectedAccident.AccidentID, elementInfo.CapNumID, elementInfo.Element, direction);
+                    seriesName = string.Format("{0}方向单元弯矩", direction);
+                }
+
+                List<string> key = new List<string>();
+                List<double> value = new List<double>();
+
+                if (nodes.Count != 0)
+                {
+                    foreach (KeyValuePair<Double, double> node in nodes)
+                    {
+                        key.Add(node.Key.ToString());
+                        value.Add(node.Value);
+                    }
+                    // Create a line chart.
+                    var c = new LineChart();
+
+                    c.AddLegend(ChartLegendPosition.TopRight, false);
+                    // Create and add series
+                    var s1 = new Series(seriesName);
+
+                    s1.Bind(key, value);
+                    c.AddSeries(s1);
+
+                    // Insert chart into document
+                    document.InsertChart(c);
+                }
+            }
+            if (seqInfo.Title != "")
+                // Add a title
+                document.InsertParagraph(seqInfo.Title).StyleName = StyleImgDes;
+            
+        }
+
+        public static void AddTable(AccidentRptElementInfo seqInfo, AccidentInfo selectedAccident, DocX document)
+        {
+            if (seqInfo.ReportTypeID == 0) return;
+            int i = 1;
+            Dictionary<double, double> infos = null;
+            Dictionary<string, double> maxInfos = null;
+            Table table1 = null;
+            NodeInfo nodeInfo = finiteDao.GetNode(seqInfo.FiniteNodeID);
+            ElementInfo elementInfo = finiteDao.GetElement(seqInfo.FiniteNodeID);
+            string direction = null;
+            int elementType = 0;
+            if (seqInfo.FiniteNodeDirection == AccidentRptElementInfo.Direction.X)
+            {
+                direction = AccidentRptElementInfo.Direction.GetDesc(AccidentRptElementInfo.Direction.X);
+                elementType = ElementType.X;
+            }
+            else
+            {
+                direction = AccidentRptElementInfo.Direction.GetDesc(AccidentRptElementInfo.Direction.Y);
+                elementType = ElementType.Y;
+            }
+
+            if (seqInfo.ReportTypeID == AccidentRptElementInfo.ReportType.ImpactForce)
+            {
+                infos = finiteDao.GetImpactForces(selectedAccident.BridgeAreaID, selectedAccident.AccidentID, nodeInfo.CapNumID, nodeInfo.Node);
+                table1 = document.AddTable(infos.Count + 1, 2);
+                table1.Rows[0].Cells[0].Paragraphs.First().InsertText("时间");
+                table1.Rows[0].Cells[1].Paragraphs.First().InsertText("节点撞击力");
+            }
+            else if (seqInfo.ReportTypeID == AccidentRptElementInfo.ReportType.DisplaceReation)
+            {
+                infos = finiteDao.GetDisplaceReations(selectedAccident.BridgeAreaID, selectedAccident.AccidentID, nodeInfo.CapNumID, nodeInfo.Node, 0, direction);
+                table1 = document.AddTable(infos.Count + 1, 2);
+                table1.Rows[0].Cells[0].Paragraphs.First().InsertText("时间");
+                table1.Rows[0].Cells[1].Paragraphs.First().InsertText("节点位移");
+            }
+            else if (seqInfo.ReportTypeID == AccidentRptElementInfo.ReportType.InternalMomentReation)
+            {
+                infos = finiteDao.GetInternalMomentReations(selectedAccident.BridgeAreaID, selectedAccident.AccidentID, elementInfo.CapNumID, elementInfo.Element, direction);
+                table1 = document.AddTable(infos.Count + 1, 2);
+                table1.Rows[0].Cells[0].Paragraphs.First().InsertText("时间");
+                table1.Rows[0].Cells[1].Paragraphs.First().InsertText("单元弯矩");
+            }
+            else if (seqInfo.ReportTypeID == AccidentRptElementInfo.ReportType.MaxDisplace)
+            {
+                maxInfos = finiteDao.GetMaxDisplaceReations(selectedAccident.BridgeAreaID, selectedAccident.AccidentID, 0, direction);
+                table1 = document.AddTable(maxInfos.Count + 1, 2);
+                table1.Rows[0].Cells[0].Paragraphs.First().InsertText("节点");
+                table1.Rows[0].Cells[1].Paragraphs.First().InsertText("节点最大位移");
+            }
+            else if (seqInfo.ReportTypeID == AccidentRptElementInfo.ReportType.MaxInternalMoment)
+            {
+                maxInfos = finiteDao.GetMaxInternalMomentReations(selectedAccident.BridgeAreaID, selectedAccident.AccidentID, direction, elementType);
+                table1 = document.AddTable(maxInfos.Count + 1, 2);
+                table1.Rows[0].Cells[0].Paragraphs.First().InsertText("单元");
+                table1.Rows[0].Cells[1].Paragraphs.First().InsertText("单元最大弯矩");
+            }
+
+            if (seqInfo.ReportTypeID == AccidentRptElementInfo.ReportType.ImpactForce || seqInfo.ReportTypeID == AccidentRptElementInfo.ReportType.DisplaceReation || seqInfo.ReportTypeID == AccidentRptElementInfo.ReportType.InternalMomentReation)
+            {
+                foreach (KeyValuePair<Double, double> info in infos)
+                {
+                    table1.Rows[i].Cells[0].Paragraphs.First().InsertText(SQLUtil.TrimNull(info.Key));
+                    table1.Rows[i].Cells[1].Paragraphs.First().InsertText(SQLUtil.TrimNull(info.Value));
+                    i++;
+                }
+            }
+            if (seqInfo.ReportTypeID == AccidentRptElementInfo.ReportType.MaxDisplace || seqInfo.ReportTypeID == AccidentRptElementInfo.ReportType.MaxInternalMoment)
+            {
+                foreach (KeyValuePair<string, double> info in maxInfos)
+                {
+                    table1.Rows[i].Cells[0].Paragraphs.First().InsertText(SQLUtil.TrimNull(info.Key));
+                    table1.Rows[i].Cells[1].Paragraphs.First().InsertText(SQLUtil.TrimNull(info.Value));
+                    i++;
+                }
+            }
+
+
+            document.InsertTable(table1);
+            
+            if (seqInfo.Title != "")
+                // Add a title
+                document.InsertParagraph(seqInfo.Title).StyleName = StyleImgDes;
+        }
+
+        public static void AddPicture(AccidentRptElementInfo seqInfo, DocX document)
+        {
+            if (seqInfo.Content != "" && seqInfo.Content != null)
+            {
+                var image = document.AddImage(seqInfo.Content);
+                var picture = image.CreatePicture();
+                var p = document.InsertParagraph();
+                p.AppendPicture(picture);
+                p.SpacingAfter(10);
+                p.Alignment = Alignment.both;
+
+                if (seqInfo.Title != "")
+                {
+                    document.InsertParagraph(seqInfo.Title).StyleName = StyleImgDes;
+                }
+            }
+        }
+
+        public static void CreateDoc4Momemt(string fileName, List<MomemtRptElementInfo> seqInfos, MomemtInfo selectedMomemt, string userName)
+        {
+            using (DocX document = DocX.Create(fileName))
+            {
+                // The path to a template document,
+                string templatePath = Path.Combine(AppFolder, "Template.docx");
+
+                // Apply a template to the document based on a path.
+                document.ApplyTemplate(templatePath, false);
+
+                // Add a title
+                var p1 = document.InsertParagraph();
+                p1.Append((string.Format("{0}", SessionInfo.selectedBridge.BridgeAreaName)));
+                p1.StyleName = StyleBridgeName;
+
+                var p2 = document.InsertParagraph();
+                p2.Append("背景评估报告");
+                p2.StyleName = "ReportTitle";
+
+                var p3 = document.InsertParagraph();
+                p3.Append(string.Format("{0}管理处", SessionInfo.selectedBridge.BridgeAreaName));
+                p3.StyleName = StyleDateAndStation;
+
+                var p4 = document.InsertParagraph();
+                p4.Append(string.Format("日期-{0}年{1}月{2}日", DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day));
+                p4.StyleName = StyleDateAndStation;
+
+                var p5 = document.InsertParagraph();
+                p5.Append(string.Format("桥 梁 名 称：{0}", SessionInfo.selectedBridge.BridgeAreaName));
+                p5.StyleName = StyleReportDetail;
+
+                var p6 = document.InsertParagraph();
+                p6.Append(string.Format("桥 梁 管 理 单 位：{0}", SessionInfo.selectedBridge.ManagerDepartmentName));
+                p6.StyleName = StyleReportDetail;
+
+                var p7 = document.InsertParagraph();
+                p7.Append(string.Format("报 告 生 成 软 件：{0} {1}", SystemName, System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString()));
+                p7.StyleName = StyleReportDetail;
+
+                var p8 = document.InsertParagraph();
+                p8.Append(string.Format("报 告 修 改 人：{0}", userName));
+                p8.StyleName = StyleReportDetail;
+
+                var p9 = document.InsertParagraph();
+                p9.Append(string.Format("报 告 生 成 时 间：{0}年{1}月{2}日", DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day));
+                p9.StyleName = StyleReportDetail;
+                p9.SpacingAfter(100d);
+
+                var p10 = document.InsertParagraph();
+                p10.Append(string.Format("报 告 推 送："));
+                p10.StyleName = StyleReportDetail;
+                p10.InsertPageBreakAfterSelf();
+
+                document.AddHeaders();
+                document.AddFooters();
+                document.DifferentFirstPage = true;
+
+                var oddFooter = document.Footers.Odd;
+                var p11 = oddFooter.InsertParagraph();
+                p11.Append(string.Format("{0}管理处                                                       ", SessionInfo.selectedBridge.BridgeAreaName));
+                p11.Append("-").AppendPageNumber(PageNumberFormat.normal);
+                p11.Append("-");
+                p11.StyleName = StyleReportFooter;
+                p11.InsertHorizontalLine(HorizontalBorderPosition.top, "single", 6, 1, "auto");
+
+                var oddHeader = document.Headers.Odd;
+                var p13 = oddHeader.InsertParagraph();
+                p13.Append(string.Format("{0}船撞安全背景评估报告                             {1}年{2}月{3}日",SessionInfo.selectedBridge.BridgeAreaName, DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day));
+                p13.StyleName = StyleReportFooter;
+                p13.InsertHorizontalLine(HorizontalBorderPosition.bottom, "single", 6, 1, "auto");
+
+                document.InsertParagraph("目录").StyleName = StyleBridgeName;
+                document.InsertTableOfContents("", TableOfContentsSwitches.O | TableOfContentsSwitches.U | TableOfContentsSwitches.Z | TableOfContentsSwitches.H, StyleBody);
+
+                document.InsertSection();
+
+                for (int i = 0; i < seqInfos.Count; i++)
+                {
+                    if (seqInfos[i].ElementTypeID == MomemtRptElementInfo.ElementType.Paragraph || seqInfos[i].ElementTypeID == MomemtRptElementInfo.ElementType.Section || seqInfos[i].ElementTypeID == MomemtRptElementInfo.ElementType.stanzas)
+                    {
+                        AddParagraph4Momemt(seqInfos[i], document);
+                    }
+                    else if (seqInfos[i].ElementTypeID == MomemtRptElementInfo.ElementType.Table)
+                    {
+                        AddTable4Momemt(seqInfos[i], selectedMomemt, document);
+                    }
+                    else if (seqInfos[i].ElementTypeID == MomemtRptElementInfo.ElementType.Picture)
+                    {
+                        AddPicture4Momemt(seqInfos[i], document);
+                    }
+                }
+
+                // Save this document to disk.
+                document.Save();
+                UIUtil.ShowInfo("导出评估报告成功", "导出");
+            }
+        }
+
+        public static void AddParagraph4Momemt(MomemtRptElementInfo seqInfo, DocX document)
+        {
+            if (seqInfo.IsBrief == true)
+            {
+                string templateCommonPath = Path.Combine(AppFolder, "BridgeDescription.docx");
+                using (DocX document1 = DocX.Load(templateCommonPath))
+                {
+                    document.InsertDocument(document1);
+                }
+            }
+            else
+            {
+                if (seqInfo.Title != "")
+                {
+                    // Insert a Paragraph into this document.
+                    var p = document.InsertParagraph();
+
+                    // Append some text and add formatting.
+                    p.Append(seqInfo.Title);
+                    if (seqInfo.ElementTypeID == MomemtRptElementInfo.ElementType.Paragraph)
+                        p.StyleName = "Heading1";
+                    else if (seqInfo.ElementTypeID == MomemtRptElementInfo.ElementType.Section)
+                        p.StyleName = "Heading2";
+                    else if (seqInfo.ElementTypeID == MomemtRptElementInfo.ElementType.stanzas)
+                        p.StyleName = "Heading3";
+                }
+                // Insert another Paragraph into this document.
+                if (seqInfo.Content != "" && seqInfo.Content != null)
+                {
+                    var p2 = document.InsertParagraph();
+
+                    // Append some text and add formatting.
+                    p2.Append(seqInfo.Content);
+                    p2.StyleName = StyleBody;
+                }
+            }
+        }
+
+        public static void AddTable4Momemt(MomemtRptElementInfo seqInfo, MomemtInfo selectedMomemt, DocX document)
+        {
+            if (seqInfo.ReportTypeID == 0) return;
+
+            Table table1 = null;
+            int TypeNum = 3;
+            List<CollisionProbabilityInfo> CollisionInfo = new List<CollisionProbabilityInfo>();
+            List<CollapseProbabilityInfo> CollapseInfo = new List<CollapseProbabilityInfo>();
+
+            if (seqInfo.ReportTypeID == MomemtRptElementInfo.ReportType.Collision)
+            {
+                CollisionInfo = momemtDao.GetCollisionProbabilitys(selectedMomemt.ID, SessionInfo.selectedBridge.BridgeAreaID);
+            }
+            else
+            {
+                TypeNum = 4;
+                CollapseInfo = momemtDao.GetCollapseProbabilitys(selectedMomemt.ID, SessionInfo.selectedBridge.BridgeAreaID);
+            }
+
+            List<int> capNums = bridgeDao.GetCapNum(SessionInfo.selectedBridge.BridgeAreaID);
+
+            table1 = document.AddTable(TypeNum + 1, capNums.Count + 1);
+            var t = table1.Rows[0].Cells[0].Paragraphs[0];
+            t.Alignment = Alignment.center;
+            t.Append("桥墩编号");
+            t.Bold();
+            foreach (int capNum in capNums)
+            {
+                var p = table1.Rows[0].Cells[capNum].Paragraphs[0];
+                p.Alignment = Alignment.center;
+                p.Append("#" + capNum);
+                p.Bold();
+            }
+
+            if (seqInfo.ReportTypeID == MomemtRptElementInfo.ReportType.Collision)
+            {
+                for (int i = 0; i < TypeNum; i++)
+                {
+                    int index = i + 1;
+                    table1.Rows[index].Cells[0].Paragraphs.First().InsertText(CollisionProbabilityInfo.Types.GetDesc(i + 1));
+                    for (int j = 0; j < capNums.Count; j++)
+                    {
+                        table1.Rows[index].Cells[j + 1].Paragraphs.First().InsertText((from CollisionProbabilityInfo info in CollisionInfo where info.Type == i + 1 && info.CapNumID == capNums[j] select info.Probability).FirstOrDefault().ToString());
+                    }
+                }
+            }
+            else
+            {
+                for (int i = 0; i < TypeNum; i++)
+                {
+                    int index = i + 1;
+                    table1.Rows[index].Cells[0].Paragraphs.First().InsertText(CollapseProbabilityInfo.Types.GetDesc(i));
+                    for (int j = 0; j < capNums.Count; j++)
+                    {
+                        table1.Rows[index].Cells[j + 1].Paragraphs.First().InsertText((from CollapseProbabilityInfo info in CollapseInfo where info.Type == i && info.CapNumID == capNums[j] select info.Probability).FirstOrDefault().ToString());
+                    }
+                }
+            }
+
+            document.InsertTable(table1);
+
+            if (seqInfo.Title != "")
+                // Add a title
+                document.InsertParagraph(seqInfo.Title).StyleName = StyleImgDes;
+        }
+
+        public static void AddPicture4Momemt(MomemtRptElementInfo seqInfo, DocX document)
+        {
+            if (seqInfo.Content != "" && seqInfo.Content != null)
+            {
+                var image = document.AddImage(seqInfo.Content);
+                var picture = image.CreatePicture();
+                var p = document.InsertParagraph();
+                p.AppendPicture(picture);
+                p.SpacingAfter(10);
+                p.Alignment = Alignment.both;
+
+                if (seqInfo.Title != "")
+                {
+                    document.InsertParagraph(seqInfo.Title).StyleName = StyleImgDes;
+                }
+            }
+        }
+
+    }
+}
+
+
+--------------------------------------------------------------------------------END----------------------------------------------------------------------------------------
+
+
+----------------------------------------------------------------------UIUtil.cs----------------------------------------------------------------------------------------
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Windows.Forms;
+using System.Drawing;
+using System.Data;
+using System.Collections;
+using System.Diagnostics;
+using System.IO;
+using BCWS.BusinessObjects.Util;
+
+namespace BCWSDesktop.Util
+{
+    public static class UIUtil
+    {
+        #region "MessageBox"
+        public static void ShowError(string message, string caption)
+        {
+            MessageBox.Show(message, caption, MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+
+        public static void ShowWarning(string message, string caption)
+        {
+            MessageBox.Show(message, caption, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+        }
+
+        public static void ShowInfo(string message, string caption)
+        {
+            MessageBox.Show(message, caption, MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
+        public static DialogResult ShowConfirm(string message, string caption, MessageBoxButtons messageBoxButtons = MessageBoxButtons.OKCancel, MessageBoxDefaultButton messageBoxDefaultButton = MessageBoxDefaultButton.Button1)
+        {
+            return MessageBox.Show(message, caption, messageBoxButtons, MessageBoxIcon.Question, messageBoxDefaultButton);
+        }
+        #endregion
+
+        #region "Control Validation"
+        public static Boolean CheckTextBoxEmpty(TextBox txtBox, String fieldName)
+        {
+            txtBox.Text = txtBox.Text.Trim();
+
+            if (txtBox.Text == String.Empty)
+            {
+                MessageBox.Show(String.Format("请输入'{0}'.", fieldName), "输入", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                txtBox.Focus();
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
+
+        public static Boolean CheckComboBoxSelected(ComboBox comboBox, String fieldName)
+        {
+            if (comboBox.SelectedIndex == -1)
+            {
+                MessageBox.Show(String.Format("请选择'{0}'.", fieldName), "输入", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                comboBox.Focus();
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
+
+        public static Boolean CheckDateTimePickerSelected(DateTimePicker dateTimePicker, String fieldName)
+        {
+            if (SQLUtil.TrimNull(dateTimePicker.Text) == string.Empty)
+            {
+                MessageBox.Show(String.Format("请选择'{0}'.", fieldName), "输入", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                dateTimePicker.Focus();
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
+
+        public static Boolean CheckNumericField(TextBox txtBox, string fieldName, int precision, bool notZero)
+        {
+            if (CheckNumericField(txtBox.Text, fieldName, precision, notZero) == false)
+            {
+                txtBox.Focus();
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
+
+        public static Boolean CheckNumericField(string fieldValue, string fieldName, int precision, bool notZero)
+        {
+            double d;
+            if (double.TryParse(fieldValue, out d) == false)
+            {
+                ShowWarning(string.Format("{0}必须是数字 ", fieldName), "警告");
+                return false;
+            }
+
+            if (precision > 0)
+            {
+                if (fieldValue.IndexOf(".") > -1)
+                {
+                    if (fieldValue.Substring(fieldValue.IndexOf(".") + 1).Length > precision)
+                    {
+                        ShowWarning(string.Format("{0} can have {1} precision.", fieldName, precision), "Warning");
+                        return false;
+                    }
+                }
+            }
+
+            if (notZero == true)
+            {
+                if (Convert.ToDecimal(fieldValue) == 0)
+                {
+                    ShowWarning(string.Format("{0} should be greater than zero.", fieldName), "Warning");
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        public static Boolean CheckDateRange(DateTimePicker dtpStart, DateTimePicker dtpEnd, bool withCheckBox = false, string dateLabel1 = "", string dateLabel2 = "")
+        {
+            if (withCheckBox == true)
+            {
+                if (dtpStart.Checked == false || dtpEnd.Checked == false) return true;
+            }
+            if (dateLabel1 == string.Empty) dateLabel1 = "Date Start";
+            if (dateLabel2 == string.Empty) dateLabel2 = "Date End";
+
+            if (dtpStart.Value.CompareTo(dtpEnd.Value) > 0)
+            {
+                ShowWarning(string.Format("{0} 必须早于 {1}.", dateLabel1, dateLabel2), "Warning");
+                dtpEnd.Focus();
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
+
+        public static Boolean CheckPassword(TextBox txtNewPassword, TextBox txtConfirmPassword)
+        {
+            if (txtNewPassword.Text.Length < 4)
+            {
+                UIUtil.ShowWarning("请输入至少4位密码.", "密码错误");
+                txtNewPassword.Text = "";
+                txtNewPassword.Focus();
+                txtConfirmPassword.Text = "";
+                return false;
+            }
+
+            if (!txtNewPassword.Text.Equals(txtConfirmPassword.Text))
+            {
+                UIUtil.ShowWarning("确认密码与密码不同!", "密码错误");
+                txtNewPassword.Text = "";
+                txtNewPassword.Focus();
+                txtConfirmPassword.Text = "";
+                return false;
+            }
+
+            return true;
+        }
+
+        public static Boolean CheckEmailTextBox(TextBox theBox)
+        {
+            string email = theBox.Text;
+            if (!System.Text.RegularExpressions.Regex.IsMatch(email, @"^[\w\-\.]+[@@]{1}[\w\-\.]+(\.\w+)+$"))
+            {
+                ShowWarning("邮箱格式错误.", "输入");
+                theBox.Focus();
+                return false;
+            }
+
+            return true;
+        }
+
+        public static Boolean CheckCheckedListBoxSelect(CheckedListBox checkedListBox, string fieldName)
+        {
+            if (checkedListBox.CheckedItems.Count == 0)
+            {
+                MessageBox.Show(String.Format("Please select at least one {0}.", fieldName), "Input", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                checkedListBox.Focus();
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
+
+        public static Boolean IsInteger(char key)
+        {
+            if (((int)(key) >= 48 && (int)(key) <= 57) || (int)(key) == 8)
+                return true;
+            else
+                return false;
+        }
+
+        public static Boolean IsDouble(char key)
+        {
+            if (((int)(key) >= 48 && (int)(key) <= 57) || (int)(key) == 8 || (int)(key) == 45 || (int)(key) == 46)
+                return true;
+            else
+                return false;
+        }
+
+        public static Boolean IsChar(char key)
+        {
+            if (((int)(key) >= 65 && (int)(key) <= 90) || (int)(key) == 8)
+                return true;
+            else if ((int)(key) >= 97 && (int)(key) <= 122)
+                return true;
+            else
+                return false;
+        }
+
+        public static Boolean IsNumeric(object obj)
+        {
+            int iValue;
+            return int.TryParse(obj.ToString(), out iValue);
+        }
+
+        public static Boolean IsFloat(object obj)
+        {
+            double dValue;
+            return double.TryParse(obj.ToString(), out dValue);
+        }
+
+        #endregion
+
+        #region "ComboBox"
+        public static void SetGridRowColor(DataGridView dgvLines)
+        {
+            for (int i = 0; i < dgvLines.Rows.Count; i++)
+            {
+                if (i % 2 == 0)
+                {
+                    dgvLines.Rows[i].DefaultCellStyle.BackColor = Color.White;
+                }
+                else
+                {
+                    dgvLines.Rows[i].DefaultCellStyle.BackColor = Color.WhiteSmoke;
+                }
+                dgvLines.Rows[i].HeaderCell.ToolTipText = (i + 1).ToString();
+            }
+        }
+
+        public static void SetGridComboBoxDataSource(DataGridViewComboBoxColumn cb, DataTable dt, string valueMember, string displayMember = "", Boolean insertEmpty = false, string emptyValue = "", string emptyDisplay = "")
+        {
+            if (insertEmpty == true)
+            {
+                DataRow dr = dt.NewRow();
+                dr[valueMember] = emptyValue;
+                if (displayMember != "")
+                    dr[displayMember] = emptyDisplay;
+                dt.Rows.InsertAt(dr, 0);
+            }
+
+            cb.DataSource = dt;
+            cb.ValueMember = valueMember;
+            if (displayMember != "")
+                cb.DisplayMember = displayMember;
+        }
+
+        public static void SetGridComboBoxDataSource(DataGridViewComboBoxColumn cb, List<string> items, Boolean insertEmpty = false)
+        {
+            if (insertEmpty == true)
+            {
+                items.Insert(0, string.Empty);
+            }
+
+            cb.Items.Clear();
+            cb.Items.AddRange(items.ToArray());
+        }
+
+        public static void SetComboBoxDataSource(ComboBox cb, DataTable dt, string valueMember, string displayMember = "", Boolean insertEmpty = false, string emptyValue = "", string emptyDisplay = "")
+        {
+            if (insertEmpty == true)
+            {
+                DataRow dr = dt.NewRow();
+                dr[valueMember] = emptyValue;
+                if (displayMember != "")
+                    dr[displayMember] = emptyDisplay;
+                dt.Rows.InsertAt(dr, 0);
+            }
+
+            cb.DataSource = dt;
+            cb.ValueMember = valueMember;
+            if (displayMember != "")
+                cb.DisplayMember = displayMember;
+
+            cb.SelectedIndex = -1;
+        }
+
+        public static void SetComboBoxDataSource(ComboBox cb, IList datasource, string valueMember = "", string displayMember = "")
+        {
+            cb.DataSource = datasource;
+            if (valueMember != "")
+                cb.ValueMember = valueMember;
+            if (displayMember != "")
+                cb.DisplayMember = displayMember;
+            cb.SelectedIndex = -1;
+        }
+
+        public static void SetComboBoxDataSource(ComboBox cb, List<string> items, Boolean insertEmpty = false)
+        {
+            if (insertEmpty == true)
+            {
+                items.Insert(0, string.Empty);
+            }
+
+            cb.Items.Clear();
+            cb.Items.AddRange(items.ToArray());
+            cb.SelectedIndex = -1;
+        }
+        #endregion
+
+        #region "Disable/enable and reset form controls"
+
+        public static void DisableAllControls(Control parentControl)
+        {
+            foreach (Control control in parentControl.Controls)
+            {
+                if (control.Controls.Count > 0)
+                {
+                    DisableAllControls(control);
+                }
+                else
+                {
+                    if (control is CheckBox || control is ComboBox || control is DateTimePicker ||
+                            control is MaskedTextBox || control is RadioButton)
+                        control.Enabled = false;
+                    else if (control is TextBox)
+                        ((TextBox)control).ReadOnly = true;
+                    else if (control is CheckedListBox)
+                        ((CheckedListBox)control).CheckOnClick = false;
+                    else if (control is Button)
+                    {
+                        if (control.Text.Contains("View") == true || control.Name.Contains("View") == true
+                                || control.Name == "btnNewNote" || control.Name == "btnViewNote"
+                                || control.Name == "btnNewAttachment" || control.Name == "btnEditAttachment" || control.Name == "btnOpenAttachment" || control.Name == "btnRemoveAttachment")
+                        { }
+                        else if (control.Text == "Cancel" || control.Text == "Close")
+                            control.Text = "Close";
+                        else
+                            control.Enabled = false;
+                    }
+                }
+            }
+        }
+
+        public static void EnableAllControls(Control parentControl)
+        {
+            foreach (Control control in parentControl.Controls)
+            {
+                if (control.Controls.Count > 0)
+                {
+                    EnableAllControls(control);
+                }
+                else
+                {
+                    if (control is Button || control is CheckBox || control is ComboBox || control is DateTimePicker ||
+                            control is MaskedTextBox || control is RadioButton)
+                        control.Enabled = true;
+                    else if (control is CheckedListBox)
+                        ((CheckedListBox)control).CheckOnClick = true;
+                    else if (control is TextBox)
+                        ((TextBox)control).ReadOnly = false;
+                }
+            }
+        }
+
+        public static void TrimTextBoxes(Control parentControl)
+        {
+            foreach (Control control in parentControl.Controls)
+            {
+                if (control.Controls.Count > 0)
+                {
+                    TrimTextBoxes(control);
+                }
+                else
+                {
+                    if (control is TextBox)
+                        ((TextBox)control).Text = ((TextBox)control).Text.Trim();
+                }
+            }
+        }
+        #endregion
+
+        public static void FormResize(Form currentForm, Control childPanel)
+        {
+            currentForm.AutoScrollPosition = new Point(0, 0);
+
+            int parentFormWidth = currentForm.Width;
+            childPanel.Location = new System.Drawing.Point(parentFormWidth > childPanel.Width ? (parentFormWidth - childPanel.Width) / 2 : -10, childPanel.Top);
+        }
+
+        public static void OpenFile(string filePath)
+        {
+            ProcessStartInfo psInfo = new ProcessStartInfo();
+
+            psInfo.FileName = filePath;
+            psInfo.WindowStyle = ProcessWindowStyle.Maximized;
+            Process.Start(psInfo);
+        }
+
+        public static void CheckDirectory(string folderPath)
+        {
+            if (Directory.Exists(folderPath) == false)
+                Directory.CreateDirectory(folderPath);
+        }
+
+        public static DateTime GetDateWithTime(DateTime selectedDate)
+        {
+            if (selectedDate == DateTime.Today)
+            {
+                return DateTime.Now.AddMinutes(-1);
+            }
+            else if (selectedDate < DateTime.Today)
+            {
+                return selectedDate.AddDays(1).AddMinutes(-1);
+            }
+            else
+            {
+                return selectedDate;
+            }
+        }
+
+        public static TreeNode GetRootNode(TreeNode childNode)
+        {
+            TreeNode parentNode = childNode;
+
+            while (true)
+            {
+                if (parentNode.Parent == null)
+                    break;
+                else
+                    parentNode = parentNode.Parent;
+            }
+
+            return parentNode;
+        }
+
+        public static void NumOnly(object sender, KeyPressEventArgs e, Button btn)
+        {
+            if (e.KeyChar == Convert.ToChar(Keys.Enter))
+            {
+                btn.PerformClick();
+            }
+            if (((int)e.KeyChar >= 48 && (int)e.KeyChar <= 57) || (int)e.KeyChar == 8)
+                e.Handled = false;
+            else
+                e.Handled = true;
+        }
+
+        public static void OpenChildForm(Type formType, Form mdiParent)
+        {
+            if (ShowChildrenForm(formType, mdiParent) == false)
+            {
+                Form childForm = (Form)Activator.CreateInstance(formType);
+
+                childForm.MdiParent = mdiParent;
+                childForm.WindowState = FormWindowState.Minimized;
+                childForm.Show();
+                childForm.WindowState = FormWindowState.Normal;
+            }
+        }
+
+        private static bool ShowChildrenForm(Type formType, Form mdiParent)
+        {
+            //依次检测当前窗体的子窗体
+            for (int i = 0; i < mdiParent.MdiChildren.Length; i++)
+            {
+                //判断当前子窗体的Text属性值是否与传入的字符串值相同
+                if (mdiParent.MdiChildren[i].GetType() == formType)
+                {
+                    //如果值相同则表示此子窗体为想要调用的子窗体，激活此子窗体并返回true值
+                    mdiParent.MdiChildren[i].Activate();
+                    return true;
+                }
+            }
+            //如果没有相同的值则表示要调用的子窗体还没有被打开，返回false值
+            return false;
+        }
+    }
+}
+
+--------------------------------------------------------------------------------END----------------------------------------------------------------------------------------
+
+
+----------------------------------------------------------------------ExportUtil.cs----------------------------------------------------------------------------------------
+using DocumentFormat.OpenXml;
+using DocumentFormat.OpenXml.Packaging;
+using DocumentFormat.OpenXml.Spreadsheet;
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.IO;
+using System.Linq;
+using System.Text;
+
+namespace BCWSDesktop.Util
+{
+    public class ExportUtil
+    {
+        public static MemoryStream ToExcel(DataTable dt, bool writeHeader = true)
+        {
+            MemoryStream stream = new MemoryStream();
+            using (DataSet ds = new DataSet())
+            {
+                ds.Tables.Add(dt);
+                using (SpreadsheetDocument document = SpreadsheetDocument.Create(stream, SpreadsheetDocumentType.Workbook, true))
+                {
+                    WriteExcelFile(ds, document, writeHeader);
+                }
+
+                stream.Flush();
+                stream.Position = 0;
+            }
+
+            return stream;
+        }
+
+        private static void WriteExcelFile(DataSet ds, SpreadsheetDocument spreadsheet, bool writeHeader)
+        {
+            //  Create the Excel file contents.  This function is used when creating an Excel file either writing 
+            //  to a file, or writing to a MemoryStream.
+            spreadsheet.AddWorkbookPart();
+            spreadsheet.WorkbookPart.Workbook = new DocumentFormat.OpenXml.Spreadsheet.Workbook();
+
+            //  My thanks to James Miera for the following line of code (which prevents crashes in Excel 2010)
+            spreadsheet.WorkbookPart.Workbook.Append(new BookViews(new WorkbookView()));
+
+            //  If we don't add a "WorkbookStylesPart", OLEDB will refuse to connect to this .xlsx file !
+            WorkbookStylesPart workbookStylesPart = spreadsheet.WorkbookPart.AddNewPart<WorkbookStylesPart>("rIdStyles");
+            Stylesheet stylesheet = new Stylesheet();
+            workbookStylesPart.Stylesheet = stylesheet;
+
+            //  Loop through each of the DataTables in our DataSet, and create a new Excel Worksheet for each.
+            uint worksheetNumber = 1;
+            foreach (DataTable dt in ds.Tables)
+            {
+                //  For each worksheet you want to create
+                string workSheetID = "rId" + worksheetNumber.ToString();
+                string worksheetName = dt.TableName;
+
+                WorksheetPart newWorksheetPart = spreadsheet.WorkbookPart.AddNewPart<WorksheetPart>();
+                newWorksheetPart.Worksheet = new DocumentFormat.OpenXml.Spreadsheet.Worksheet();
+
+                // create sheet data
+                newWorksheetPart.Worksheet.AppendChild(new DocumentFormat.OpenXml.Spreadsheet.SheetData());
+
+                // save worksheet
+                WriteDataTableToExcelWorksheet(dt, newWorksheetPart, writeHeader);
+                newWorksheetPart.Worksheet.Save();
+
+                // create the worksheet to workbook relation
+                if (worksheetNumber == 1)
+                    spreadsheet.WorkbookPart.Workbook.AppendChild(new DocumentFormat.OpenXml.Spreadsheet.Sheets());
+
+                spreadsheet.WorkbookPart.Workbook.GetFirstChild<DocumentFormat.OpenXml.Spreadsheet.Sheets>().AppendChild(new DocumentFormat.OpenXml.Spreadsheet.Sheet()
+                {
+                    Id = spreadsheet.WorkbookPart.GetIdOfPart(newWorksheetPart),
+                    SheetId = (uint)worksheetNumber,
+                    Name = dt.TableName
+                });
+
+                worksheetNumber++;
+            }
+
+            spreadsheet.WorkbookPart.Workbook.Save();
+        }
+
+
+        private static void WriteDataTableToExcelWorksheet(DataTable dt, WorksheetPart worksheetPart, bool writeHeader)
+        {
+            var worksheet = worksheetPart.Worksheet;
+            var sheetData = worksheet.GetFirstChild<SheetData>();
+
+            string cellValue = "";
+
+            //  Create a Header Row in our Excel file, containing one header for each Column of data in our DataTable.
+            //
+            //  We'll also create an array, showing which type each column of data is (Text or Numeric), so when we come to write the actual
+            //  cells of data, we'll know if to write Text values or Numeric cell values.
+            int numberOfColumns = dt.Columns.Count;
+            bool[] IsNumericColumn = new bool[numberOfColumns];
+
+            string[] excelColumnNames = new string[numberOfColumns];
+            for (int n = 0; n < numberOfColumns; n++)
+                excelColumnNames[n] = GetExcelColumnName(n);
+
+            //
+            //  Create the Header row in our Excel Worksheet
+            //
+            uint rowIndex = 1;
+
+            var headerRow = new Row { RowIndex = rowIndex };  // add a row at the top of spreadsheet
+            sheetData.Append(headerRow);
+
+            for (int colInx = 0; colInx < numberOfColumns; colInx++)
+            {
+                DataColumn col = dt.Columns[colInx];
+                if (writeHeader)
+                    AppendTextCell(excelColumnNames[colInx] + "1", col.ColumnName, headerRow);
+                IsNumericColumn[colInx] = (col.DataType.FullName == "System.Decimal") || (col.DataType.FullName == "System.Int32") ||
+                                col.ColumnName.StartsWith("Count") || col.ColumnName.StartsWith("Amount") || col.ColumnName.StartsWith("Budget");
+            }
+
+            //
+            //  Now, step through each row of data in our DataTable...
+            //
+            double cellNumericValue = 0;
+            foreach (DataRow dr in dt.Rows)
+            {
+                // ...create a new row, and append a set of this row's data to it.
+                ++rowIndex;
+                var newExcelRow = new Row { RowIndex = rowIndex };  // add a row at the top of spreadsheet
+                sheetData.Append(newExcelRow);
+
+                for (int colInx = 0; colInx < numberOfColumns; colInx++)
+                {
+                    cellValue = dr.ItemArray[colInx].ToString();
+
+                    // Create cell with data
+                    if (IsNumericColumn[colInx])
+                    {
+                        //  For numeric cells, make sure our input data IS a number, then write it out to the Excel file.
+                        //  If this numeric value is NULL, then don't write anything to the Excel file.
+                        cellNumericValue = 0;
+                        if (double.TryParse(cellValue, out cellNumericValue))
+                        {
+                            cellValue = cellNumericValue.ToString();
+                            AppendNumericCell(excelColumnNames[colInx] + rowIndex.ToString(), cellValue, newExcelRow);
+                        }
+                        else
+                        {
+                            AppendTextCell(excelColumnNames[colInx] + rowIndex.ToString(), cellValue, newExcelRow);
+                        }
+                    }
+                    else
+                    {
+                        //  For text cells, just write the input data straight out to the Excel file.
+                        AppendTextCell(excelColumnNames[colInx] + rowIndex.ToString(), cellValue, newExcelRow);
+                    }
+                }
+            }
+        }
+
+        private static void AppendTextCell(string cellReference, string cellStringValue, Row excelRow)
+        {
+            //  Add a new Excel Cell to our Row 
+            Cell cell = new Cell() { CellReference = cellReference, DataType = CellValues.String };
+            CellValue cellValue = new CellValue();
+            cellValue.Text = cellStringValue;
+            cell.Append(cellValue);
+            excelRow.Append(cell);
+        }
+
+        private static void AppendNumericCell(string cellReference, string cellStringValue, Row excelRow)
+        {
+            //  Add a new Excel Cell to our Row 
+            Cell cell = new Cell() { CellReference = cellReference, DataType = CellValues.Number };
+            CellValue cellValue = new CellValue();
+            cellValue.Text = cellStringValue;
+            cell.Append(cellValue);
+            excelRow.Append(cell);
+        }
+
+        private static string GetExcelColumnName(int columnIndex)
+        {
+            //  Convert a zero-based column index into an Excel column reference  (A, B, C.. Y, Y, AA, AB, AC... AY, AZ, B1, B2..)
+            //
+            //  eg  GetExcelColumnName(0) should return "A"
+            //      GetExcelColumnName(1) should return "B"
+            //      GetExcelColumnName(25) should return "Z"
+            //      GetExcelColumnName(26) should return "AA"
+            //      GetExcelColumnName(27) should return "AB"
+            //      ..etc..
+            //
+            if (columnIndex < 26)
+                return ((char)('A' + columnIndex)).ToString();
+
+            char firstChar = (char)('A' + (columnIndex / 26) - 1);
+            char secondChar = (char)('A' + (columnIndex % 26));
+
+            return string.Format("{0}{1}", firstChar, secondChar);
+        }
+    }
+}
+
+
+
+--------------------------------------------------------------------------------END----------------------------------------------------------------------------------------
+
+----------------------------------------------------------------------DispatchJournalDetail.cshtml----------------------------------------------------------------------------------------
+
+@{
+    ViewBag.Title = ViewBag.ActionName;
+    Layout = "~/Views/Shared/_SubMain.cshtml";
+    string actionName = ViewBag.ActionName;
+    List<BusinessObjects.Domain.KeyValueInfo> resultStatus = BusinessObjects.Manager.LookupManager.GetDispatchJournalResultStatus();
+    BusinessObjects.Domain.UserInfo user = (BusinessObjects.Domain.UserInfo)Session[MedicalEquipmentHostingSystem.Controllers.BaseController.SESSION_KEY_USER];
+    int ID = ViewBag.ID;
+}
+<div id="dispatchJournalVue" v-cloak class="tblDiv">
+    <div>
+        <a class="linkFile backPage" href="@Url.Action(actionName, "Dispatch")">
+            &lt;&lt; @BusinessObjects.Domain.Constants.BACKLIST
+        </a>
+    </div>
+    <h3 align="center">填写服务凭证</h3>
+    <!-- 设备信息 -->
+    <div class="tblDiv">
+        <table border="1" class="tblDetail" v-if="SelectRequest.Request.RequestType.ID != @BusinessObjects.Domain.RequestInfo.RequestTypes.Others && SelectRequest.Request.RequestType.ID != @BusinessObjects.Domain.RequestInfo.RequestTypes.OnSiteInspection && SelectRequest.Request.RequestType.ID != @BusinessObjects.Domain.RequestInfo.RequestTypes.Inventory">
+            <tr class="headtr">
+                <td colspan="4" class="tblName" style="border-right:none">设备基本信息</td>
+            </tr>
+            <tr>
+                <td class="tdHead" width="20%">系统编号</td>
+                <td class="tdReadOnly" width="30%">{{SelectRequest.Equipment.OID}}</td>
+                <td class="tdHead" width="20%">资产等级</td>
+                <td class="tdReadOnly" width="30%">{{SelectRequest.Equipment.AssetLevel.Name}}</td>
+            </tr>
+            <tr>
+                <td class="tdHead">名称</td>
+                <td class="tdReadOnly">{{SelectRequest.Equipment.Name}}</td>
+                <td class="tdHead">使用科室</td>
+                <td class="tdReadOnly">{{SelectRequest.Equipment.Department.Name}}</td>
+            </tr>
+            <tr>
+                <td class="tdHead">型号</td>
+                <td class="tdReadOnly">{{SelectRequest.Equipment.EquipmentCode}}</td>
+                <td class="tdHead">安装地点</td>
+                <td class="tdReadOnly">{{SelectRequest.Equipment.InstalSite}}</td>
+            </tr>
+            <tr>
+                <td class="tdHead">序列号</td>
+                <td class="tdReadOnly">{{SelectRequest.Equipment.SerialCode}}</td>
+                <td class="tdHead">维保状态</td>
+                <td class="tdReadOnly">{{SelectRequest.Equipment.WarrantyStatus}}</td>
+            </tr>
+            <tr>
+                <td class="tdHead">设备厂商</td>
+                <td class="tdReadOnly">{{SelectRequest.Equipment.Manufacturer.Name}}</td>
+                <td class="tdHead">服务范围</td>
+                <td class="tdReadOnly">{{SelectRequest.Equipment.ContractScope.Name}}</td>
+            </tr>
+        </table>
+        <table class="tblDetail" border="1" v-if="SelectRequest.Request.RequestType.ID == @BusinessObjects.Domain.RequestInfo.RequestTypes.OnSiteInspection || SelectRequest.Request.RequestType.ID == @BusinessObjects.Domain.RequestInfo.RequestTypes.Inventory">
+            <tr>
+                <td colspan="10" class="tblName" style="border-right:none">
+                    设备
+                </td>
+            </tr>
+            <tr>
+                <td class="tdHead">系统编号</td>
+                <td class="tdHead">名称</td>
+                <td class="tdHead">设备型号</td>
+                <td class="tdHead">序列号</td>
+                <td class="tdHead">设备厂商</td>
+                <td class="tdHead">资产等级</td>
+                <td class="tdHead">使用科室</td>
+                <td class="tdHead">安装地点</td>
+                <td class="tdHead">维保状态</td>
+                <td class="tdHead">服务范围</td>
+            </tr>
+            <tr v-for="info in SelectRequest.Request.Equipments" style="font-size:10px">
+                <td>{{info.OID}}</td>
+                <td>{{info.Name}}</td>
+                <td>{{info.EquipmentCode}}</td>
+                <td>{{info.SerialCode}}</td>
+                <td>{{info.Manufacturer.Name}}</td>
+                <td>{{info.AssetLevel.Name}}</td>
+                <td>{{info.Department.Name}}</td>
+                <td>{{info.InstalSite}}</td>
+                <td>{{info.WarrantyStatus}}</td>
+                <td>{{info.ContractScope.Name}}</td>
+            </tr>
+        </table>
+        <br v-if="SelectRequest.Request.RequestType.ID != @BusinessObjects.Domain.RequestInfo.RequestTypes.Others" />
+        <!-- 派工单信息 -->
+        <table border="1" class="tblDetail">
+            <tr class="headtr">
+                <td colspan="4" class="tblName">派工内容</td>
+            </tr>
+            <tr class="tblList">
+                <td class="tdHead" width="20%">派工单编号</td>
+                <td class="tdReadOnly" width="30%"><a class="linkFile cursor" href="#" v-on:click="GoToDispatchResponse()">{{SelectRequest.OID}}</a></td>
+                <td class="tdHead" width="20%">紧急程度</td>
+                <td class="tdReadOnly" width="30%">{{SelectRequest.Urgency.Name}}</td>
+            </tr>
+            <tr v-if="SelectRequest.RequestType.ID != @BusinessObjects.Domain.RequestInfo.RequestTypes.Others">
+                <td class="tdHead">派工类型</td>
+                <td class="tdReadOnly">{{SelectRequest.RequestType.Name}}</td>
+                <td class="tdHead">机器状态</td>
+                <td class="tdReadOnly">{{SelectRequest.MachineStatus.Name}}</td>
+            </tr>
+            <tr v-else>
+                <td class="tdHead">派工类型</td>
+                <td class="tdReadOnly" colspan="3">{{SelectRequest.RequestType.Name}}</td>
+            </tr>
+            <tr>
+                <td class="tdHead">工程师姓名</td>
+                <td class="tdReadOnly">{{SelectRequest.Engineer.Name}}</td>
+                <td class="tdHead">出发时间</td>
+                <td class="tdReadOnly">{{parseAndFormatJsonDate(SelectRequest.ScheduleDate)}}</td>
+            </tr>
+            <tr>
+                <td class="tdHead">派工单状态</td>
+                <td class="tdReadOnly" colspan="3">{{SelectRequest.Status.Name}}</td>
+            </tr>
+            <tr>
+                <td class="tdHead">备注</td>
+                <td class="tdReadOnly" colspan="3">{{SelectRequest.LeaderComments}}</td>
+            </tr>
+        </table>
+        <br>
+        <!--服务详情信息 -->
+        <table border="1" class="tblDetail">
+            <tbody>
+                <tr class="headtr">
+                    <td colspan="4" class="tblName">服务详情信息</td>
+                </tr>
+                <tr>
+                    <td class="tdHead" width="20%"><span class="required">&nbsp;&nbsp;</span>服务凭证编号</td>
+                    <td class="tdReadOnly" width="30%">{{DispatchJournal.OID == "0" ? "系统自动生成" : DispatchJournal.OID}}</td>
+                    <td class="tdHead" width="20%"><span class="required">*</span>服务结果</td>
+                    <td class="tdReadOnly" width="30%">
+                        @if (ViewBag.dispatchJournalID > 0)
+                        {
+                            <label class="tdReadOnly">{{DispatchJournal.ResultStatus.ID}}</label>
+                        }
+                        else
+                        {
+                            <select v-model="DispatchJournal.ResultStatus.ID">
+                                @foreach (var item in resultStatus)
+                                {
+                                    <option value="@item.ID">@item.Name</option>
+                                }
+                            </select>
+                            <label class="required" id="reStatus"></label>
+                        }
+
+                    </td>
+                </tr>
+                <tr>
+                    <td class="tdHead"><span class="required">&nbsp;&nbsp;</span>客户姓名</td>
+                    <td class="tdReadOnly">{{SelectRequest.Request.RequestUser.Name}}</td>
+                    <td class="tdHead"><span class="required">&nbsp;&nbsp;</span>客户电话</td>
+                    <td class="tdReadOnly">{{SelectRequest.Request.RequestUser.Mobile}}</td>
+                </tr>
+                <tr>
+                    <td class="tdHead"><span class="required">*</span>故障现象/错误代码/事由</td>
+                    <td colspan="3">
+                        <textarea rows="2" style="width: 600px;" id="FaultCode" maxlength="500" v-model="DispatchJournal.FaultCode"></textarea>
+                        <label id="reFaultCode" class="required"></label>
+                    </td>
+
+                </tr>
+                <tr>
+                    <td class="tdHead"><span class="required">*</span>工作内容</td>
+                    <td colspan="3">
+                        <textarea rows="2" style="width: 600px;" id="JobContent" maxlength="500" v-model="DispatchJournal.JobContent"></textarea>
+                        <label id="reJobContent" class="required"></label>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="tdHead"><span class="required">&nbsp;&nbsp;</span>待跟进问题</td>
+                    <td colspan="3">
+                        <textarea rows="2" style="width: 600px;" id="FollowProblem" maxlength="500" v-model="DispatchJournal.FollowProblem"></textarea>
+                        <label id="reFollowProblem" class="required"></label>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="tdHead"><span class="required">&nbsp;&nbsp;</span>待确认问题</td>
+                    <td colspan="3">
+                        <textarea rows="2" style="width: 600px;" id="UnconfirmedProblem" maxlength="500" v-model="DispatchJournal.UnconfirmedProblem"></textarea>
+                        <lable id="reUnconfirmedProblem" class="required"></lable>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="tdHead"><span class="required">&nbsp;&nbsp;</span>建议留言</td>
+                    <td colspan="3">
+                        <textarea rows="2" style="width: 600px;" maxlength="500" id="Advice" v-model="DispatchJournal.Advice"></textarea>
+                        <label id="reAdvice" class="required"></label>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="tdHead" width="20%"><span class="required">*</span>客户签名</td>
+                    <td colspan="3">
+                        <div id="signature" style="border:1px solid black;float:left;width:400px;"></div>@*签名区*@
+                        <div class="operationBtn" style="margin:30px 0;">
+                            <button type="button" class="btn btn-outline-info btn-sm" id="clear" onclick="ClearSignature()">清除</button>
+                            <label id="resignature" class="required">&nbsp;</label>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <br>
+        <table class="tblDetail" width="800" border="1">
+            <tbody>
+                <tr>
+                    <td class="tblName" colspan="2">审批流程</td>
+                </tr>
+                <tr>
+                    <td class="tdHead" width="20%">流程信息</td>
+                    <td>
+                        <textarea readonly style="width:100%">{{DispatchJournal.FormatHistory}}</textarea>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <br />
+        <table width="600" style="text-align: center; margin: 20px auto;">
+            <tbody>
+                <tr class="tblList">
+                    <td width="30%">
+                        <button class="btn btn-info" onclick="SaveDispatchJournal()">保存并提交</button>
+                    </td>
+                    <td width="30%"><button class="btn btn-info" onclick="back()">返回</button></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+<script src="~/Content/scripts/jSignature.min.js"></script>
+<script>
+    var dispatchJournalVue = new Vue({
+        el: "#dispatchJournalVue",
+        data: {
+            DispatchJournal: {
+                OID:'0',
+                Status: { ID: 0 },
+                ResultStatus:{ID:1},
+                SignatureFileName:'',
+                FileContent: "",
+                FaultCode: '',
+                JobContent: '',
+                FollowProblem: '',
+                Dispatch:{},
+                Signed:true
+            },
+            SelectRequest: {
+                ScheduleDate: '',
+                Urgency: {},
+                RequestType: {},
+                MachineStatus: {},
+                Engineer: {},
+                Status:{},
+                Equipment: {
+                    AssetLevel: {},
+                    Department: {},
+                    Manufacturer: {},
+                    ContractScope:{}
+                },
+                Request: {
+                    RequestUser: {},
+                    DealType: {},
+                    FaultType: {},
+                    Priority:{},
+                    Equipments: [],
+                    RequestType: {}
+                }
+            }
+        }
+    })
+</script>
+<script>
+    $().ready(function () {
+        setTimeout(GetDispatchByID(), 100);
+    })
+
+    function GetDispatchByID() {
+        $.ajax({
+            type: "get",
+            async: false,
+            secureuri: false,
+            url: '@Url.Action("GetDispatchByID", "Dispatch")',
+            data: {
+                dispatchID: '@ViewBag.DispatchID',
+            },
+            dataType: "json",
+            success: function (response) {
+                if (response.ResultCode != "00") {
+                    processResponseError(response.ResultCode, response.ResultMessage);
+                } else {
+                     dispatchJournalVue.SelectRequest = response.Data;
+                     if (dispatchJournalVue.SelectRequest.Request.RequestType.ID != '@BusinessObjects.Domain.RequestInfo.RequestTypes.Others' && dispatchJournalVue.SelectRequest.Request.RequestType.ID != '@BusinessObjects.Domain.RequestInfo.RequestTypes.OnSiteInspection' && dispatchJournalVue.SelectRequest.Request.RequestType.ID != '@BusinessObjects.Domain.RequestInfo.RequestTypes.Inventory') {
+                        dispatchJournalVue.SelectRequest.Equipment = response.Data.Request.Equipments[0];
+                    }
+                    dispatchJournalID = dispatchJournalVue.SelectRequest.DispatchJournal.ID;
+                    if (dispatchJournalID > 0) {
+                        GetDispatchJournalByID(dispatchJournalID);
+                    }
+                }
+            },
+            error: function () { jAlert("连接服务器出错", "错误"); }
+        })
+    }
+
+    function GetDispatchJournalByID(dispatchJournalID) {
+        $.get('@Url.Action("GetDispatchJournalByID", "DispatchJournal")', { dispatchJournalID: dispatchJournalID },
+            function (response) {
+                if (response.ResultCode != "00") {
+                    processResponseError(response.ResultCode, response.ResultMessage);
+                } else {
+                    dispatchJournalVue.DispatchJournal = response.Data;
+                }
+            }
+        )
+    }
+
+    function CheckForm() {
+        $("label.required").html("");
+        var IsValid = true;
+
+        var statusID = dispatchJournalVue.DispatchJournal.ResultStatus.ID;
+        if (statusID == 0) {
+            $("#reStatus").html("请选择服务结果");
+            IsValid = false;
+        }
+
+        var faultCode = dispatchJournalVue.DispatchJournal.FaultCode.replace(/\s/g, "");
+        if (faultCode == "") {
+            $("#FaultCode").focus();
+            $("#reFaultCode").html("故障现象/错误代码/事由不能为空");
+            IsValid = false;
+        }
+
+        var JobContent = dispatchJournalVue.DispatchJournal.JobContent.replace(/\s/g, "");
+        if (JobContent == "") {
+            $("#JobContent").focus();
+            $("#reJobContent").html("工作内容不能为空");
+            IsValid = false;
+        }
+
+        //var followProblem = dispatchJournalVue.DispatchJournal.FollowProblem.replace(/\s/g, "");
+        //if (followProblem == "") {
+        //    $("#FollowProblem").focus();
+        //    $("#reFollowProblem").html("待跟进问题不能为空");
+        //    IsValid = false;
+        //}
+
+        if ($("#signature").jSignature("getData", "native").length == 0) {
+            $("#signature").focus();
+            $("#resignature").html("签名不能为空");
+            IsValid = false;
+        }
+
+        return IsValid;
+    }
+
+    function IsExit() {
+        var IsExit = true;
+        GetDispatchByID();
+
+        if (dispatchJournalVue.SelectRequest.DispatchJournal.ID > 0 && dispatchJournalVue.DispatchJournal.Status.ID != '@BusinessObjects.Domain.DispatchInfo.DocStatus.New')
+            IsExit = false;
+        return IsExit;
+    }
+
+    function back() {
+        window.location.href = '@Url.Action(actionName,"Dispatch")'
+    }
+
+    function GoToDispatchResponse() {
+        window.open("@Url.Action("DispatchResponse", "Dispatch")" + "?" + $.param({ actionName: '@ViewBag.Title', dispatchID: dispatchJournalVue.SelectRequest.ID, requestType: dispatchJournalVue.SelectRequest.RequestType.ID }))
+    }
+</script>
+
+<script>
+    $(function(){
+        $("#signature").jSignature({"decor-color":"transparent"});//初始化签字板,并清除生成的横线
+    })
+
+    function ClearSignature(){
+        $("#signature").jSignature("reset"); //重置签字板
+        dispatchJournalVue.DispatchJournal.FileContent="";
+    }
+
+    function GenerateImgData(){//生成图片操作"
+        var signature=$("#signature");
+        var datapair = signature.jSignature("getData", "image");
+        var i = new Image();
+        i.src = "data:" + datapair[0] + "," + datapair[1];//得到格式化文件数据
+        dispatchJournalVue.DispatchJournal.FileContent=i.src;
+    }
+
+    function SaveDispatchJournal() {
+        if (!CheckForm()) return;
+        if (!IsExit()) {
+            jAlert('不可重复提交', '警告', function () {
+                GetDispatchByID();
+            });
+            return;
+        }
+        SetPageWaiting(true)
+        GenerateImgData();
+
+        dispatchJournalVue.DispatchJournal.FujiComments="";
+        dispatchJournalVue.DispatchJournal.Status.ID = '@BusinessObjects.Domain.DispatchJournalInfo.DispatchJournalStatus.Pending';
+        dispatchJournalVue.DispatchJournal.Dispatch.ID = dispatchJournalVue.SelectRequest.ID;
+        
+        $.post('@Url.Action("SaveDispatchJournal", "DispatchJournal")', { dispatchJournal: dispatchJournalVue.DispatchJournal },
+            function (response) {
+                SetPageWaiting(false)
+                if (response.ResultCode != "00") {
+                    processResponseError(response.ResultCode, response.ResultMessage);
+                } else {
+                    dispatchJournalVue.DispatchJournal.ID = response.Data;
+                    jAlert('提交成功','提交',function(){
+                        window.location.href="@Url.Action(actionName,"Dispatch")"
+                    })
+                }
+            }
+        )
+    }
+
+</script>
+
+
+--------------------------------------------------------------------------------END----------------------------------------------------------------------------------------

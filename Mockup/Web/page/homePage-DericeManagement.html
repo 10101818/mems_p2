@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html style="width: 100%;">
+	<head>
+		<meta charset="utf-8">
+		<title>富士超级用户页面</title>
+		<link rel="stylesheet" type="text/css" href="../css/bootstrap.min.css" />
+		<link rel="stylesheet" type="text/css" href="../style.css" />
+	</head>
+	<body class="iframeBody">
+		<div>
+			<div>
+				<div class="mold">
+					客户请求
+				</div>
+				<div class="homeFJ">
+					<div style="width:30%">
+						<p>待审核</p>
+						<table class="table" cellspacing="0px" cellpadding="5px" width="500px">
+							<thead class="thead-light">
+								<tr>
+									<th scope="col">设备名称</th>
+									<th scope="col">请求人</th>
+									<th scope="col">请求日期<span class="sortIcon">▼</span></th>
+									<th scope="col">查看</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td>医用磁共振设备</td>
+									<td>张三</td>
+									<td>2019-04-11</td>
+									<td><button class="btn btn-outline-info btn-sm" onclick="approve()">&nbsp;审&nbsp;核&nbsp;</button></td>
+								</tr>
+								<tr>
+
+									<td>医用磁共振设备</td>
+									<td>源臣</td>
+									<td>2019-04-11</td>
+									<td><button class="btn btn-outline-info btn-sm" onclick="approve()">&nbsp;审&nbsp;核&nbsp;</button></td>
+								</tr>
+								<tr>
+									<td>医用磁共振设备</td>
+									<td>周望</td>
+									<td>2019-04-11</td>
+									<td><button class="btn btn-outline-info btn-sm" onclick="approve()">&nbsp;审&nbsp;核&nbsp;</button></td>
+								</tr>								
+								<tr>
+									<td>医用磁共振设备</td>
+									<td>杨洛</td>
+									<td>2019-04-14</td>
+									<td><button class="btn btn-outline-info btn-sm" onclick="approve()">&nbsp;审&nbsp;核&nbsp;</button></td>
+								</tr>
+								<tr>
+									<td>医用磁共振设备</td>
+									<td>杨洛</td>
+									<td>2019-04-14</td>
+									<td><button class="btn btn-outline-info btn-sm" onclick="approve()">&nbsp;审&nbsp;核&nbsp;</button></td>
+								</tr>
+
+								<tr>
+									<td colspan="4">
+										<a href="clientRequest.html" style="float: right;" class="linkFile">更多...</a>
+									</td>
+								</tr>
+							</tbody>
+						</table>
+
+					</div>
+					<div style="width:30%">
+						<p>待派工</p>
+						<table class="table" cellspacing="0px" cellpadding="5px" width="500px">
+							<thead class="thead-light">
+								<tr>
+									<th scope="col">设备名称</th>
+									<th scope="col">请求人</th>
+									<th scope="col">请求日期<span class="sortIcon">▼</span></th>
+									<th scope="col">操作</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td>医用磁共振设备</td>
+									<td>张三</td>
+									<td>2019-04-11</td>
+									<td><button class="btn btn-outline-info btn-sm" onclick="cat()">&nbsp;派&nbsp;工&nbsp;</button></td>
+								</tr>
+								<tr>
+									<td>医用磁共振设备</td>
+									<td>源臣</td>
+									<td>2019-04-11</td>
+									<td><button class="btn btn-outline-info btn-sm" onclick="cat()">&nbsp;派&nbsp;工&nbsp;</button></td>
+								</tr>								
+								<tr>
+									<td>医用磁共振设备</td>
+									<td>杨洛</td>
+									<td>2019-04-14</td>
+									<td><button class="btn btn-outline-info btn-sm" onclick="cat()">&nbsp;派&nbsp;工&nbsp;</button></td>
+								</tr>
+								<tr>
+									<td>医用磁共振设备</td>
+									<td>周望</td>
+									<td>2019-04-11</td>
+									<td><button class="btn btn-outline-info btn-sm" onclick="cat()">&nbsp;派&nbsp;工&nbsp;</button></td>
+								</tr>
+								<tr>
+									<td>医用磁共振设备</td>
+									<td>周望</td>
+									<td>2019-04-11</td>
+									<td><button class="btn btn-outline-info btn-sm" onclick="cat()">&nbsp;派&nbsp;工&nbsp;</button></td>
+								</tr>
+								<tr>
+									<td colspan="4">
+										<a href="clientRequest.html" style="float: right;" class="linkFile">更多...</a>
+									</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+					<div style="width:30%">
+						<p>待更新</p>
+						<table class="table" cellspacing="0px" cellpadding="5px" width="500px">
+							<thead class="thead-light">
+								<tr>
+									<th scope="col">设备名称</th>
+									<th scope="col">请求人</th>
+									<th scope="col">请求日期<span class="sortIcon">▼</span></th>
+									<th scope="col">操作</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td>医用磁共振设备</td>
+									<td>张三</td>
+									<td>2019-04-11</td>
+									<td><button class="btn btn-outline-info btn-sm" onclick="update()">&nbsp;更&nbsp;新&nbsp;</button></td>
+								</tr>
+								<tr>
+									<td>医用磁共振设备</td>
+									<td>张三</td>
+									<td>2019-04-11</td>
+									<td><button class="btn btn-outline-info btn-sm" onclick="update()">&nbsp;更&nbsp;新&nbsp;</button></td>
+								</tr>								
+								<tr>
+									<td>医用磁共振设备</td>
+									<td>张三</td>
+									<td>2019-04-11</td>
+									<td><button class="btn btn-outline-info btn-sm" onclick="update()">&nbsp;更&nbsp;新&nbsp;</button></td>
+								</tr>
+								<tr>
+									<td>医用磁共振设备</td>
+									<td>张三</td>
+									<td>2019-04-11</td>
+									<td><button class="btn btn-outline-info btn-sm" onclick="update()">&nbsp;更&nbsp;新&nbsp;</button></td>
+								</tr>
+								<tr>
+									<td>医用磁共振设备</td>
+									<td>张三</td>
+									<td>2019-04-11</td>
+									<td><button class="btn btn-outline-info btn-sm" onclick="update()">&nbsp;更&nbsp;新&nbsp;</button></td>
+								</tr>
+								<tr>
+									<td colspan="4">
+										<a href="clientRequest.html" style="float: right;margin-right: 10px;" class="linkFile">更多...</a>
+									</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+			<div>
+				<div class="mold">
+					派工单
+				</div>
+				<div class="homeFJ">
+					<div style="width:35%">
+						<p>服务凭证待审核</p>
+						<table class="table" cellspacing="0px" cellpadding="5px" width="500px">
+							<thead class="thead-light">
+								<tr>
+									<th scope="col">派工单编号</th>
+									<th scope="col">设备名称</th>
+									<th scope="col">紧急程度</th>
+									<th scope="col">结束日期<span class="sortIcon">▼</span></th>
+									<th scope="col">操作</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td>
+										<a class="linkFile" href="">PGD00000001</a>
+									</td>
+									<td>医用磁共振设备</td>
+									<td>张三</td>
+									<td>2019-04-11</td>
+									<td style="width: 95px;"><button class="btn btn-outline-info btn-sm" onclick="checkService()">服务凭证</button></td>
+								</tr>
+								<tr>
+									<td>
+										<a class="linkFile" href="">PGD00000001</a>
+									</td>
+									<td>医用磁共振设备</td>
+									<td>张三</td>
+									<td>2019-04-11</td>
+									<td style="width: 95px;"><button class="btn btn-outline-info btn-sm" onclick="checkService()">服务凭证</button></td>
+								</tr>
+								<tr>
+									<td>
+										<a class="linkFile" href="">PGD00000001</a>
+									</td>
+									<td>医用磁共振设备</td>
+									<td>张三</td>
+									<td>2019-04-11</td>
+									<td style="width: 95px;"><button class="btn btn-outline-info btn-sm" onclick="checkService()">服务凭证</button></td>
+								</tr>
+								<tr>
+									<td>
+										<a class="linkFile" href="">PGD00000001</a>
+									</td>
+									<td>医用磁共振设备</td>
+									<td>张三</td>
+									<td>2019-04-11</td>
+									<td style="width: 95px;"><button class="btn btn-outline-info btn-sm" onclick="checkService()">服务凭证</button></td>
+								</tr>
+								<tr>
+									<td>
+										<a class="linkFile" href="">PGD00000001</a>
+									</td>
+									<td>医用磁共振设备</td>
+									<td>张三</td>
+									<td>2019-04-11</td>
+									<td style="width: 95px;"><button class="btn btn-outline-info btn-sm" onclick="checkService()">服务凭证</button></td>
+								</tr>
+								<tr>
+									<td colspan="5">
+										<a href="clientRequest.html" style="float: right;margin-right: 10px;" class="linkFile">更多...</a>
+									</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+					<div style="width:35%">
+						<p>作业报告待审核</p>
+						<table class="table" cellspacing="0px" cellpadding="5px">
+							<thead class="thead-light">
+								<tr>
+									<th scope="col">派工单编号</th>
+									<th scope="col">设备名称</th>
+									<th scope="col">紧急程度</th>
+									<th scope="col">结束日期<span class="sortIcon">▼</span></th>
+									<th scope="col">操作</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td>
+										<a class="linkFile" href="">PGD00000001</a>
+									</td>
+									<td>医用磁共振设备</td>
+									<td>张三</td>
+									<td>2019-04-11</td>
+									<td><button class="btn btn-outline-info btn-sm" onclick="checkJob()">作业报告</button></td>
+								</tr>
+								<tr>
+									<td>
+										<a class="linkFile" href="">PGD00000001</a>
+									</td>
+									<td>医用磁共振设备</td>
+									<td>张三</td>
+									<td>2019-04-11</td>
+									<td><button class="btn btn-outline-info btn-sm" onclick="checkJob()">作业报告</button></td>
+								</tr>
+								<tr>
+									<td>
+										<a class="linkFile" href="">PGD00000001</a>
+									</td>
+									<td>医用磁共振设备</td>
+									<td>张三</td>
+									<td>2019-04-11</td>
+									<td><button class="btn btn-outline-info btn-sm" onclick="checkJob()">作业报告</button></td>
+								</tr>
+								<tr>
+									<td>
+										<a class="linkFile" href="">PGD00000001</a>
+									</td>
+									<td>医用磁共振设备</td>
+									<td>张三</td>
+									<td>2019-04-11</td>
+									<td><button class="btn btn-outline-info btn-sm" onclick="checkJob()">作业报告</button></td>
+								</tr>
+								<tr>
+									<td>
+										<a class="linkFile" href="">PGD00000001</a>
+									</td>
+									<td>医用磁共振设备</td>
+									<td>张三</td>
+									<td>2019-04-11</td>
+									<td><button class="btn btn-outline-info btn-sm" onclick="checkJob()">作业报告</button></td>
+								</tr>
+								<tr>
+									<td colspan="5">
+										<a href="clientRequest.html" style="float: right;margin-right: 10px;" class="linkFile">更多...</a>
+									</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+			<script>
+				function approve() {
+					window.location = "ApproveRepairApplication.html";
+				}
+
+				function update() {
+					window.location.href = "updateServerRequest.html";
+				}
+
+				function cat() {
+					window.location = "AllocatedRepairApplication.html";
+				}
+			</script>
+	</body>
+</html>

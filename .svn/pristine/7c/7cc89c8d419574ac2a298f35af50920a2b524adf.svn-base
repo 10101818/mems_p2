@@ -1,0 +1,392 @@
+body,
+.bodyDiv {
+	font-family: "微软雅黑";
+	font-size: 14px;
+	width: 100%;
+	height: 100%;
+	margin: 0;
+}
+
+.dropdown-content {
+	min-width: 121.66px;
+
+	background-color: #DFDEDC;
+	position: absolute;
+	display: none;
+	box-shadow: 0px 8px 15px 10px rgba(0, 0, 0, 0.2);
+	box-shadow: 0px 10px 5px #DFDEDC;
+}
+
+.dropdown-content a {
+	color: white;
+	padding: 12px 16px;
+	text-decoration: none;
+	display: block;
+}
+
+.dropdown-content a:hover {
+	color: white;
+	background-color: #5F0B1B;
+}
+
+.dropdown:hover .dropdown-content {
+	display: block;
+}
+
+.deptitle {
+	color: white;
+	font-size: 16px;
+}
+
+/* frank */
+.tdListCenter {text-align: center !Important;}
+
+
+
+/* Joanna */
+/* 共同部分 css*/
+
+/*filter按钮颜色*/
+.btnFilter{background-color:#3b4674;color:#FFF}
+
+.uploadfj {
+	width: 50px;
+	height: 50px;
+}
+
+section {
+	display: block;
+	margin: 40px auto;
+}
+
+.title {
+	text-align: center;
+	font-size: 24px;
+	padding-bottom: 20px;
+}
+
+.title img {
+	width: 35px;
+	align-content: center;
+}
+
+.text {
+	margin: 10px;
+	color: black;
+	font-size: 45px;
+}
+
+tr .summit {
+	text-align: center;
+}
+
+/* Email css */
+/* 邮箱设置 */
+
+#emailtable1 {
+	width: 650px;
+	border-collapse: collapse;
+	border-spacing: 0;
+	border-left: 1px solid rgb(68, 56, 56);
+	border-top: 1px solid #888;
+}
+
+#emailtable1 th,
+#emailtable1 td {
+	border-right: 2px solid #888;
+	border-bottom: 2px solid #888;
+	padding: 5px 5px;
+	word-break: break-all;
+	width: 100px;
+}
+
+#emailtable1 th {
+	background: rgb(110, 65, 74);
+	color: #DFDEDC;
+}
+
+#emailtable1 img {
+	width: 20px;
+}
+
+.test {
+	float: right;
+	border-radius: 5px;
+	border: none;
+	padding: 5px;
+	background: deepskyblue;
+	font-size: 15px;
+	margin-right: 10px;
+}
+
+#emailtable1 input {
+	width: 200px;
+	height: 20px;
+}
+
+/*.routeTable span {
+	color: rgb(240, 6, 48);
+	padding: 5px;
+}*/
+
+/*超级管理员homepage*/
+
+.homeFJ {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	flex-wrap: wrap;
+	padding: 0 3%;
+}
+
+.homeFJ p {
+	text-align: center;
+	font-size: 20px;
+	font-weight: bolder;
+
+}
+
+/* 短信设置 */
+#emailtable2 {
+	width: 650px;
+	border-collapse: collapse;
+	border-spacing: 0;
+	border-left: 1px solid rgb(68, 56, 56);
+	border-top: 1px solid #888;
+}
+
+#emailtable2 th,
+#emailtable2 td {
+	border-right: 2px solid #888;
+	border-bottom: 2px solid #888;
+	padding: 5px 5px;
+	word-break: break-all;
+	width: 100px;
+}
+
+#emailtable2 th {
+	background: rgb(110, 65, 74);
+	color: #DFDEDC;
+}
+
+#emailtable2 img {
+	width: 20px;
+}
+
+.test {
+	float: right;
+	border-radius: 5px;
+	border: none;
+	padding: 5px;
+	background: deepskyblue;
+	font-size: 15px;
+	margin-right: 10px;
+	color: rgb(39, 39, 39);
+}
+
+#emailtable2 input {
+	width: 200px;
+	height: 20px;
+}
+
+/*.routeTable span {
+	color: rgb(240, 6, 48);
+	padding: 5px;
+}*/
+
+/* user css */
+#usertable {
+	width: 800px;
+	border: #5F0B1B 1px solid;
+	border-collapse: collapse;
+	border-spacing: 0;
+	border-left: 1px solid rgb(68, 56, 56);
+	border-top: 1px solid #888;
+	text-align: center;
+}
+
+#usertable th,
+#usertable td {
+	border-right: 1px solid #888;
+	border-bottom: 1px solid #888;
+	padding: 5px 15px;
+}
+
+#usertable img {
+	width: 20px;
+}
+
+.inform {
+	width: 800px;
+	font-size: 13px;
+	display: flex;
+	justify-content: space-between;
+	padding-bottom: 20px;
+}
+
+.inform img {
+	width: 30px;
+}
+
+/* reportManager*/
+.middle .reportbutton {
+	padding: 10px;
+	border-radius: 5px;
+	background: rgb(128, 18, 18);
+	box-shadow: #70303D 2px 3px;
+	font-weight: 1000;
+	color: rgb(239, 239, 252);
+}
+
+/* addNewServerRequest */
+.middle .newserverbutton {
+	padding: 10px;
+	border-radius: 5px;
+	background: rgb(128, 18, 18);
+	box-shadow: #70303D 2px 3px;
+	font-weight: 1000;
+	width: 100px;
+	color: rgb(239, 239, 252);
+}
+
+/* PlanServer  */
+.planserver input {
+	width: 130px;
+}
+
+.planserver table {
+	margin-top: 20px;
+}
+
+.planserver table th {
+	background: rgb(110, 65, 74);
+	color: white;
+}
+
+.planserver img {
+	width: 25px;
+}
+
+/* a{
+	color: #17a2b8;
+} */
+/*-----------------------------Kevin--------------------------Strat*/
+.requiredItem {color: red;}
+.bodyDiv {color: white;}
+/*详情页大标题*/
+.tblTitle {font-size: 1.75rem;color: #000;text-align: center;margin-top: 3%;}
+/*子数据表格样式*/
+.tblDetail {border-color: #000;width: 800px;}
+.tblDetail td {height: 35px;padding: 1px 10px;}
+.tdDetailHead,.headtd {background-color: #e9ecef;font-weight: bold;text-align: left;padding: 1px 10px;}
+.tdDetailHead th {height: 35px;padding: 1px 5px;}
+/*设备详情页面*/
+/*.addDeviceDetails{width: 700px;font-family: "微软雅黑";}*/
+/*设备详情页面内主数据的子数据名*/
+/*表格内输入框*/
+.input {width: 90%;height: 90%;}
+/*各工单详情页宽度*/
+.serverDetail,.addDeviceDetails {width: 800px;margin:auto;}
+/*所有iframe公共样式*/
+.iframe {border: none;}
+/*1px solid rgb(162,193,196)*/
+/*topIframe框架样式*/
+.comment {height:60px;width: 100%;}
+.commentiframe {width: 100%;height: 100%;}
+.topBody {height: 100%;overflow: hidden;background:linear-gradient(to right, #5579c4, #7accc6)}
+.topDiv {float: left;height: 60px;}
+/*topIframe图标位置*/
+.logoDiv {width: 13%;height:100%;}/*  */
+.logoDiv>.logoImg{vertical-align: middle;height:60px;display: flex;justify-content: center;align-items: center;  }/*  */
+/*topIframe横幅滚动条框架样式*/
+/* .homePage {width: 6%;float: left;margin: 1.75%;}
+.homeLink {font-family: 微软雅黑;padding: .5rem;border: 1px solid #FFFFFF;border-radius: .25rem;color: #FFFFFF;}
+.homeLink:hover {background-color: #17A2B8;border: 1px solid #17A2B8;} */
+.affiche,.userP {height: 100%;}
+.affiche {width: 73%;margin: 0;}
+.marquee{width: 70%;margin: 0 auto;display: table;height: 100%;}
+.marqueeItem{display: table-cell;vertical-align: middle;}
+/*topIframe登录人员框架样式*/
+.userP {width: 14%;font-weight: bold;display: table;}
+.userContent{display: table-cell;vertical-align: middle;text-align: right;padding-right: 30%;}
+/*middleIframe内容主体框架样式*/
+.middle {height: 92%;width: 100%;font-size: 14px;}
+.middleiframe{float: left;}
+.leftiframe{width: 13%;height: 100%;}
+.rightiframe{width: 87%;height: 100%;}
+/*footerIframe框架样式*/
+.footeriframe {width: 100%;height: 50px;}/*edit*/
+.footer {font-weight: bold;	text-align: center;}
+/*middleIframe内部镶嵌页面body宽度*/
+.iframeBody {width: 100%;padding: 0px;padding-left: 3%;padding-top: 1.5%;}
+
+/*leftIframe菜单导航栏框架样式*/
+/*leftIframe菜单导航栏内部镶嵌页面body、链接悬浮样式*/
+.leftBody {height: 100%;width: 100%;}
+.leftDiv,.leftList,.leftList>a,.list-group-item {width: 100%;background-color: #F6F6F6;}
+.leftDiv {height: 100%;}
+.leftList {padding-left: 8%;}
+.leftList>a {border: none;}
+.menuList {display: none;font-size: 12px;margin-left: 20px;}
+.list-group-item:focus,.list-group-item:hover,.leftList a:hover {color: #17A2B8;}
+.badge {float: right;padding-right: 25px;}
+/*.leftList a:hover .badge{color: green;}*/
+/*middleIframe内部镶嵌页面filter按钮组表格样式*/
+.filterTable {width: 95.25%;margin-bottom: 1.5%;}
+.btnContent {color: white;font-size: 1em;}
+.btnContent1 {color: white;	font-size: 1em;}
+.btnBadge {position: absolute;top: 2.5%;color: white;background-color: red;border-radius: 15px;padding: 1px 3px;}
+/*middleIframe内部镶嵌页面手动filter表格样式*/
+.operationTable {width: 94.8%;border: 0px;color: black;text-align: left;margin-bottom: 10px;}
+/*middleIframe内部镶嵌页面数据table样式*/
+.table {width: 95%;text-align: left;}
+.table td {padding: 0.4%;vertical-align: middle;height: 40px;}
+.table th {padding: 0.5%;vertical-align: middle;}
+.strCell {text-align: left;}
+.numCell {text-align: right;}
+.controlsCell {text-align: center;}
+.pagenationDiv {float: right;height: 35px;margin: 3px 0px;}
+.sortIcon {color: #17A2B8;}
+.table .thead-light tr th:last-child {text-align: center;}
+.table tbody tr td:last-child {text-align: center;}
+/*数据表格内部图片*/
+.update {width: 26px;}
+/*数据链接*/
+.linkFile {color: #17a2B8;}
+/*分页工具样式*/
+.page-link {color: #17A2B8;}
+/*dialog样式*/
+.modal-header {	background-color: #555A6D;}
+.modal-body,.modal-footer {background-color: #F6F6F6;}
+.modal-footer button:last-child {margin-left: 5%;}
+.modal-title {color: #FFFFFF;}
+.modal-icon {color: #FFFFFF;}
+.modal-table {width: 95%;margin: auto;}
+.modal-table td {border: none;}
+.modal-table tbody tr td:last-child {text-align: left;}
+.modal-dialog {width: 100%;}
+/*表格内起止时间样式*/
+.shortInput {width: 44%;}
+/*输入数据表格*/
+.table-input {color: #000000;}
+.NoLeftSection {width: 800px;margin: 0 10.5%;text-align: center;}
+.NoLeftSection>h3:first-child {margin-top: 3%;}
+.disableContent,label {color: #777;}
+.hiddenTable{visibility: hidden;}
+.broadCastTable td{white-space:nowrap;overflow:hidden;word-break:keep-all;}
+/*-----------------------------Kevin--------------------------End*/
+/*April-Detail页面的表格样式*/
+.routeTable {
+	width: 800px;
+	text-align: left;
+}
+
+.headtr {
+	font-weight: bold;
+	font-size: 14px;
+}
+
+/*结束-April*/
+.card-body {padding: 10px 10px;}
+
+

@@ -1,0 +1,994 @@
+<template>
+	<div class="container">
+		<div class="content">
+			<div class="top">
+				<div class="left box box1">
+					<div class="top-list-box">
+                        <div class="item">
+                            <div class=" center-center value">{{(overview.EquipmentCount==null)?"Loading":numberComma(overview.EquipmentCount)}}</div>
+                            <div class=" center-center text">设备数量（台）</div>
+                        </div>
+                        <div class="item">
+                            <div class=" center-center value">{{(overview.EquipmentAmount==null)?"Loading":numberComma(Math.floor(overview.EquipmentAmount/10000))}}</div>
+                            <div class=" center-center text">设备金额（万元）</div>
+                        </div>
+                        <div class="item">
+                            <div class=" center-center value">{{(overview.EquipmentAmount==null)?"Loading":((overview.DepreciationRate*100).toFixed(2)+"%")}}</div>
+                            <div class=" center-center text">折旧率</div>
+                        </div>
+                        <div class="item">
+                            <div class=" center-center value">{{(overview.ServiceCount==null)?"Loading":numberComma(overview.ServiceCount)}}</div>
+                            <div class=" center-center text">当年服务人次(人)</div>
+                        </div>
+					</div>
+					<div class="chart1-box">
+						<div class="legend-div"><span class="legend light-blue-border"></span>&nbsp;收入</div>
+						<div class="legend-div legend-expenditure"><span class="legend blue-border"></span>&nbsp;支出</div>
+						<div class="legend-div legend-loss"><span class="legend red-border"></span>&nbsp;亏损</div>
+						<div class="list-box1">
+							<div class="list">
+								<div class="total">
+									<div class=" center-center value ">{{(totalIncome==null)?"Loading":numberComma(Math.floor(Number(totalIncome/10000)))}}</div>
+                                    <div class=" center-center text">总收入（万元）</div>
+                                </div>
+                                <div :class="(totalIncome-totalIncomeLast)>0?'status up green':'status down red'">
+                                    <div class=" center-center value">
+                                        <span v-if="totalIncomeLast == 0">0.00%</span>
+                                        <span v-else>{{(totalIncome==null)?"Loading":Math.abs(Number((totalIncome-totalIncomeLast)*1.0/totalIncomeLast*100).toFixed(2))}}%</span>
+                                        <span class="iconfont icon-shang"></span>
+                                    </div>
+                                    <div class=" center-center text">
+                                        同比去年
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="list">
+                                <div class="total">
+                                    <div class=" center-center value">{{(totalExpense==null)?"Loading":numberComma(Math.floor(Number(totalExpense/10000)))}}</div>
+                                    <div class=" center-center text">总支出（万元）</div>
+                                </div>
+                                <div :class="(totalExpense-totalExpenseLast)>0?'status up green':'status down red'">
+                                    <div class=" center-center value">
+                                        <span v-if="totalExpenseLast == 0">0.00%</span>
+                                        <span v-else>{{(totalExpense==null)?"Loading":Math.abs(Number((totalExpense-totalExpenseLast)*1.0/totalExpenseLast*100).toFixed(2))}}%</span>
+                                        <span class="iconfont icon-shang"></span>
+                                    </div>
+                                    <div class=" center-center text">
+                                        同比去年
+									</div>
+								</div>
+							</div>
+						</div>
+						<div id="chart1"></div>
+                        <div class="sort">
+                            <el-popover
+                            placement="right"
+                            width="220"
+                            v-model="popvisible"
+                            popper-class="filter-poper" >
+                                <div >
+                                    <div class="tooltips" style="margin-bottom:.1rem;"><span >排序：</span><el-select v-model="sort" placeholder="请选择" style="width:150px;">
+                                        <el-option
+                                            v-for="type in sorts"
+                                            :key="type.value"
+                                            :label="type.label"
+                                            :value="type.value"
+                                            @click.native="getIncome" >
+                                        </el-option>
+                                    </el-select></div>
+                                    <div class="tooltips">
+                                        <span>筛选：</span><el-select v-model="filter" placeholder="请选择" style="width:150px;">
+                                            <el-option
+                                                v-for="type in filters"
+                                                :key="type.value"
+                                                :label="type.label"
+                                                :value="type.value"
+                                                @click.native="getIncome">
+                                            </el-option>
+                                        </el-select>
+                                    </div>
+                                </div>
+                                <div slot="reference" style="cursor:pointer;"> 
+                                    <el-tooltip placement="right" effect="light" v-model="tooltipsvisible" :enterable="false" popper-class="tooltips-filter" :disabled="disabled"> 
+                                        <div slot="content">
+                                            <span >排序：</span><span >{{sorts.find(info=>sort == info.value).label}}</span>
+                                            <br/>
+                                            <span></span><br/>
+                                            <span >筛选：</span><span >{{filters.find(info=>filter == info.value).label}}</span>
+                                        </div>
+                                        <div>
+                                            <span class="iconfont icon-sort-filter" style="color:#ccc"></span><!-- #58CFEA -->
+                                        </div>
+                                    </el-tooltip>
+                                </div>
+                            </el-popover>
+                        </div>
+					</div>
+				</div>
+				<div class="right box box2">
+					<EventList :date="date" ref="eventList"></EventList>
+				</div>
+			</div>
+			<div class="bottom">
+				<div class="left box box3">
+                    <div id="chart3"></div>
+                    <div class="list-box-container">
+                        <div :class="(chart3.data.length>0 && chart3.data[0].name=='暂无报修'?'list-box3 flex-center':'list-box3')">
+                            <div class="list" v-for="(item,key) of list3" :key="key" v-show="chart3.data.length>0 && chart3.data[0].name!='暂无报修'">
+                                <span class="index">{{key+1}}</span>
+                                <span class="name elip" :title="item.name">{{item.name}}</span>
+                                <span class="status" :class="{'err':item.status}">{{item.statusDesc}}</span>
+                            </div>
+							<div v-show="chart3.data.length>0 && chart3.data[0].name=='暂无报修'" class="repairNull">
+								<div class="repairText">暂无报修</div>
+							</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="right box box4">
+					<KpiList :date="date" ref="kpi" class="kpi"></KpiList>
+				</div>
+			</div>
+		</div>
+	</div>
+</template>
+<script>
+    import {} from '@/api/api'
+    import G2 from '@antv/g2';
+    import {DataSet} from '@antv/data-set'
+    import {queryOverview, departmentIncome, requestToday} from '@/api/api'
+    import {getRem} from '@/common/common'
+    import EventList from '../../components/componentEventList'
+	import KpiList from '../../components/componentKpiGauge'
+
+	export default {
+		components: {
+			EventList,
+			KpiList,
+		},
+
+		data() {
+			return {
+                disabled:false,
+                popvisible:false,
+                tooltipsvisible:false,
+				sort:(localStorage.getItem("sort")||"seq"),
+				sorts:[
+					{label:"科室",value:"seq"},
+					{label:"收入",value:"收入"},
+					{label:"支出",value:"支出"}
+				],
+				filter:(localStorage.getItem("filter")||"医技科室"),
+				filters:[
+					{label:"所有科室",value:"all"},
+					{label:"医技科室",value:"医技科室"},
+					{label:"临床科室",value:"临床科室"},
+					{label:"其他科室",value:"其他科室"}
+				], 
+				overview: '',
+				chart1: {
+					data: [],
+					startIndex:1
+				},
+				chart1_origin:{},
+				totalIncome: 0.00,
+				totalExpense: 0.00,
+				totalIncomeLast: 0.00,
+				totalExpenseLast: 0.00,
+				chart3: {
+					data: [],
+					interval: null,
+					activeIndex: 0,
+					timing: null,
+				},
+				chart3_origin:{},
+				list3: [],
+				date: ((localStorage.getItem("date"))?new Date(localStorage.getItem("date")) :new Date()),
+			}
+        },
+        props: ['masterDate'],
+        watch: {
+            masterDate: function (date) {   
+                    this.changeDate(date) 
+                }
+            },
+        created() {
+			this.getCurrUserVue()
+			this.getqueryOverview()
+			this.getRequestToday()
+			this.getIncome()
+			this.autoSelectchart3()
+        },
+        updated(){
+            this.disabled = this.popvisible
+            if(this.disabled)
+                this.tooltipsvisible = false
+        },
+		methods: {
+            refreshAll(){
+                let _this = this
+                Object.keys(_this.chart1_origin).length && !_this.chart1_origin.destroyed && _this.chart1_origin.destroy()
+                Object.keys(_this.chart3_origin).length && !_this.chart3_origin.destroyed  && _this.chart3_origin.destroy()
+                Object.keys(_this.$refs.kpi.chart_origin).length && !_this.$refs.kpi.chart_origin.destroyed  && _this.$refs.kpi.chart_origin.destroy()
+				_this.$refs.kpi.init()
+				_this.getRequestToday()
+				_this.getIncome()
+			    _this.autoSelectchart3()
+            },
+			changeDate(date){
+				//debugger
+				this.date= date || this.date
+                document.querySelector(".datepicker-poper").style.display = "none"
+                this.popvisible =false
+				localStorage.setItem("date",this.date)
+				localStorage.setItem("sort",this.sort)
+				localStorage.setItem("filter",this.filter)
+				this.$refs.eventList.iconClick(0)
+				this.$refs.kpi.init()
+				this.getRequestToday()
+				this.getIncome()
+				this.getqueryOverview()
+			},
+			getCurrUserVue() {
+				localStorage.setItem("sort",this.sort)
+				localStorage.setItem("filter",this.filter)
+				let flag = true
+				if (roleID < 0)
+					window.location.href = BASE_URL + "/Home/Login";
+				else if (roleID == 1)
+					this.$router.push("indexSA");
+				else if (roleID == 2)
+					this.$router.push("indexA");
+				else
+					flag = false
+				if(flag)
+					localStorage.removeItem("date")
+			},
+			getqueryOverview() {
+				let params = {
+					date:this.date
+				}
+				queryOverview(params).then(res => {
+					this.overview = res.Data;
+				})
+			},
+			getRequestToday() {
+				//debugger
+				let params = {date:this.date}
+				requestToday(params).then(res => {
+					// debugger
+					let data = res.Data;
+					let _list = [];
+					for (let i = 0; i < data.length; i++) {
+						let ret = _list.findIndex((val) => {
+							return val.name == data[i].DepartmentName;
+						})
+						if (ret == -1) {
+                            _list.push({
+                                name: data[i].DepartmentName,
+                                count: 1,
+                                list: [
+                                    {
+                                        name: `${data[i].DepartmentName}: ${data[i].EquipmentName} [${data[i].EquipmentOID}]请求${data[i].RequestType.Name}`,
+                                        status: data[i].Status.ID != 99 ? true : false,
+                                        statusDesc: data[i].Status.Name
+                                    }
+                                ]
+                            })
+                        } else {
+                            _list[ret].count ++;
+                            _list[ret].list.push({
+                                name:`${data[i].DepartmentName}: ${data[i].EquipmentName} [${data[i].EquipmentOID}]请求${data[i].RequestType.Name}`,
+                                status: data[i].Status.ID != 99 ? true : false,
+                                statusDesc: data[i].Status.Name
+                            })
+                        }
+                    }
+                    this.chart3.data = _list;
+					if(!data.length){
+						let nullList=[]
+						nullList.push({
+                                name: "暂无报修",
+                                count: 1,
+                                list: [
+                                    {
+                                        name: '暂无报修',
+                                        status: true,
+                                        statusDesc: '正常'
+                                    }
+                                ]
+                            })
+						this.chart3.data =nullList
+					}
+					//debugger
+					this.renderChart3()
+				})
+            },
+			getIncome() {
+                this.popvisible =false
+				let params = {
+					date:this.date
+				}
+				localStorage.setItem("sort",this.sort)
+				localStorage.setItem("filter",this.filter)
+				departmentIncome(params).then(res => {
+					let t_income = 0.00,
+						t_expense = 0.00,
+						t_income_last = 0,
+						t_expense_last = 0
+					let data = res.Data;
+					let d_list = [];
+					for (let i = 0; i < data.length; i++) {
+						t_income += Number(data[i].Incomes);
+						t_income_last += Number(data[i].LastIncomes);
+						t_expense += Number(data[i].Expenses);
+						t_expense_last += Number(data[i].LastExpenses);
+						let json = {
+							id: data[i].Department.ID,
+							name: data[i].Department.Description,
+							type: data[i].Department.DepartmentType.Name,
+							seq: data[i].Department.Seq,
+							'收入': Number(data[i].Incomes/10000),
+							'支出': Number(data[i].Expenses/10000),
+							'设备数量': data[i].EquipmentCount,
+                            '设备价值': Number(data[i].EquipmentAmount / 10000),
+							'服务人次': data[i].ServiceCount,
+						}
+						d_list.push(json)
+					}
+					this.chart1.data = d_list;
+					this.totalIncome = t_income;
+					this.totalExpense = t_expense;
+					this.totalIncomeLast = t_income_last;
+					this.totalExpenseLast = t_expense_last;
+					this.renderChart1()
+				})
+			},
+			
+			renderChart1() {
+                let _this = this
+				let dv = new DataSet.DataView();
+                let sort = _this.sort,filter = _this.filter;
+                
+				let sortFunc = (a,b) => { return a.seq -b.seq}
+				if(sort == "收入")
+					sortFunc = (a,b) => { return a.收入 -b.收入}
+				else if(sort == "支出")
+                    sortFunc = (a,b) => { return a.支出 -b.支出} 
+				let result = this.chart1.data.filter(info=> {
+					if(filter != "" && filter != "all")
+						return info.type == filter
+					else return true
+                }).sort(sortFunc)
+                if(sort == "收入" || sort == "支出")
+                    result.reverse()
+				dv.source(result)
+					.transform({
+						type: 'filter',
+						callback(row) {
+							if(filter != "" && filter != "all")
+								return row.type == filter
+							else
+								return true;
+						},
+					}).transform({
+						type: 'sort-by',
+						fields: [sort], // 根据指定的字段集进行排序，与lodash的sortBy行为一致
+						order: sort=='seq'?'ASC':'DESC', // 默认为 ASC，DESC 则为逆序
+					})
+					while(dv.rows.length - 5 < 0){
+						dv.rows.push({
+							name: "null_"+dv.rows.length,
+                            '收入':0,
+                            '支出':0,
+							id: -1,
+						})
+					}
+					dv.transform({
+						type: 'map',
+						callback: function callback(row) {
+							if(!/^null_[0-9]*$/.test(row['name']))
+								row['支出'] *= -1;
+							return row;
+						}
+					}).transform({
+						type: 'fold',
+						fields: ['收入', '支出'],
+						key: 'opinion',
+						value: 'value',
+						retains: ['name']
+					})
+				let colorMap = {
+					'收入': '#86C7E6',
+					'支出': '#1B85E7',
+                };
+                Object.keys(_this.chart1_origin).length && !_this.chart1_origin.destroyed && _this.chart1_origin.destroy()
+				_this.chart1_origin = new G2.Chart({
+					container: 'chart1',
+					forceFit: _this.chart1.data.length <= 20 ? true : false,
+					height: document.querySelector('#chart1').clientHeight,
+					width: _this.chart1.data.length * 48,
+					padding: [getRem(1.6), 0, 0, 0],
+				});
+				let chart = _this.chart1_origin
+				chart.source(dv);
+				chart.axis(false);
+                if(result.length<5){
+                    for(let i =0 ;i<5;i++){
+                        chart.guide().line({
+                            top: true,
+                            start: [i - .25, 0], // 辅助框起始位置，值为原始数据值，支持 callback
+                            end: [i + .25, 0],// 辅助框结束位置，值为原始数据值，支持 callback
+                            lineStyle: {
+                                stroke: '#3aa0ff',
+                                lineWidth: 1,
+                                lineDash: [2, 2]
+                            },
+                        });
+                    }
+                }
+                result.forEach(function(data, dataIndex) {
+					if ( data['支出'] && data['收入'] && data['支出'] > data['收入']) {
+						// 辅助框
+						chart.guide().regionFilter({
+							top: true, // 指定 giude 是否绘制在 canvas 最上层，默认为 false, 即绘制在最下层
+							start: [dataIndex - .25, -data['收入']], // 辅助框起始位置，值为原始数据值，支持 callback
+							end: [dataIndex + .25, -data['支出']], // 辅助框结束位置，值为原始数据值，支持 callback
+							color: '#E2340D',
+						});
+					}
+                    result.length>=5 && chart.guide().line({
+                        top: true,
+                        start: [dataIndex - .25, 0], // 辅助框起始位置，值为原始数据值，支持 callback
+                        end: [dataIndex + .25, 0],// 辅助框结束位置，值为原始数据值，支持 callback
+                        lineStyle: {
+                            stroke: '#3aa0ff',
+                            lineWidth: 1,
+                            lineDash: [2, 2]
+                        },
+                    });
+				});
+
+
+				chart.tooltip({
+					inPlot: true,
+					useHtml: true,
+					htmlContent: function(title, items) {
+						let data = {};
+						_this.chart1.data.forEach(n => {
+							if (n.name === title) {
+                                data = n
+                            }
+						})
+						if(Object.keys(data).length ){
+							return `<div class="g2-tooltip">
+										<div class="g2-tooltip-title">${title}</div>
+										<ul class="g2-tooltip-list">
+										<li class="g2-tooltip-li">设备数量：${_this.numberComma(data.设备数量)}</li>
+										<li class="g2-tooltip-li">设备价值：${_this.numberComma(Math.floor(Number(data.设备价值)))}万</li>
+										<li class="g2-tooltip-li">服务人次：${_this.numberComma(data.服务人次)}</li>
+										<li class="g2-tooltip-li">收入：${_this.numberComma(Math.floor(Number(data.收入)))}万</li>
+										<li class="g2-tooltip-li">支出：${_this.numberComma(Math.floor(Number(data.支出)))}万</li>
+										</ul>
+									</div>`
+						}else return "<div></div>"
+					}
+				});
+				chart.coord();
+				chart.intervalStack().position('name*value').color('opinion', function(opinion) {
+					return colorMap[opinion];
+				});
+
+				chart.on('click', ev => {
+					// 获取逼近的点 point 的原始数据集合
+					let records = chart.getSnapRecords({
+						x: ev.x,
+						y: ev.y
+					});
+
+					const name = records[0]._origin.name
+					let item = _this.chart1.data.find(function(val) {
+						return val.name == name
+					})
+					if(!item || item.id == -1)
+						return
+					let id = item.id
+					localStorage.setItem("date",this.date || new Date())
+					localStorage.setItem("sort",this.sort)
+					localStorage.setItem("filter",this.filter)
+					_this.$router.push({
+						path: '/radar',
+						query: {
+							id
+						}
+					});
+				});
+
+				chart.render();
+			},
+			renderChart3() {
+				let _this = this
+				let total = 0;
+				this.chart3.data.forEach(n => {
+					if (n.count > 0)
+						total += n.count
+				})
+				if(this.chart3.data[0].name=="暂无报修"){
+					total = 0
+                } 
+                Object.keys(_this.chart3_origin).length && !_this.chart3_origin.destroyed && _this.chart3_origin.destroy()
+				_this.chart3_origin =new G2.Chart({
+					container: 'chart3',
+					forceFit: true,
+					padding: 0,
+					height: document.querySelector('#chart3').clientHeight,
+					// animate: false,
+				});
+				let chart = _this.chart3_origin
+				chart.source(this.chart3.data, {});
+				// 坐标轴
+				chart.coord('theta', {
+					radius: 0.75,
+					innerRadius: 0.7
+				});
+				// 鼠标hover交互
+				chart.tooltip({
+					showTitle: false,
+					'g2-tooltip': {
+						'background-color': 'rgba(0, 0, 0, 0.7)',
+						color: '#ddd',
+					},
+                    itemTpl: '<li style="font-size: .4rem;">{name}<br/><br/><span style="font-size:.36rem;">参报数量：'+((this.chart3.data[0].name=="暂无报修")?'0':'{value}')+'</span></li>'
+                });
+                // 辅助文本
+                chart.guide().html({
+                    position: ['50%', '50%'],
+                    html: `<div class="total-repair" style="font-size: .4rem;text-align: center;width: 10em;cursor: pointer;">
+                  <span style="font-size:.8rem;font-weight: bold;">${total}</span>件
+                  <div style="margin-top: .25rem">今日总报修</div>
+                </div>`,
+                    alignX: 'middle',
+                    alignY: 'middle'
+				});
+				// 不显示图例
+				chart.legend(false)
+				this.chart3.interval = chart.intervalStack()
+					.position('count')
+					.style({
+						cursor: 'pointer'
+					}).color('name*count', (name, count) => {
+						// console.log(name,count)
+						let c = count[1] - count[0]
+						if (c === 0) {
+							return '#eeeeee'
+						}
+					})
+					.tooltip("name*count", (name, count) => {
+						return {
+							name: name,
+							value: count,
+							title: "参报数量："
+						}
+					})
+				chart.render();
+
+				this.addEvent(true)
+
+
+				// 默认选中
+				this.chart3.interval.setSelected(this.chart3.data[this.chart3.activeIndex]);
+				this.getchart3List(this.chart3.activeIndex)
+
+				chart.on('interval:click', ev => {
+					const data = ev.data;
+					if (data) {
+						let name = data._origin['name'];
+						// 重新开始定时，防止刚点击一项就自动跳到下一项
+						this.chart3.data.forEach((n, i) => {
+							if (n.name === name) {
+								this.chart3.activeIndex = i
+								this.getchart3List(this.chart3.activeIndex)
+								clearInterval(this.chart3.timing)
+								this.autoSelectchart3()
+							}
+						})
+					}
+				})
+			},
+			autoSelectchart3() {
+				this.chart3.timing = setInterval(() => {
+					this.chart3.activeIndex++
+						(this.chart3.activeIndex > this.chart3.data.length - 1) && (this.chart3.activeIndex = 0)
+					this.chart3.interval.setSelected(this.chart3.data[this.chart3.activeIndex])
+					this.getchart3List(this.chart3.activeIndex)
+				}, 30000)
+			},
+			getchart3List(index) {
+				// 通过下标获取list
+				let temp = (this.chart3.data[index] == null) ? [] : this.chart3.data[index].list
+				this.list3 = temp
+				// this.list3_title = (this.chart3.data[index] == null || this.chart3.data[index].name == "暂无报修")?"":this.chart3.data[index].name+" 参报："+this.list3.length
+				//debugger
+				// 滚动条回到顶
+				if (document.querySelector('.list-box3') != null)
+					document.querySelector('.list-box3').scrollTo(0, 0)
+			},
+
+			numberComma(source, length = 3) {
+				source = String(source).split(".");
+				source[0] = source[0].replace(new RegExp('(\\d)(?=(\\d{' + length + '})+$)', 'ig'), "$1,");
+				return source.join(".");
+			},
+			clickEvent() {
+				window.open('', '_self') //跳转位置今日报修
+			},
+			addEvent(flag) {
+				let ele = document.querySelector('.total-repair')
+				if (!ele) return
+				if (flag) {
+					ele.addEventListener('click', this.clickEvent)
+				} else {
+					ele.document.querySelector('.total-repair').removeEventListener('click', this.clickEvent)
+				}
+			}
+		},
+		beforeDestroy() {
+			this.addEvent(false)
+		}
+	}
+</script>
+
+<style>
+	/* .el-date-picker{background: linear-gradient(to right, #5579c4, #7accc6);}
+	.el-month-table td.current:not(.disabled) .cell{color:#fff;}
+	.el-year-table td.current:not(.disabled) .cell{color:#fff;}
+	.el-picker-panel__icon-btn,.el-date-picker__header-label{color:#fff;}
+	.el-date-table>tbody>tr>th{color:#fff;}
+	.el-date-table__row>.available>div:hover{color:#fff;}
+	.el-date-picker__header-label.active, .el-date-picker__header-label:hover {color: #000;}
+	.el-picker-panel__icon-btn:hover,.el-date-picker__header-label:hover{color:#000;}
+	.el-date-table td.today span {color:#fff;}
+	.el-date-table td.disabled div{background: rgba(0, 0, 0, 0);}
+	.el-month-table td.today .cell{color:#000;}
+	.el-year-table td.today .cell{color:#000;}
+	.el-year-table td .cell:hover{color:#000;}
+	.el-month-table td .cell:hover{color:#000;}
+	.el-year-table td.disabled .cell {background-color: rgba(0, 0, 0, 0)}  
+	.datepicker-poper,.filter-poper{box-shadow: 4px 4px 4px 2px rgba(0, 0, .2, .2);border: 1px solid rgba(0, 0, .2, .2);}*/
+</style>
+<style scoped lang="less">
+	.main-header {
+		display: block;
+	}
+	/*定义滚动条高宽及背景 高宽分别对应横竖滚动条的尺寸*/
+::-webkit-scrollbar
+{
+    width: 0.32rem;
+    height: 0.32rem;
+    background-color: #F5F5F5;
+}
+ 
+/*定义滚动条轨道 内阴影+圆角*/
+::-webkit-scrollbar-track
+{
+    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+    border-radius: 0.2rem;
+    background-color: #F5F5F5;
+}
+ 
+/*定义滑块 内阴影+圆角*/
+::-webkit-scrollbar-thumb
+{
+    border-radius: 0.2rem;
+    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,.3);
+}
+
+	.container {
+		min-width: 1200px;
+		width: 100%;
+		height: 100%;
+		background: #D7E0EE;
+		overflow: hidden;
+		font-size: .4rem;
+
+		.content {
+			padding: .3rem;
+			width: 100%;
+			height: 100%;
+			/*height: calc(100% - 1.6rem);*/
+
+			.top,
+			.bottom {
+				width: 100%;
+				height: 55%;
+				display: flex;
+
+				.left {
+					width: 55%;
+				}
+
+				.right {
+					width: 45%;
+				}
+
+				.box {
+					background: #fff;
+					margin: .15rem;
+					border-radius: .16rem;
+				}
+
+				.box1 {
+					display: flex;
+					flex-direction: column;
+					background: transparent;
+
+					.top-list-box {
+						/*background: #D7E0EE;*/
+						display: flex;
+						padding-bottom: .3rem;
+
+						.item {
+							background: #fff;
+							border-radius: .16rem;
+							height: 2.6rem;
+							flex: 1;
+							margin-right: .3rem;
+							padding: .5rem 0 .5rem 0;
+							display: flex;
+							flex-direction: column;
+							justify-content: space-between;
+
+							.value {
+								color: #3D6EC0;
+								font-size: .72rem;
+								font-weight: bolder;
+							}
+
+							.text {
+								font-size: .4rem;
+							}
+
+							&:last-of-type {
+								margin-right: 0;
+							}
+						}
+					}
+
+					.chart1-box {
+						background: #fff;
+						width: 20.46rem;
+						/*flex: 1;*/
+						padding: .5rem;
+						position: relative;
+						border-radius: .16rem;
+						height: calc(100% - 2.9rem);
+
+						.legend-div{
+							position: absolute;
+
+							.legend{display: inline-block;}
+							.light-blue-border{border: 5px solid #86C7E6;}
+							.blue-border{border: 5px solid #1B85E7;}
+							.red-border{border: 5px solid #f00000;}
+						}
+
+						.legend-expenditure{top: 1rem;}
+						.legend-loss{top: 1.5rem;}
+
+						
+						.list-box-start{
+							position: absolute;
+                            display: flex;
+							justify-content: flex-start;
+							left: 2rem;
+                            z-index: 3;
+						}
+						.list-box1 {
+							position: absolute;
+                            right: 0;
+                            padding-right: .8rem;
+                            left: 0;
+                            top: .5rem;
+                            display: flex;
+                            justify-content: flex-end;
+                            z-index: 2;
+
+                            .list {
+                                display: flex;
+                                align-items: baseline;
+								margin-left: .85rem;
+
+                                .total {
+                                    margin-right: .6rem;
+
+									.value {
+										font-weight: bold;
+										font-size: .6rem;
+										margin-bottom: .1rem;
+									}
+
+									.text {
+										font-size: .4rem;
+									}
+								}
+
+								.status {
+
+
+									.value {
+										font-weight: bold;
+										font-size: .6rem;
+										display: flex;
+										align-items: baseline;
+										margin-bottom: .1rem;
+
+										.iconfont {
+											font-size: .7rem;
+										}
+									}
+
+									.text {
+										color: #000;
+										font-size: .4rem;
+									}
+
+									&.up {}
+
+									&.red {
+										color: #E64340;
+									}
+
+									&.green {
+										color: #3eaf7c;
+									}
+
+									&.down {
+
+										.iconfont {
+											transform: rotate(180deg);
+										}
+									}
+								}
+							}
+						}
+
+						#chart1 {
+							width: 100%;
+							height: 100%;
+							overflow-x: auto;
+							overflow-y: hidden;
+                        }
+                        .sort{
+                            position: absolute;
+                            left: 10px;
+                            
+                        }
+                        
+					}
+				}
+
+				.box2 {
+					position: relative;
+
+
+				}
+
+				.box3 {
+					display: flex;
+
+					#chart3 {
+						width: 40%;
+						height: 100%;
+					}
+
+					.list-box-container {
+						width: 60%;
+						padding: .6rem 0 .6rem .4rem;
+						/*flex: 1;*/
+
+						.flex-center{
+							display: flex;
+							align-items: center;
+							justify-content: center;
+						}
+						.list-box3 {
+							padding-right: .9rem;
+							height: 100%;
+							overflow-y: auto;
+							
+							.flex-center{
+								display: flex;
+								align-items: center;
+								justify-content: center;
+							}
+
+							.repairNull {
+								font-size: 0.6rem;
+								text-align: center;
+							}
+
+							.list {
+								display: flex;
+								justify-content: space-between;
+								align-items: center;
+								margin-bottom: .25rem;
+								height:.65rem;
+
+								&:last-of-type {
+									margin-bottom: 0;
+								}
+
+								.index {
+									font-size: .54rem;
+									color: #5a81c4;
+									margin-right: .35rem;
+								}
+
+								.name {
+									flex: 1;
+									margin-right: .4rem;
+									width: 0;
+								}
+
+								.status {
+									font-size: .36rem;
+									padding: .08rem .14rem;
+									border-radius: .08rem;
+									background: #5975AE;
+									color: #fff;
+
+									&.err {
+										background: #E2340D;
+									}
+								}
+							}
+						}
+					}
+
+				}
+
+				.box4 {
+                    padding: 0 .8rem;
+				}
+			}
+
+			.bottom {
+				height: 45%;
+			}
+
+
+			/deep/ .g2-tooltip {
+				position: absolute;
+				background-color: rgba(0, 0, 0, 0.7);
+				border-radius: .16rem;
+				color: #ddd;
+				white-space: nowrap;
+				font-size: .36rem;
+				line-height: 1.2;
+				padding: .24rem .24rem .1rem .24rem;
+				box-shadow: 0 0 .1rem #aeaeae;
+			}
+
+			/deep/ .g2-tooltip-title {
+				font-size: .4rem;
+			}
+
+			/deep/ .g2-tooltip-list {
+				padding: 0;
+				list-style-type: none;
+				margin-top: .2rem;
+
+				.g2-tooltip-li {
+					margin: .2rem 0;
+					font-size: 0.3rem;
+				}
+			}
+
+			canvas {
+				background: #fff;
+				width: 100%;
+				height: 100%;
+			}
+		}
+	}
+</style>

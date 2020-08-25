@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1" />
+		<title></title>
+		<link rel="stylesheet" type="text/css" href="../css/bootstrap.min.css" />
+		<link rel="stylesheet" type="text/css" href="../style.css" />
+		<script src="../js/jquery-1.11.0.js"></script>
+		<script src="../js/bootstrap.min.js"></script>
+
+	</head>
+	<style>
+	select{min-width:120px;}
+	.table tbody tr td:last-child {
+    text-align: start;
+	}
+	.table .thead-light tr th:last-child {
+		text-align: start;
+	}
+	</style>
+	<body>
+		<div class="iframeBody">
+			<table class="filterTable">
+				<tr>
+					<td style="width:200px;">
+						<table class="toolsTable" cellspacing="0">
+							<tr>
+								<td>
+									<h3 align="left">富士类别</h3>
+								</td>
+							</tr>
+						</table>
+					</td>
+					<td>
+						<table cellspacing="0px" cellpadding="9px" class="hiddenTable">
+							<tr>
+								<td>
+									<button class="btn btn-sm btn-danger "><span class="btnContent">隐藏信息</span><span class="btnBadge">01</span></button>
+								</td>
+								<td>
+									<button class="btn btn-sm btn-warning "><span class="btnContent">隐藏信息</span><span class="btnBadge">02</span></button>
+								</td>
+							</tr>
+						</table>
+					</td>
+					<td width="1%">
+						<table style="width: 200px;" cellspacing="0" cellpadding="5px">
+							<tr>
+								<td>
+									<button class="btn btn-secondary  btn-sm">打印</button>
+								</td>
+								<td>
+									<button class="btn btn-secondary  btn-sm">导出</button>
+								</td>
+								<td>
+									<button class="btn btn-secondary btn-sm">刷新</button>
+								</td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+			</table>
+			<table class="operationTable">
+				<tr>
+					<td>
+						<table>
+							<tr>
+								<td>
+									搜索：
+									<select>
+										<option>设备类型I</option>
+										<option>设备类型II</option>
+										<option>富士I类</option>
+									</select>&nbsp;&nbsp;
+									<input type="text" /><img src="../img/icons8-search-48.png" class="update">
+								</td>
+							</tr>
+						</table>
+					</td>
+
+				</tr>
+			</table>
+			<table class="table" cellspacing="0px" cellpadding="5px">
+				<thead class="thead-light">
+					<tr>
+						<th scope="col" >设备类型I</th>
+						<th scope="col" >设备类型II&nbsp;&nbsp;<img src="../img/add.png" onclick="$('#FujiClassIModal').modal(options)" class="update ShowRouteTable"></th>
+						<th scope="col" style="width:430px">富士I类&nbsp;&nbsp;<img src="../img/add.png" onclick="$('#FujiClassIModalCenter').modal(options)" class="update ShowRouteTable"></th>
+						<th scope="col" style="width:430px">富士II类&nbsp;&nbsp;<img src="../img/add.png" onclick="$('#FujiClassIIModalCenter').modal(options)" class="update ShowRouteTable"></th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td>医用成像器械</td>
+						<td>磁共振成像设备(MRI)</td>
+						<td>
+							<select class="deviceType">
+								
+								<option value="1">医用激光类</option>
+								<option value="6801" >医用刀类</option>
+								<option value="6802">灯床塔</option>
+								<option value="6807">输注泵</option>
+							</select>&nbsp;&nbsp;&nbsp;&nbsp;<a><img src="../img/update.png" class="update" onclick="$('#EditFujiClassIModal').modal(options)"></a>
+						</td>
+						<td>
+							<select class="deviceType">
+								
+								<option value="1">医用刀类</option>
+								<option value="6801" selected>医用激光类</option>
+								<option value="6802">灯床塔</option>
+							</select>&nbsp;&nbsp;&nbsp;&nbsp;<a><img src="../img/update.png" class="update" onclick="$('#EditFujiClassIIModalCenter').modal(options)" ></a>
+						</td>
+					</tr>
+					<tr>
+						<td>医用成像器械</td>
+						<td>基础外科手术器械</td>
+						<td>
+							<select class="deviceType">
+								
+								<option value="1">医用激光类</option>
+								<option value="6801" selected>医用刀类</option>
+								<option value="6802">灯床塔</option>
+								<option value="6807">输注泵</option>
+							</select>&nbsp;&nbsp;&nbsp;&nbsp;<a><img src="../img/update.png" class="update" onclick="$('#EditFujiClassIModal').modal(options)"></a>
+						</td>
+						<td>
+							<select class="deviceType">
+								
+								<option value="1">医用刀类</option>
+								<option value="6801">医用激光类</option>
+								<option value="6802">灯床塔</option>
+							</select>&nbsp;&nbsp;&nbsp;&nbsp;<a><img src="../img/update.png" class="update" onclick="$('#EditFujiClassIIModalCenter').modal(options)" ></a>
+						</td>
+					</tr>
+					<tr>
+						<td>医用成像器械</td>
+						<td>显微外科手术器械</td>
+						<td>
+							<select class="deviceType">
+								
+								<option value="1">医用激光类</option>
+								<option value="6801">医用刀类</option>
+								<option value="6802" selected>灯床塔</option>
+								<option value="6807">输注泵</option>
+							</select>&nbsp;&nbsp;&nbsp;&nbsp;<a><img src="../img/update.png" class="update" onclick="$('#EditFujiClassIModal').modal(options)"></a>
+						</td>
+						<td>
+							<select class="deviceType">
+								
+								<option value="1">医用刀类</option>
+								<option value="6801">医用激光类</option>
+								<option value="6802" selected>灯床塔</option>
+							</select>&nbsp;&nbsp;&nbsp;&nbsp;<a><img src="../img/update.png" class="update" onclick="$('#EditFujiClassIIModalCenter').modal(options)" ></a>
+						</td>
+					</tr>
+					<tr>
+						<td>医用成像器械</td>
+						<td>胸腔心血管外科手术器械</td>
+						<td>
+							<select class="deviceType">
+								
+								<option value="1">医用激光类</option>
+								<option value="6801">医用刀类</option>
+								<option value="6802">灯床塔</option>
+								<option value="6807">输注泵</option>
+							</select>&nbsp;&nbsp;&nbsp;&nbsp;<a><img src="../img/update.png" class="update" onclick="$('#EditFujiClassIModal').modal(options)"></a>
+						</td>
+						<td>
+							<select class="deviceType">
+								
+								<option value="1">医用刀类</option>
+								<option value="6801">医用激光类</option>
+								<option value="6802">灯床塔</option>
+							</select>&nbsp;&nbsp;&nbsp;&nbsp;<a><img src="../img/update.png" class="update" onclick="$('#EditFujiClassIIModalCenter').modal(options)" ></a>
+						</td>
+					</tr>
+					<tr>
+						<td>有源手术器械</td>
+						<td>超声手术设备及附件</td>
+						<td>
+							<select class="deviceType">
+								
+								<option value="1">医用激光类</option>
+								<option value="6801">医用刀类</option>
+								<option value="6802">灯床塔</option>
+								<option value="6807">输注泵</option>
+							</select>&nbsp;&nbsp;&nbsp;&nbsp;<a><img src="../img/update.png" class="update" onclick="$('#EditFujiClassIModal').modal(options)"></a>
+						</td>
+						<td>
+							<select class="deviceType">
+								
+								<option value="1">医用刀类</option>
+								<option value="6801">医用激光类</option>
+								<option value="6802">灯床塔</option>
+							</select>&nbsp;&nbsp;&nbsp;&nbsp;<a><img src="../img/update.png" class="update" onclick="$('#EditFujiClassIIModalCenter').modal(options)" ></a>
+						</td>
+					</tr>
+					<tr>
+						<td>有源手术器械</td>
+						<td>激光手术设备及附件</td>
+						<td>
+							<select class="deviceType">
+								
+								<option value="1">医用激光类</option>
+								<option value="6801">医用刀类</option>
+								<option value="6802">灯床塔</option>
+								<option value="6807">输注泵</option>
+							</select>&nbsp;&nbsp;&nbsp;&nbsp;<a><img src="../img/update.png" class="update" onclick="$('#EditFujiClassIModal').modal(options)"></a>
+						</td>
+						<td>
+							<select class="deviceType">
+								
+								<option value="1">医用刀类</option>
+								<option value="6801">医用激光类</option>
+								<option value="6802">灯床塔</option>
+							</select>&nbsp;&nbsp;&nbsp;&nbsp;<a><img src="../img/update.png" class="update" onclick="$('#EditFujiClassIIModalCenter').modal(options)" ></a>
+						</td>
+					</tr>
+					<tr>
+						<td>有源手术器械</td>
+						<td>高频/射频手术设备及附件</td>
+						<td>
+							<select class="deviceType">
+								
+								<option value="1">医用激光类</option>
+								<option value="6801">医用刀类</option>
+								<option value="6802">灯床塔</option>
+								<option value="6807">输注泵</option>
+							</select>&nbsp;&nbsp;&nbsp;&nbsp;<a><img src="../img/update.png" class="update" onclick="$('#EditFujiClassIModal').modal(options)"></a>
+						</td>
+						<td>
+							<select class="deviceType">
+								
+								<option value="1">医用刀类</option>
+								<option value="6801">医用激光类</option>
+								<option value="6802">灯床塔</option>
+							</select>&nbsp;&nbsp;&nbsp;&nbsp;<a><img src="../img/update.png" class="update" onclick="$('#EditFujiClassIIModalCenter').modal(options)" ></a>
+						</td>
+					</tr>
+					<tr>
+						<td>无源手术器械</td>
+						<td>手术器械-刀</td>
+						<td>
+							<select class="deviceType">
+								
+								<option value="1">医用激光类</option>
+								<option value="6801">医用刀类</option>
+								<option value="6802">灯床塔</option>
+								<option value="6807">输注泵</option>
+							</select>&nbsp;&nbsp;&nbsp;&nbsp;<a><img src="../img/update.png" class="update" onclick="$('#EditFujiClassIModal').modal(options)"></a>
+						</td>
+						<td>
+							<select class="deviceType">
+								
+								<option value="1">医用刀类</option>
+								<option value="6801">医用激光类</option>
+								<option value="6802">灯床塔</option>
+							</select>&nbsp;&nbsp;&nbsp;&nbsp;<a><img src="../img/update.png" class="update" onclick="$('#EditFujiClassIIModalCenter').modal(options)" ></a>
+						</td>
+					</tr>
+					<tr>
+						<td>无源手术器械</td>
+						<td>手术器械-凿</td>
+						<td>
+							<select class="deviceType">
+								
+								<option value="1">医用激光类</option>
+								<option value="6801">医用刀类</option>
+								<option value="6802">灯床塔</option>
+								<option value="6807">输注泵</option>
+							</select>&nbsp;&nbsp;&nbsp;&nbsp;<a><img src="../img/update.png" class="update" onclick="$('#EditFujiClassIModal').modal(options)"></a>
+						</td>
+						<td>
+							<select class="deviceType">
+								
+								<option value="1">医用刀类</option>
+								<option value="6801">医用激光类</option>
+								<option value="6802">灯床塔</option>
+							</select>&nbsp;&nbsp;&nbsp;&nbsp;<a><img src="../img/update.png" class="update" onclick="$('#EditFujiClassIIModalCenter').modal(options)" ></a>
+						</td>
+					</tr>
+					<tr>
+						<td>无源手术器械</td>
+						<td>手术器械-剪</td>
+						<td>
+							<select class="deviceType">
+								
+								<option value="1">医用激光类</option>
+								<option value="6801">医用刀类</option>
+								<option value="6802">灯床塔</option>
+								<option value="6807">输注泵</option>
+							</select>&nbsp;&nbsp;&nbsp;&nbsp;<a><img src="../img/update.png" class="update" onclick="$('#EditFujiClassIModal').modal(options)"></a>
+						</td>
+						<td>
+							<select class="deviceType">
+								
+								<option value="1">医用刀类</option>
+								<option value="6801">医用激光类</option>
+								<option value="6802">灯床塔</option>
+							</select>&nbsp;&nbsp;&nbsp;&nbsp;<a><img src="../img/update.png" class="update" onclick="$('#EditFujiClassIIModalCenter').modal(options)" ></a>
+						</td>
+					</tr>
+					<tr>
+						<td>骨科手术器械</td>
+						<td>骨科用刀</td>
+						<td>
+							<select class="deviceType">
+								
+								<option value="1">医用激光类</option>
+								<option value="6801">医用刀类</option>
+								<option value="6802">灯床塔</option>
+								<option value="6807">输注泵</option>
+							</select>&nbsp;&nbsp;&nbsp;&nbsp;<a><img src="../img/update.png" class="update" onclick="$('#EditFujiClassIModal').modal(options)"></a>
+						</td>
+						<td>
+							<select class="deviceType">
+								
+								<option value="1">医用刀类</option>
+								<option value="6801">医用激光类</option>
+								<option value="6802">灯床塔</option>
+							</select>&nbsp;&nbsp;&nbsp;&nbsp;<a><img src="../img/update.png" class="update" onclick="$('#EditFujiClassIIModalCenter').modal(options)" ></a>
+						</td>
+					</tr>
+					<tr>
+						<td>骨科手术器械</td>
+						<td>骨科用剪</td>
+						<td>
+							<select class="deviceType">
+								
+								<option value="1">医用激光类</option>
+								<option value="6801">医用刀类</option>
+								<option value="6802">灯床塔</option>
+								<option value="6807">输注泵</option>
+							</select>&nbsp;&nbsp;&nbsp;&nbsp;<a><img src="../img/update.png" class="update" onclick="$('#EditFujiClassIModal').modal(options)"></a>
+						</td>
+						<td>
+							<select class="deviceType">
+								
+								<option value="1">医用刀类</option>
+								<option value="6801">医用激光类</option>
+								<option value="6802">灯床塔</option>
+							</select>&nbsp;&nbsp;&nbsp;&nbsp;<a><img src="../img/update.png" class="update" onclick="$('#EditFujiClassIIModalCenter').modal(options)" ></a>
+						</td>
+					</tr>
+					<tr>
+						<td>骨科手术器械</td>
+						<td>骨科用钳</td>
+						<td>
+							<select class="deviceType">
+								
+								<option value="1">医用激光类</option>
+								<option value="6801">医用刀类</option>
+								<option value="6802">灯床塔</option>
+								<option value="6807">输注泵</option>
+							</select>&nbsp;&nbsp;&nbsp;&nbsp;<a><img src="../img/update.png" class="update" onclick="$('#EditFujiClassIModal').modal(options)"></a>
+						</td>
+						<td>
+							<select class="deviceType">
+								
+								<option value="1">医用刀类</option>
+								<option value="6801">医用激光类</option>
+								<option value="6802">灯床塔</option>
+							</select>&nbsp;&nbsp;&nbsp;&nbsp;<a><img src="../img/update.png" class="update" onclick="$('#EditFujiClassIIModalCenter').modal(options)" ></a>
+						</td>
+					</tr>
+					<tr>
+						<td colspan="8">
+							<div>
+								<button class="btn btn-info" data-toggle="modal" style="float: right;margin: 10px 180px 0 0;">保存</button>
+							</div>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+			
+			<!-- 新增富士I类 -->
+			<div class="modal fade" id="FujiClassIModalCenter" tabindex="-1" role="dialog" 
+			 aria-hidden="true">
+				<div class="modal-dialog  modal-dialog-centered" role="document">
+					<div class="modal-content">
+						<div class="modal-header">
+							<h6 class="modal-title" id="userModalLongTitle">新增富士I类</h6>
+							<button type="button" class="close" data-dismiss="modal" aria-lable="Close"><span class="modal-icon" aria-hidden="true">&times;</span></button>
+						</div>
+						<div class="modal-body">
+							<table class="table table-sm  table-input modal-table" style="text-align: left;">
+								<tbody>
+									<tr>
+										<td width="25%" class=""><span class="requiredItem"></span>设备类型I:</td>
+										<td width="75%">
+											<select class="deviceType">
+												<option value="1">医用成像器械</option>
+												<option value="6801">有源手术器械</option>
+												<option value="6802">无源手术器械</option>
+												<option value="6802">骨科手术器械</option>
+											</select>
+										</td>
+									</tr>
+									<tr>
+										<td width="25%" class=""><span class="requiredItem"></span>设备类型II:</td>
+										<td width="75%">
+											<select class="deviceType">
+												<option value="1">磁共振成像设备(MRI)</option>
+												<option value="6801">基础外科手术器械</option>
+												<option value="6802">显微外科手术器械</option>
+												<option value="6802">胸腔心血管外科手术器械</option>
+											</select>
+										</td>
+									</tr>
+									<tr>
+										<td width="15%" class=""><span class="requiredItem"></span>简称:</td>
+										<td width="85%"><input type="text" class="input" /></td>
+									</tr>
+									<tr>
+										<td class=""><span class="requiredItem"></span>描述:</td>
+										<td><input type="text" class="input" /></td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+						<div class="modal-footer">
+							<button type="button" class="btn btn-info " >保存</button>
+							<button type="button" class="btn btn-secondary " data-dismiss="modal">关闭</button>
+						</div>
+					</div>
+				</div>
+			</div>
+			
+			<!-- 新增新增设备类型 -->
+			<div class="modal fade" id="FujiClassIModal" tabindex="-1" role="dialog" 
+			 aria-hidden="true">
+				<div class="modal-dialog  modal-dialog-centered" role="document">
+					<div class="modal-content">
+						<div class="modal-header">
+							<h6 class="modal-title" id="userModalLongTitle">新增设备类型</h6>
+							<button type="button" class="close" data-dismiss="modal" aria-lable="Close"><span class="modal-icon" aria-hidden="true">&times;</span></button>
+						</div>
+						<div class="modal-body">
+							<table class="table table-sm  table-input modal-table" style="text-align: left;">
+								<tbody>
+									<tr>
+										<td width="25%" class=""><span class="requiredItem"></span>设备类型I:</td>
+										<td width="75%">
+											<select class="deviceType">
+												<option value="1">医用成像器械</option>
+												<option value="6801">有源手术器械</option>
+												<option value="6802">无源手术器械</option>
+												<option value="6802">骨科手术器械</option>
+											</select>
+										</td>
+									</tr>
+									<tr>
+										<td width="25%" class=""><span class="requiredItem"></span>设备类型II:</td>
+										<td width="75%">
+											<select class="deviceType">
+												<option value="1">磁共振成像设备(MRI)</option>
+												<option value="6801">基础外科手术器械</option>
+												<option value="6802">显微外科手术器械</option>
+												<option value="6802">胸腔心血管外科手术器械</option>
+											</select>
+										</td>
+									</tr>
+									<tr>
+										<td width="15%" class=""><span class="requiredItem"></span>简称:</td>
+										<td width="85%">
+											<select class="deviceType">
+								
+											<option value="1">医用激光类</option>
+											<option value="6801">医用刀类</option>
+											<option value="6802">灯床塔</option>
+											<option value="6807">输注泵</option>
+										</select>
+										</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+						<div class="modal-footer">
+							<button type="button" class="btn btn-info " >保存</button>
+							<button type="button" class="btn btn-secondary " data-dismiss="modal">关闭</button>
+						</div>
+					</div>
+				</div>
+			</div>
+			
+			<!-- 编辑富士I类 -->
+			<div class="modal fade" id="EditFujiClassIModal" tabindex="-1" role="dialog" 
+			 aria-hidden="true">
+				<div class="modal-dialog  modal-dialog-centered" role="document">
+					<div class="modal-content">
+						<div class="modal-header">
+							<h6 class="modal-title" id="userModalLongTitle">编辑富士I类</h6>
+							<button type="button" class="close" data-dismiss="modal" aria-lable="Close"><span class="modal-icon" aria-hidden="true">&times;</span></button>
+						</div>
+						<div class="modal-body">
+							<table class="table table-sm  table-input modal-table" style="text-align: left;">
+								<tbody>
+									<tr>
+										<td width="25%" class=""><span class="requiredItem"></span>设备类型I:</td>
+										<td width="75%">
+											<select class="deviceType">
+												<option value="1">医用成像器械</option>
+												<option value="6801">有源手术器械</option>
+												<option value="6802">无源手术器械</option>
+												<option value="6802">骨科手术器械</option>
+											</select>
+										</td>
+									</tr>
+									<tr>
+										<td width="25%" class=""><span class="requiredItem"></span>设备类型II:</td>
+										<td width="75%">
+											<select class="deviceType">
+												<option value="1">磁共振成像设备(MRI)</option>
+												<option value="6801">基础外科手术器械</option>
+												<option value="6802">显微外科手术器械</option>
+												<option value="6802">胸腔心血管外科手术器械</option>
+											</select>
+										</td>
+									</tr>
+									<tr>
+										<td width="15%" class=""><span class="requiredItem"></span>简称:</td>
+										<td width="85%"><input type="text" class="input" value="医用激光类" /></td>
+									</tr>
+									<tr>
+										<td class=""><span class="requiredItem"></span>描述:</td>
+										<td><input type="text" class="input" value="医用激光类描述" /></td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+						<div class="modal-footer">
+							<button type="button" class="btn btn-info " >保存</button>
+							<button type="button" class="btn btn-secondary " data-dismiss="modal">关闭</button>
+						</div>
+					</div>
+				</div>
+			</div>
+			
+			<!-- 新增富士II类 -->
+			<div class="modal fade" id="FujiClassIIModalCenter" tabindex="-1" role="dialog" 
+			 aria-hidden="true">
+				<div class="modal-dialog  modal-dialog-centered" role="document">
+					<div class="modal-content">
+						<div class="modal-header">
+							<h6 class="modal-title" id="userModalLongTitle">新增富士II类</h6>
+							<button type="button" class="close" data-dismiss="modal" aria-lable="Close"><span class="modal-icon" aria-hidden="true">&times;</span></button>
+						</div>
+						<div class="modal-body">
+							<table class="table table-sm  table-input modal-table" style="text-align: left;">
+								<tbody>
+									<tr>
+										<td width="25%" class=""><span class="requiredItem"></span>富士I类:</td>
+										<td width="75%">	
+											<select class="deviceType">
+												<option value="1">医用激光类</option>
+												<option value="6801">医用刀类</option>
+												<option value="6802">灯床塔</option>
+												<option value="6807">输注泵</option>
+											</select>
+										</td>
+									</tr>
+									<tr>
+										<td width="25%" class=""><span class="requiredItem"></span>简称:</td>
+										<td width="75%"><input type="text" class="input" /></td>
+									</tr>
+									<tr>
+										<td class=""><span class="requiredItem"></span>描述:</td>
+										<td><input type="text" class="input" /></td>
+									</tr>
+									<tr>
+										<td class=""><span class="requiredItem"></span>状态:</td>
+										<td>
+											<input type="radio" name="fujiClass2" checked/>启用
+											<input type="radio" name="fujiClass2" />停用
+										</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+						<div class="modal-footer">
+							<button type="button" class="btn btn-info " onclick="window.location.href = 'fujiclass2.html'">保存</button>
+							<button type="button" class="btn btn-secondary " data-dismiss="modal">关闭</button>
+						</div>
+					</div>
+				</div>
+			</div>
+			
+			<!-- 编辑富士II类 -->
+			<div class="modal fade" id="EditFujiClassIIModalCenter" tabindex="-1" role="dialog" 
+			 aria-hidden="true">
+				<div class="modal-dialog  modal-dialog-centered" role="document">
+					<div class="modal-content">
+						<div class="modal-header">
+							<h6 class="modal-title" id="userModalLongTitle">编辑富士II类</h6>
+							<button type="button" class="close" data-dismiss="modal" aria-lable="Close"><span class="modal-icon" aria-hidden="true">&times;</span></button>
+						</div>
+						<div class="modal-body">
+							<table class="table table-sm  table-input modal-table" style="text-align: left;">
+								<tbody>
+									<tr>
+										<td width="25%" class=""><span class="requiredItem"></span>富士I类:</td>
+										<td width="75%">	
+											<select class="deviceType">
+												<option value="1">医用激光类</option>
+												<option value="6801">医用刀类</option>
+												<option value="6802">灯床塔</option>
+												<option value="6807">输注泵</option>
+											</select>
+										</td>
+									</tr>
+									<tr>
+										<td width="25%" class=""><span class="requiredItem"></span>简称:</td>
+										<td width="75%"><input type="text" class="input" value="医用激光类" /></td>
+									</tr>
+									<tr>
+										<td class=""><span class="requiredItem"></span>描述:</td>
+										<td><input type="text" class="input" value="医用激光类描述" /></td>
+									</tr>
+									<tr>
+										<td class=""><span class="requiredItem"></span>状态:</td>
+										<td>
+											<input type="radio" name="fujiClass2" checked/>启用
+											<input type="radio" name="fujiClass2" />停用
+										</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+						<div class="modal-footer">
+							<button type="button" class="btn btn-info " onclick="window.location.href = 'fujiclass2.html'">保存</button>
+							<button type="button" class="btn btn-secondary " data-dismiss="modal">关闭</button>
+						</div>
+					</div>
+				</div>
+			</div>
+	</body>
+
+	<script>
+		$(function() {
+			$(".requiredItem").html("*");
+			$(".unrequiredItem").html("&nbsp;&nbsp;");
+			$(".requiredItem").css("color", "red");
+		});
+		var options = {};
+	</script>
+</html>

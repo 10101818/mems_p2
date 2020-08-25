@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1" />
+		<title></title>
+		<link rel="stylesheet" type="text/css" href="../css/bootstrap.min.css" />
+		<link rel="stylesheet" type="text/css" href="../style.css" />
+		<script src="../js/jquery-1.11.0.js"></script>
+		<script src="../js/bootstrap.min.js"></script>
+
+	</head>
+
+	<body>
+		<section>
+			
+			<div class="title">
+				<span id="email" onclick="change('emailtable1')">估价参数设置</span>
+			</div>
+			<table class="routeTable" border="1" cellpadding="6px" align="center">
+				<tr>
+					<td class="headtd"><span class="requiredItem">* </span>医院等级</td>
+					<td>
+						<select>
+							<option>1</option>
+							<option>2</option>
+							<option>3</option>
+						</select>
+					</td>
+				</tr>
+				<tr>
+					<td class="headtd"><span class="requiredItem">* </span>1级医院等级系数</td>
+					<td><input type="text" value="0.8"/></td>
+				</tr>
+				<tr>
+					<td class="headtd"><span class="requiredItem">* </span>2级医院等级系数</td>
+					<td><input type="text" value="1"/></td>
+				</tr>
+				<tr>
+					<td class="headtd"><span class="requiredItem">* </span>3级医院等级系数</td>
+					<td><input type="text" value="1.5"/></td>
+				</tr>
+				<tr>
+					<td class="headtd"><span class="requiredItem">* </span>信息系统使用费</td>
+					<td><input type="text" value="0"/> 元/年</td>
+				</tr>
+				<tr>
+					<td class="headtd"><span class="requiredItem">* </span>每月工作时长</td>
+					<td><input type="text" value="0"/> 小时</td>
+				</tr>
+				<tr>
+					<td class="headtd"><span class="requiredItem">* </span>单位人工成本</td>
+					<td><input type="text" value="0"> 元/月</td>
+				</tr>
+				<tr>
+					<td class="headtd"><span class="requiredItem">* </span>小额成本耗材标准年费用</td>
+					<td><input type="text" value="0"> 元/年</td>
+				</tr>
+				<tr>
+					<td colspan="2"> 备注：用<span class="requiredItem">*</span>标记的为必填项</td>
+				</tr>
+			</table>
+			<br/>
+			<p align="center"><button class="btn btn-info">保存</button></p>
+		</section>
+	</body>
+</html>

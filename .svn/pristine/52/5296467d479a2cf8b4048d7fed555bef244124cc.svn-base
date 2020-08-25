@@ -1,0 +1,218 @@
+<template>
+  <div id="app">
+    <div class="main-header">
+        <div class="main-header-name">
+            <div class="main-name-logo">
+                <img class="main-name-img" src="./Content/img/logo.png">
+            </div>
+            <div class="main-name-master"><span class="main-name-master" id="systemName">{{systemName}}</span></div>
+        </div>
+        <div class="main-header-content">
+            <div class="main-content-mequee"> </div>
+        </div>
+        <div class="main-header-user"> 
+            <div class="header-user-top">
+                <div class="user-top-left"><span id="helloInfo">欢迎：{{userName}}—{{userRole}}</span></div>  
+                <div class="user-top-right"><a v-bind:href='background' class="linkFile" id="background">管理页面</a></div>
+            </div>
+            <div class="header-user-bottom">
+                <div  class="main-content-times user-bottom-left">
+                    <div class="setting">
+                        <el-popover 
+                            trigger="manual"
+                            placement="bottom"
+                            v-model="visible"
+                            :offset='52'
+                            popper-class="datepicker-poper">
+                            <div style="display: flex;align-items: center;justify-content: space-evenly;">
+                                <el-date-picker 
+                                v-model="date"
+                                align="bottom"
+                                type="date"
+                                placeholder="选择日期"
+                                :picker-options="pickerOptions"
+                                :clearable="false" 
+                                :offset='-2'
+                                popper-class="datepicker-panel"
+                                size="mini"
+                                ref="datePicker"
+                                @change="onClick"
+                                @focus="disabledDate"> 
+                                </el-date-picker>
+                                <i class="el-icon-refresh-right" @click="resetDate"></i>
+                            </div> 
+                            <div slot="reference" style="cursor:pointer;"> 
+                                    <el-popover 
+                                        trigger="manual"
+                                        placement="bottom"
+                                        v-model="visibleTooltip"
+                                        :offset='52'
+                                        popper-class="datepicker-poper"> 
+                                    <div style="display: flex;align-items: center;justify-content: space-evenly;" >
+                                        <el-date-picker 
+                                            v-model="date" 
+                                            type="date"  
+                                            size="mini"
+                                            popper-class="datepicker-panel fake-datepicker-panel"
+                                            @click.native="openDatePicker"
+                                            readonly="readonly"> 
+                                        </el-date-picker>
+                                        <i class="el-icon-refresh-right" @click="resetDate"></i>
+                                    </div>
+                                    <el-button type="text" style="color:#ccc" v-show="roleID===3 || roleID===0" @click="openDatePicker" slot="reference">
+                                        <span class="iconfont icon-calender" style="padding-right:5px;"></span>
+                                    </el-button>
+                                </el-popover >
+                            </div>
+                        </el-popover>
+                    </div>
+                    <div id="times"></div> 
+                </div>
+                <div class="user-bottom-right"><a v-bind:href='logout' class="linkFile" id="logout">退出 </a></div>
+            </div>
+        </div>
+    </div>
+    <div class="main-body">
+        <router-view :masterDate="date" ref="sub"/>
+    </div>
+  </div>
+</template>
+
+<script>
+import {} from './common/scripts/js.DateTime'
+  export default {
+    name: 'App',
+    data() {
+        return {
+            visible:false,
+            visibleTooltip:false,
+            roleID:roleID,
+            systemName:systemName,
+            userName:userName,
+            userRole:userRole,
+            background:background,
+            logout:logout,
+            date: ((localStorage.getItem("date"))?new Date(localStorage.getItem("date")) :new Date()), 
+        }
+    }, 
+    methods: {  
+        onClick(){
+            let _this = this
+            _this.visible = false
+            _this.visibleTooltip = true 
+        },
+        openDatePicker(){  
+            let _this = this
+            !_this.visible && (_this.visibleTooltip = false,_this.visible = true)
+            //_this.visibleTooltip = !_this.visibleTooltip;
+            //_this.visible = !_this.visible
+            setTimeout(()=>{
+                _this.visible && _this.$refs.datePicker.focus()
+            })
+        },
+        resetDate(){
+            this.visible = false
+            this.visibleTooltip = false
+            this.date = new Date();
+        },
+        disabledDate(){
+            setTimeout(()=>{
+                let current = document.querySelector(".current")
+                current.firstElementChild.classList.add("clicked")
+                current.firstElementChild.firstElementChild.style.color="#FFFFFF"
+                current.firstElementChild.firstElementChild.style.backgroundColor="#409EFF"
+                current.firstElementChild.firstElementChild.style.borderRadius="50%"
+                let disableds = document.getElementsByClassName("clicked") ;
+                [...disableds].forEach(info=> {
+                    if(![...info.parentElement.classList].some(className => className == "current")){
+                        info.firstElementChild.style.borderRadius =""
+                        info.firstElementChild.style.color=""
+                        info.firstElementChild.style.backgroundColor=""
+                    }
+                })
+            },100)
+        },
+    },
+    created(){ 
+        let _this = this
+        setInterval(function() {
+            document.getElementById("times").innerHTML = new Date().format("yyyy/MM/dd hh:mm");
+        }, 1000);
+        ;(function (designWidth, minWidth) {
+            let doc = document,
+                win = window,
+                docEl = doc.documentElement,
+                remStyle = document.createElement("style"),
+                tid;
+
+            function refreshRem() {
+                    let width = docEl.getBoundingClientRect().width;
+                    // var height = win.innerHeight;
+                    minWidth = minWidth || 1200;
+                    width < minWidth && (width = minWidth);
+                    // width = Math.min(width, height)
+                    let rem = width * 100 / designWidth;
+                    remStyle.innerHTML = 'html{font-size:' + rem + 'px;}';
+                    _this.$refs.sub && _this.$refs.sub.refreshAll()
+            }
+
+            if (docEl.firstElementChild) {
+                docEl.firstElementChild.appendChild(remStyle);
+            } else {
+                let wrap = doc.createElement("div");
+                wrap.appendChild(remStyle);
+                doc.write(wrap.innerHTML);
+                wrap = null;
+            }
+            //要等 wiewport 设置好后才能执行 refreshRem，不然 refreshRem 会执行2次；
+            refreshRem();
+
+            win.addEventListener("resize", function () {
+                clearTimeout(tid); //防止执行两次
+                tid = setTimeout(refreshRem, 300);
+            }, false);
+
+            // win.addEventListener("onorientationchange" in window ? "orientationchange" : "resize", function () {
+            //     clearTimeout(tid); //防止执行两次
+            //     tid = setTimeout(refreshRem, 300);
+            // }, false);
+
+            win.addEventListener("pageshow", function (e) {
+                if (e.persisted) { // 浏览器后退的时候重新计算
+                clearTimeout(tid);
+                tid = setTimeout(refreshRem, 300);
+                }
+            }, false);
+
+            if (doc.readyState === "complete") {
+                doc.body.style.fontSize = "16px";
+            } else {
+                doc.addEventListener("DOMContentLoaded", function (e) {
+                doc.body.style.fontSize = "16px";
+                }, false);
+            }
+            })(3840, 1200);
+    },
+    computed: {  
+        pickerOptions() {
+            var _this=this;
+            return {
+                disabledDate(time) {
+                    var date = _this.date;// 动态起始时间 ，这个时间是已经得到的时间戳
+                    return time.getTime() > Date.now() || time.getTime() == date.getTime();
+                }
+            }
+        }
+    }, 
+  }
+  window.onload = function() {
+      setTimeout(function() {
+          document.querySelector('.main-header').style.opacity = '1'; // 针对所有现代浏览器
+          document.querySelector('.main-header').style.filter = 'alpha(opacity=100)'; // 针对所有现代浏览器
+      }, 300)
+  }
+</script>
+
+<style>
+  @import 'common/css/common.css';
+</style>

@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width,initial-scale=1" />
+	<title></title>
+	<link rel="stylesheet" type="text/css" href="../css/bootstrap.min.css" />
+	<link rel="stylesheet" type="text/css" href="../style.css" />
+	<script src="../js/jquery-1.11.0.js"></script>
+	<script src="../js/bootstrap.min.js"></script>
+
+</head>
+<style>
+	select {
+		min-width: 120px;
+	}
+</style>
+
+<body>
+	<div class="iframeBody">
+		<table class="filterTable">
+			<tr>
+				<td style="width:200px;">
+					<table class="toolsTable" cellspacing="0">
+						<tr>
+							<td>
+								<h3 align="left">服务库</h3>
+							</td>
+						</tr>
+					</table>
+				</td>
+				<td width="1%">
+					<table style="width: 200px;" cellspacing="0" cellpadding="5px">
+						<tr>
+							<td>
+								<button class="btn btn-secondary  btn-sm">打印</button>
+							</td>
+							<td>
+								<button class="btn btn-secondary  btn-sm">导出</button>
+							</td>
+							<td>
+								<button class="btn btn-secondary btn-sm">刷新</button>
+							</td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+		</table>
+		<table class="operationTable" cellpadding="0" cellspacing="0">
+			<tr>
+				<td>
+					<table>
+						<tbody>
+							<tr>
+								<td>状态:
+									<select>
+										<option>全部</option>
+										<option>即将失效</option>
+										<option>生效</option>
+										<option>失效</option>
+										<option>未生效</option>
+									</select>&nbsp;&nbsp;&nbsp;&nbsp;
+								</td> 
+							</tr>
+						</tbody>
+					</table>
+				</td>
+			</tr>
+		</table>
+		<table class="table" cellspacing="0px" cellpadding="5px">
+			<thead class="thead-light">
+				<tr>
+					<th scope="col" style="width: 100px; color:#17A2B8;">系统编号<span class="sortIcon">▼</span></th>
+					<th scope="col" style="min-width: 150px;">服务名称</th>
+					<th scope="col" style="min-width: 120px;">关联富士II类</th>
+					<th scope="col" style="min-width: 100px;">供应商</th>
+					<th scope="col" style="min-width: 100px;">服务次数</th>
+					<th scope="col" style="min-width: 120px;">服务开始时间</th>
+					<th scope="col" style="min-width: 120px;">服务结束时间</th>
+                    <th scope="col" style="min-width: 100px;">金额</th>
+					<th scope="col" style="min-width: 100px;">剩余服务次数</th>
+                    <th scope="col" style="min-width: 80px;">状态</th>
+					<th scope="col" style="min-width: 80px;">编辑</th>
+                </tr>
+                <tr>
+                    <td>WGFW00000001</td>
+					<td>设备1的整机维修</td>
+                    <td>彩超</td>
+                    <td>飞利浦</td>
+                    <td>10</td>
+                    <td>2020-05-01</td>
+                    <td>2021-04-30</td>
+					<td>100000</td>
+					<td>9</td>
+                    <td>生效</td>
+                    <td style="text-align: center;"><img src="../img/edit.png" class="update editLabour"/></td>
+                </tr>
+                <tr>
+                    <td>WGFW00000002</td>
+					<td>CT机维修</td>
+                    <td>多设备</td>
+                    <td>常州市友邦医疗康复器材有限公司</td>
+                    <td>10</td>
+                    <td>2020-05-01</td>
+                    <td>2021-04-30</td>
+					<td>100000</td>
+					<td>9</td>
+                    <td>生效</td>
+                    <td style="text-align: center;"><img src="../img/edit.png" class="update editLabour"/></td>
+                </tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td>
+						<div>
+							<button class="btn btn-info addLabour" data-toggle="modal"
+								style="float: left;margin: 10px 180px 0 0;">新增</button>
+						</div>
+					</td>
+					<td colspan="15">
+						<div class="pagenationDiv">
+							<nav aria-lable="Page navigation example">
+								<ul class="pagination">
+									<li class="page-item">
+										<a class="page-link " href="#">首页</a>
+									</li>
+									<li class="page-item">
+										<a class="page-link" href="#">上一页</a>
+									</li>
+									<li class="page-item">
+										<a class="page-link" href="#">1</a>
+									</li>
+									<li class="page-item">
+										<a class="page-link" href="#">2</a>
+									</li>
+									<li class="page-item">
+										<a class="page-link" href="#">3</a>
+									</li>
+									<li class="page-item">
+										<a class="page-link" href="#">下一页</a>
+									</li>
+									<li class="page-item">
+										<a class="page-link" href="#">末页</a>
+									</li>
+								</ul>
+							</nav>
+						</div>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+</body>
+<script>
+	var options = {};
+	$(function () {
+		$(".addLabour").click(function () {
+			//$("#AddLabour").modal(options);
+			window.location.href = "RepairServiceAdd.html";
+		})
+		$(".editLabour").click(function () {
+			//$("#EditLabour").modal(options);
+			window.location.href = "RepairServiceEdit.html";
+		})
+	})
+
+</script>
+<style>
+</style>
+
+</html>

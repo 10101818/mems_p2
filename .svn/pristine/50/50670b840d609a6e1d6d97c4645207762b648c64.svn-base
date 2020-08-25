@@ -1,0 +1,299 @@
+﻿using BusinessObjects.DataAccess;
+using BusinessObjects.Domain;
+using BusinessObjects.Manager;
+using MedicalEquipmentHostingSystem.App_Start;
+using MedicalEquipmentHostingSystem.Areas.App.Models;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Web;
+using System.Web.Mvc;
+
+namespace MedicalEquipmentHostingSystem.Areas.App.Controllers
+{
+    /// <summary>
+    /// EquipmentController
+    /// </summary>
+    public class EquipmentController : BaseController
+    {
+        private EquipmentManager equipmentManager = new EquipmentManager();
+        private UploadFileManager uploadFileManager = new UploadFileManager();
+        private EquipmentDao equipmentDao = new EquipmentDao();
+        private FileDao fileDao = new FileDao();
+
+        /// <summary>
+        /// 扫码获取设备信息
+        /// </summary>
+        /// <param name="codeContent">二维码信息</param>
+        /// <returns>设备信息</returns>
+        public JsonResult GetDeviceByQRCode(string codeContent)
+        {
+            ServiceResultModel<EquipmentInfo> response = new ServiceResultModel<EquipmentInfo>();
+
+            try
+            {
+                if (string.IsNullOrEmpty(codeContent))
+                {
+                    response.SetFailed(ResultCodes.ParameterError, "二维码内容为空，请重新扫码");//您输入的codeContent参数不正确
+                }
+                else
+                {
+                    string strEquipmentID = codeContent.Split('=')[codeContent.Split('=').Count() - 1];
+                    int equipmentID = 0;
+                    if (Int32.TryParse(strEquipmentID, out equipmentID) == false)
+                    {
+                        response.SetFailed(ResultCodes.ParameterError, "二维码参数不正确，请重新扫码");//您输入的codeContent参数不正确
+                        return MyJson(response, JsonRequestBehavior.AllowGet);
+                    }
+
+                    EquipmentInfo info = this.equipmentManager.GetEquipment(equipmentID);
+                    if (info == null) response.SetFailed(ResultCodes.ParameterError, "设备系统编号不正确，请重新扫码");//您输入的设备系统编号不正确
+                    else response.Data = info.Copy4App();
+                }
+            }
+            catch (Exception ex)
+            {
+                NLog.LogManager.GetCurrentClassLogger().Error(ex, ex.Message);
+                response.SetFailed(ResultCodes.SystemError, ControlManager.GetSettingInfo().ErrorMessage);
+            }
+
+            return MyJson(response, JsonRequestBehavior.AllowGet);
+        }
+        
+        /// <summary>
+        /// 获取设备列表信息
+        /// </summary>
+        /// <param name="status">设备状态</param>
+        /// <param name="warrantyStatus">维保状态</param>
+        /// <param name="departmentID">科室</param>
+        /// <param name="filterTextName">设备名称</param>
+        /// <param name="filterTextSerialCode">设备序列号</param>
+        /// <param name="useStatus">是否停用</param>
+        /// <param name="filterField">搜索条件</param>
+        /// <param name="filterText">搜索内容</param>
+        /// <param name="curRowNum">当前页数第一个数据的位置</param>
+        /// <param name="pageSize">每页展示数据条数</param>
+        /// <returns>设备信息</returns>
+        public JsonResult GetDevices(int status = 0, int warrantyStatus = 0, int departmentID = 0, string filterTextName = "", string filterTextSerialCode = "",bool useStatus = false, string filterField = "e.ID", string filterText = "", int curRowNum = 0, int pageSize = 0)
+        {
+            ServiceResultModel<List<EquipmentInfo>> response = new ServiceResultModel<List<EquipmentInfo>>();
+
+            try
+            {
+                BaseDao.ProcessFieldFilterValue(filterField, ref filterText);
+                List<EquipmentInfo> infos = new List<EquipmentInfo>();
+                List<EquipmentInfo> equipments = this.equipmentDao.QueryEquipments(status, warrantyStatus, departmentID, filterTextName, filterTextSerialCode, useStatus, filterField, filterText, "e.ID", false, curRowNum, pageSize);
+                foreach (EquipmentInfo info in equipments)
+                {
+                    infos.Add(info.Copy4App());
+                }
+                response.Data = infos;
+            }
+            catch (Exception ex)
+            {
+                NLog.LogManager.GetCurrentClassLogger().Error(ex, ex.Message);
+                response.SetFailed(ResultCodes.SystemError, ControlManager.GetSettingInfo().ErrorMessage);
+            }
+
+            return MyJson(response, JsonRequestBehavior.AllowGet);
+        }
+
+        /// <summary>
+        /// 通过设备编号获取二维码信息
+        /// </summary>
+        /// <param name="id">设备编号</param>
+        /// <returns>设备二维码信息</returns>
+        public JsonResult EquipmentLabel(int id)
+        {
+            ServiceResultModel<string> result = new ServiceResultModel<string>();
+            try
+            {
+                result.Data = this.equipmentManager.GetEquipmentLabel(id, GetBaseUrl(), WebConfig.HOSPITAL_NAME);
+            }
+            catch (Exception ex)
+            {
+                NLog.LogManager.GetCurrentClassLogger().Error(ex, ex.Message);
+                result.SetFailed(ResultCodes.SystemError, ControlManager.GetSettingInfo().ErrorMessage);
+            }
+
+            return MyJson(result, JsonRequestBehavior.AllowGet);
+        }
+
+        /// <summary>
+        /// 通过设备编号获取设备信息
+        /// </summary>
+        /// <param name="id">设备编号</param>
+        /// <returns>设备信息</returns>
+        public JsonResult GetDeviceById(int id)
+        {
+            ServiceResultModel<EquipmentInfo> response = new ServiceResultModel<EquipmentInfo>();
+
+            try
+            {
+                EquipmentInfo info = this.equipmentManager.GetEquipment(id);
+                if (info == null) response.SetFailed(ResultCodes.ParameterError, "设备系统编号不正确");//您输入的设备系统编号不正确
+                else response.Data = info;
+                
+            }
+            catch (Exception ex)
+            {
+                NLog.LogManager.GetCurrentClassLogger().Error(ex, ex.Message);
+                response.SetFailed(ResultCodes.SystemError, ControlManager.GetSettingInfo().ErrorMessage);
+            }
+
+            return MyJson(response, JsonRequestBehavior.AllowGet);
+        }
+
+        /// <summary>
+        /// 保存设备信息
+        /// </summary>
+        /// <param name="userID">用户编号</param>
+        /// <param name="info">设备信息</param>
+        /// <returns>保存设备信息返回编码</returns>
+        [HttpPost]
+        public JsonResult SaveEquipment(int userID, EquipmentInfo info)
+        {
+            ServiceResultModelBase response = new ServiceResultModelBase();
+            try
+            {
+                UserInfo user = null;
+                if (CheckUser(userID, response, out user) == false)
+                    return MyJson(response, JsonRequestBehavior.AllowGet);
+
+                if (WebConfig.AutoAssetCode == false)
+                {
+                    if (string.IsNullOrEmpty(info.AssetCode))
+                    {
+                        response.SetFailed(ResultCodes.ParameterError, "设备资产编号不能为空");
+                        return MyJson(response, JsonRequestBehavior.AllowGet);
+                    }
+                    else
+                    {
+                        if (this.equipmentDao.CheckAssetCode(info.ID, info.AssetCode))
+                        {
+                            response.SetFailed(ResultCodes.ParameterError, "设备资产编号重复");
+                            return MyJson(response, JsonRequestBehavior.AllowGet);
+                        }
+                    }
+                }
+
+                this.equipmentManager.SaveEquipment4App(info, info.EquipmentFile, user);
+            }
+            catch (Exception ex)
+            {
+                NLog.LogManager.GetCurrentClassLogger().Error(ex, ex.Message);
+                response.SetFailed(ResultCodes.SystemError, ControlManager.GetSettingInfo().ErrorMessage);
+            }
+            return MyJson(response, JsonRequestBehavior.AllowGet);
+        }
+
+        /// <summary>
+        /// 根据附件编号获取设备附件信息
+        /// </summary>
+        /// <param name="id">附件编号</param>
+        /// <returns>获取设备附件信息返回编码</returns>
+        public JsonResult DownloadUploadFile(int id)
+        {
+            ServiceResultModel<string> response = new ServiceResultModel<string>();
+            try
+            {
+                UploadFileInfo file = this.fileDao.GetFileByID(ObjectTypes.Equipment, id);
+
+                if (file == null)
+                {
+                    response.SetFailed(ResultCodes.ParameterError, "找不到上传文件");
+                }
+                else
+                {
+                    string path = Path.Combine(Constants.EquipmentFolder, file.GetFileName());
+                    if (!System.IO.File.Exists(path))
+                    {
+                        response.SetFailed(ResultCodes.ParameterError, "找不到上传文件");
+                    }
+                    else
+                    {
+                        byte[] arr = System.IO.File.ReadAllBytes(path);
+                        response.Data = Convert.ToBase64String(arr);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                NLog.LogManager.GetCurrentClassLogger().Error(ex, ex.Message);
+                response.SetFailed(ResultCodes.SystemError, ControlManager.GetSettingInfo().ErrorMessage);
+            }
+
+            return MyJson(response, JsonRequestBehavior.AllowGet);
+        }
+
+        /// <summary>
+        /// 删除设备附件
+        /// </summary>
+        /// <param name="fileID">附件编号</param>
+        /// <returns>删除设备附件返回编码</returns>
+        [HttpPost]
+        public JsonResult DeleteEquipmentFile(int fileID)
+        {
+            ServiceResultModelBase response = new ServiceResultModelBase();
+            try
+            {
+                if (fileID > 0)
+                {
+                    this.uploadFileManager.DeleteUploadFileByID(ObjectTypes.Equipment, fileID);
+                }
+            }
+            catch (Exception ex)
+            {
+                NLog.LogManager.GetCurrentClassLogger().Error(ex, ex.Message);
+                response.SetFailed(ResultCodes.SystemError, ControlManager.GetSettingInfo().ErrorMessage);
+            }
+            return MyJson(response, JsonRequestBehavior.AllowGet);
+        }
+
+        /// <summary>
+        /// 获取设备类别信息
+        /// </summary>
+        /// <param name="level">等级</param>
+        /// <param name="parentCode">父级分类编码</param>
+        /// <returns>该条件下的所有信息</returns>
+        public JsonResult GetEquipmentClass(int level, string parentCode = null)
+        {
+            ServiceResultModel<List<EquipmentClassInfo>> response = new ServiceResultModel<List<EquipmentClassInfo>>();
+
+            try
+            {
+                response.Data = LookupManager.GetEquipmentClass(level, parentCode); ;
+            }
+            catch (Exception ex)
+            {
+                NLog.LogManager.GetCurrentClassLogger().Error(ex, ex.Message);
+                response.SetFailed(ResultCodes.SystemError, ControlManager.GetSettingInfo().ErrorMessage);
+            }
+
+            return MyJson(response, JsonRequestBehavior.AllowGet);
+        }
+
+        /// <summary>
+        /// 通过设备编号获取设备生命周期
+        /// </summary>
+        /// <param name="id">设备编号</param>
+        /// <returns>生命周期</returns>
+        public JsonResult GetTimeLine4App(int id)
+        {
+            ServiceResultModel<EquipmentInfo> result = new ServiceResultModel<EquipmentInfo>();
+            try
+            {
+                EquipmentInfo info = this.equipmentManager.GetTimeLine(id);
+
+                result.Data = info;
+            }
+            catch (Exception ex)
+            {
+                NLog.LogManager.GetCurrentClassLogger().Error(ex, ex.Message);
+                result.SetFailed(ResultCodes.SystemError, ControlManager.GetSettingInfo().ErrorMessage);
+            }
+            return MyJson(result, JsonRequestBehavior.AllowGet);
+        }
+    }
+}

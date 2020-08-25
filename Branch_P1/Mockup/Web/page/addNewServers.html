@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>设备报修申请</title>
+		<link rel="stylesheet" type="text/css" href="../css/bootstrap.min.css" />
+		<link rel="stylesheet" type="text/css" href="../style.css" />
+		<script src="../js/jquery-1.11.0.js"></script>
+		<!-- <script src="js/jquery-2.1.3.js" type="text/javascript" charset="utf-8"></script> -->
+		<style type="text/css">
+			.middle {
+				width: 100%;
+				text-align: center;
+				margin-top: 5%;
+			}
+
+			.routeTable {
+				width: 800px;
+				text-align: left;
+			}
+
+			.contentTable,
+			.filterContent {
+				display: none;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="option1" width="800px">
+			<h3 align="center">新增请求</h3>
+			<div id="msg-box" align="center">
+				请选择任务类型：
+				<select id="s1">
+					<option value="-1">-请选择-</option>
+					<option value="维修">维修</option>
+					<option value="保养">保养</option>
+					<option value="强检">强检</option>
+					<option value="巡检">巡检</option>
+					<option value="校正">校正</option>
+					<option value="设备新增">设备新增</option>
+					<option value="不良事件">不良事件</option>
+					<option value="合同档案">合同档案</option>
+					<option value="验收安装">验收安装</option>
+					<option value="调拨">调拨</option>
+					<option value="借用">借用</option>
+					<option value="盘点">盘点</option>
+					<option value="报废">报废</option>
+					<option value="其他服务">其他服务</option>
+				</select>
+			</div>
+			<br />
+			<div class="contentTable">
+				<table class="routeTable" border="1px" align="center" cellpadding="6px" cellspacing="0">
+					<tr>
+						<td colspan="4" align="center">
+							请输入设备系统编号:<input type="" id="" value="" /> <img src="../img/icons8-search-48.png" class="update ShowRouteTable" />
+						</td>
+					</tr>
+					<tr class="headtr">
+						<td colspan="4">设备基本信息</td>
+					</tr>
+					<tr>
+						<td class="headtd" width="20%">系统编号</td>
+						<td>
+							<label>ZC00000001</label>
+						</td>
+						<td class="headtd" width="20%">资产等级</td>
+						<td>
+							<label>重要</label>
+						</td>
+					</tr>
+					<tr>
+						<td class="headtd">名称</td>
+						<td>
+							<label>医用磁共振设备</label>
+						</td>
+						<td class="headtd">型号</td>
+						<td>
+							<label>HA 710 二郎神</label>
+						</td>
+					</tr>
+					<tr>
+						<td class="headtd">使用科室</td>
+						<td>
+							<label>磁共振</label>
+						</td>
+						<td class="headtd">安装地点</td>
+						<td>
+							<label>磁共振1室</label>
+						</td>
+					</tr>
+					<tr>
+						<td class="headtd">设备厂商</td>
+						<td>
+							<label>飞利浦</label>
+						</td>
+						<td class="headtd">保修状况</td>
+						<td>
+							<label>保内</label>
+						</td>
+					</tr>
+				</table>
+				</br>
+				<table class="routeTable" border="1px" align="center" cellpadding="6px" cellspacing="0">
+					<tr class="headtr">
+						<td colspan="4">请求详细信息</td>
+					</tr>
+					<tr>
+						<td class="headtd" width="20%">类型</td>
+						<td width="28.5%">
+							<label class="requestType"></label>
+						</td>
+						<td class="headtd">请求人</td>
+						<td>
+							<label>超级管理员</label>
+						</td>
+
+					</tr>
+					<tr>
+						<td class="headtd" width="20%">主题</td>
+						<td> <input type="text" value="系统报错" class="input" /></td>
+						<td class="headtd">故障分类</td>
+						<td>
+							<select>
+								<option>未知</option>
+							</select>
+						</td>
+					</tr>
+					<tr>						
+						<td class="headtd">故障描述</td>
+						<td colspan="3"><textarea name="" style="width: 100%;"></textarea></td>
+					</tr>
+					<tr>
+						<td class="headtd">上传附件</td>
+						<td colspan="3"> <img src="../img/upload%20.png" alt="" class="update" /></td>
+					</tr>
+				</table>
+				<br />
+				<table class="routeTable" border="0" align="center" style="text-align: center;">
+					<tr>
+						<td>
+							<button class="btn btn-info">提交</button>
+						</td>
+						<td><button class="btn btn-info" onclick="window.history.back()">返回</button></td>
+					</tr>
+				</table>
+			</div>
+		</div>
+
+		<div id="option2" style="display:none">
+			<h3 align="center">新增其他服务</h3>
+			<br />
+			<table width="600px" border="1px" align="center" cellpadding="6px" cellspacing="0" style="text-align: left;">
+				<tr class="headtr">
+					<td colspan="4">服务详细信息</td>
+				</tr>
+				<tr>
+					<td class="headtd" width="25%" style="width:25%;">客户请求编号</td>
+					<td style="color: gray;width:25%" width="25%">001222455</td>
+					<td class="headtd" width="25%" style="width:25%;">提出人</td>
+					<td width="25%">宋XX</td>
+				</tr>
+				<tr>
+					<td class="headtd">服务类型</td>
+					<td colspan="3">
+						<select name="">
+							<option value="">培训</option>
+							<option value="">更换耗材</option>
+							<option value="">标签更换</option>
+						</select>
+					</td>
+				</tr>
+				<tr>
+					<td class="headtd">具体服务内容描述</td>
+					<td colspan="3"><textarea name="" rows="3" cols="60"></textarea></td>
+				</tr>
+				<tr>
+					<td class="headtd">上传附件</td>
+					<td colspan="3"> <img src="../img/upload%20.png" class="uploadfj" /></td>
+				</tr>
+			</table>
+			<br />
+			<table class="routeTable" border="0" align="center" style="text-align: center;">
+				<tr>
+					<td>
+						<label>
+							<button class="btn btn-info">提交申请</button>
+					</td>
+					<td><button class="btn btn-info" onclick="goBack()">返回</button></td>
+
+				</tr>
+			</table>
+		</div>
+	</body>
+	<script type="text/javascript">
+		$(function() {
+			$("#s1").change(function() {
+				if ($(this).val() == -1) {
+					$(".contentTable").hide();
+				} else {
+					$(".requestType").html($("#s1").val());
+					$(".contentTable").show();
+				}
+			})
+			$(".ShowRouteTable").click(function() {
+				$(".requestType").html($("#s1").val());
+				$(".contentTable").show();
+			})
+		})
+		//     $(document).ready(function () {
+		//         $("#s1").change(function () {
+		//             var item = $(this).val();
+		//             if (item === "option1") {
+		//                 $("#option1").show();
+		//                 $("#option2").hide();
+		//             } else {
+		//                 $("#option1").hide();
+		//                 $("#option2").show();
+		//             }
+		//         });
+		//     });
+	</script>
+
+</html>

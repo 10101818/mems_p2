@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<title>超级管理员-编辑合同</title>
+	<link rel="stylesheet" type="text/css" href="../css/bootstrap.min.css" />
+	<link rel="stylesheet" type="text/css" href="../style.css" />
+	<script src="../js/jquery-1.11.0.js"></script>
+	<script src="../js/bootstrap.min.js"></script>
+</head>
+
+<body>
+	<div class="serverDetail">
+		<div style="font-size:18px;text-align:left;width: 800px;margin: 10px auto;"><a class="linkFile" href="#"
+				onclick="window.history.back()">
+				<<返回 </a>
+		</div>
+		<h3 align="center">更新合同</h3>
+		<table border="1" class="tblDetail" style="text-align: left;">
+			<tbody>
+				<tr>
+					<td colspan="11" class="headtr">设备信息<img src="../img/add.png" class="update ShowRouteTable" /></td>
+				</tr>
+
+				<tr class="tdDetailHead">
+					<th width="100px">系统编号</th>
+					<th style="min-width: 50px;">名称</th>
+					<th style="min-width: 50px;">型号</th>
+					<th style="min-width: 60px;">资产编号</th>
+					<th style="min-width: 70px;">设备厂商</th>
+					<th width="70px">资产等级</th>
+					<th style="min-width: 70px;">使用科室</th>
+					<th style="min-width: 70px;">安装地点</th>
+					<th width="50px" style="text-align: center;">删除</th>
+				</tr>
+				<tr>
+					<td>ZC00000014</td>
+					<td>呼吸机</td>
+					<td>111</td>
+					<td>LSRM000000266</td>
+					<td>GE</td>
+					<td>重要</td>
+					<td>放射科</td>
+					<td></td>
+					<td><img src="../img/delete.png" class="cursor"></td>
+				</tr>
+				<tr>
+					<td>ZC00000015</td>
+					<td>CT机</td>
+					<td>SOMATOM</td>
+					<td>LSRM002020500006</td>
+					<td>爱科凯能</td>
+					<td>重要</td>
+					<td>放射科</td>
+					<td>核磁共振A室</td>
+					<td><img src="../img/delete.png" class="cursor"></td>
+				</tr>
+			</tbody>
+		</table>
+		<br />
+		<table class="tblDetail" border="1" style="text-align: left;">
+			<tbody>
+				<tr>
+					<td class="tdDetailHead" width="20%"><span class="requiredItem"></span>系统编号:</td>
+					<td width="30%"><input type="text" class="" value="HT00000001" disabled /></td>
+					<td class="tdDetailHead" width="20%"><span class="requiredItem"></span>项目编号:</td>
+					<td width="30%"><input type="text" class="input" value="P0123" /></td>
+				</tr>
+				<tr>
+					<td class="tdDetailHead"><span class="requiredItem"></span>合同编号:</td>
+					<td><input type="text" class="" value="209420124" /></td>
+					<td class="tdDetailHead"><span class="requiredItem"></span>金额(元):</td>
+					<td><input type="text" class="input" value="108000" /></td>
+				</tr>
+				<tr>
+					<td class="tdDetailHead"><span class="requiredItem"></span>名称:</td>
+					<td><input type="text" class="input" value="某某合同" /></td>
+					<td class="tdDetailHead"><span class="unrequiredItem"></span>合同状态:</td>
+					<td><input disabled value="生效" class="shortInput"></td>
+				</tr>
+				<tr>
+					<td class="tdDetailHead"><span class="requiredItem"></span>类型:</td>
+					<td>
+						<select>
+							<option>原产服务合同</option>
+							<option>采购服务合同</option>
+						</select>
+					</td>
+					<td class="tdDetailHead"><span class="requiredItem"></span>供应商:</td>
+					<td>
+						<select class="">
+							<option value="1">飞利浦医疗(上海)有限公司</option>
+							<option value="2">测试</option>
+						</select>
+					</td>
+				</tr>
+				<tr>
+					<td class="tdDetailHead"><span class="requiredItem"></span>起止日期:</td>
+					<td colspan="3"><input type="date" class="shortInput" value="2018-01-02" />—<input type="date"
+							class="shortInput" value="2023-01-03" /></td>
+				</tr>
+				<tr>
+					<td class="tdDetailHead"><span class="requiredItem"></span>服务范围:</td>
+					<td colspan="3">
+						<select id="s1">
+							<option>全保</option>
+							<option>技术保</option>
+							<option value="3">其他</option>
+						</select>&nbsp;&nbsp;&nbsp;<input type="text" id="t1" placeholder="选其他时显示并输入"
+							style="display:none" />
+					</td>
+				</tr>
+				<tr>
+					<td class="tdDetailHead"><span class="unrequiredItem"></span>备注:</td>
+					<td colspan="3"><textarea class="input"></textarea></td>
+				<tr>
+					<td class="tdDetailHead"><span class="requiredItem"></span>附件:</td>
+					<td colspan="3"><a class="linkFile" href="#">某某合同</a><img src="../img/delete1.png"><img
+							src="../img/upload .png" class="update" /></td>
+				</tr>
+			</tbody>
+		</table>
+		<br />
+		<!--零件、耗材-->
+		<div id="t2">
+			<table class="tblDetail" width="800" border="1" bordercolor="000000" cellpadding="0" cellspacing="0">
+				<tbody>
+					<tr>
+						<td class="headtr" colspan="6">零件<img src="../img/add.png" class="update addComponent" /></td>
+					</tr>
+					<tr>
+						<td class="tdDetailHead">简称</td>
+						<td class="tdDetailHead">描述</td>
+						<td class="tdDetailHead">设备系统编号</td>
+						<td class="tdDetailHead">设备资产编号</td>
+						<td class="tdDetailHead">关联设备名称</td>
+						<td class="tdDetailHead" style="text-align: center;">删除</td>
+					</tr>
+					<tr>
+						<td>CT球管</td>
+						<td>CT球管</td>
+						<td>ZC00000015</td>
+						<td>LSRM002020500006</td>
+						<td>CT机</td>
+						<td style="text-align: center;"><img src="../img/delete.png" /></td>
+					</tr>
+					<tr>
+						<td>探测器</td>
+						<td>探测器</td>
+						<td>ZC00000015</td>
+						<td>LSRM002020500006</td>
+						<td>CT机</td>
+						<td style="text-align: center;"><img src="../img/delete.png" /></td>
+					</tr>
+					<tr>
+						<td>高压发生器</td>
+						<td>高压发生器</td>
+						<td>ZC00000015</td>
+						<td>LSRM002020500006</td>
+						<td>CT机</td>
+						<td style="text-align: center;"><img src="../img/delete.png" /></td>
+					</tr>
+					<tr>
+						<td>高压滑环</td>
+						<td>高压滑环</td>
+						<td>ZC00000015</td>
+						<td>LSRM002020500006</td>
+						<td>CT机</td>
+						<td style="text-align: center;"><img src="../img/delete.png" /></td>
+					</tr>
+					<tr>
+						<td>其他(床)</td>
+						<td>其他</td>
+						<td>ZC00000015</td>
+						<td>LSRM002020500006</td>
+						<td>CT机</td>
+						<td style="text-align: center;"><img src="../img/delete.png" /></td>
+					</tr>
+				</tbody>
+			</table>
+			<br />
+			<table class="tblDetail" width="800" border="1" bordercolor="000000" cellpadding="0" cellspacing="0">
+				<tbody>
+					<tr>
+						<td class="headtr" colspan="6">耗材<img src="../img/add.png" class="update addConsumables" /></td>
+					</tr>
+					<tr>
+						<td class="tdDetailHead">简称</td>
+						<td class="tdDetailHead">描述</td>
+						<td class="tdDetailHead">设备系统编号</td>
+						<td class="tdDetailHead">设备资产编号</td>
+						<td class="tdDetailHead">关联设备名称</td>
+						<td class="tdDetailHead" style="text-align: center;">删除</td>
+					</tr>
+					<tr>
+						<td>树脂+活性炭</td>
+						<td>树脂</td>
+						<td>ZC00000015</td>
+						<td>LSRM002020500006</td>
+						<td>CT机</td>
+						<td style="text-align: center;"><img src="../img/delete.png" /></td>
+					</tr>
+					<tr>
+						<td>反渗膜（一般）</td>
+						<td>反渗膜</td>
+						<td>ZC00000015</td>
+						<td>LSRM002020500006</td>
+						<td>CT机</td>
+						<td style="text-align: center;"><img src="../img/delete.png" /></td>
+					</tr>
+					<tr>
+						<td>反渗膜（血透）</td>
+						<td>反渗膜（血透）</td>
+						<td>ZC00000015</td>
+						<td>LSRM002020500006</td>
+						<td>CT机</td>
+						<td style="text-align: center;"><img src="../img/delete.png" /></td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+		<br />
+		<table border="0" width="800" class="tblDetail" style="text-align: center;">
+			<tbody>
+				<tr>
+					<td><button class="btn btn-info"><span>保存</span></button></td>
+					<td><button class="btn btn-info" onclick="window.history.back()"><span>返回</span></button></td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+
+	<!-- 新增零件 -->
+	<div class="modal fade" id="AddComponent" tabindex="-1" role="dialog"
+		aria-lableledby="lpjModalCenterTitle" aria-hidden="true">
+		<div class="modal-dialog  modal-dialog-centered" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h6 class="modal-title" id="lpjModalLongTitle">新增零件</h6>
+					<button type="button" class="close" data-dismiss="modal" aria-lable="Close"><span
+							class="modal-icon" aria-hidden="true">&times;</span></button>
+				</div>
+				<div class="modal-body">
+					<table class="table table-sm  table-input modal-table" style="text-align: left;">
+						<tbody>
+							<tr>
+								<td width="35%"><span class="requiredItem"></span>关联设备:</td>
+								<td width="65%">
+									<select>
+										<option>呼吸机</option>
+										<option>CT机</option>
+									</select>
+								</td>
+							</tr>
+							<tr>
+								<td width="35%"><span class="unrequiredItem"></span>设备系统编号:</td>
+								<td width="65%">ZC00000014</td>
+							</tr>
+							<tr>
+								<td width="35%"><span class="unrequiredItem"></span>设备资产编号:</td>
+								<td width="65%">LSRM000000266</td>
+							</tr>
+							<tr>
+								<td><span class="requiredItem"></span>零件:</td>
+								<td><input type="text" /><img src="../img/find.png" class="update" ></td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-info btn-sm">保存</button>
+					<button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">关闭</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- 新增耗材 -->
+	<div class="modal fade" id="AddConsumables" tabindex="-1" role="dialog"
+		aria-lableledby="lpjModalCenterTitle" aria-hidden="true">
+		<div class="modal-dialog  modal-dialog-centered" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h6 class="modal-title" id="lpjModalLongTitle">新增耗材</h6>
+					<button type="button" class="close" data-dismiss="modal" aria-lable="Close"><span
+							class="modal-icon" aria-hidden="true">&times;</span></button>
+				</div>
+				<div class="modal-body">
+					<table class="table table-sm  table-input modal-table" style="text-align: left;">
+						<tbody>
+							<tr>
+								<td width="35%"><span class="requiredItem"></span>关联设备:</td>
+								<td width="65%">
+									<select>
+										<option>呼吸机</option>
+										<option>CT机</option>
+									</select>
+								</td>
+							</tr>
+							<tr>
+								<td width="35%"><span class="unrequiredItem"></span>设备系统编号:</td>
+								<td width="65%">ZC00000014</td>
+							</tr>
+							<tr>
+								<td width="35%"><span class="unrequiredItem"></span>设备资产编号:</td>
+								<td width="65%">LSRM000000266</td>
+							</tr>
+							<tr>
+								<td><span class="requiredItem"></span>耗材:</td>
+								<td><input type="text" /><img src="../img/find.png" class="update" ></td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-info btn-sm">保存</button>
+					<button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">关闭</button>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+<script>
+	var options = {};
+	$(function () {
+		$(".requiredItem").html("*");
+		$(".unrequiredItem").html("&nbsp;&nbsp;");
+		$(".requiredItem").css("color", "red");
+
+		$(".addComponent").click(function () {
+			$("#AddComponent").modal(options);
+		})
+		$(".addConsumables").click(function () {
+			$("#AddConsumables").modal(options);
+		})
+		$("#s1").change(function () {
+			if ($(this).val() != 3) {
+				$("#t1").hide();
+				$("#t2").show();
+			} else {
+				$("#t1").show();
+				$("#t2").hide();
+			}
+		})
+	})
+</script>
+</html>

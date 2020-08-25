@@ -1,0 +1,207 @@
+const path = require("path")
+const HtmlWebpackPlugin = require("html-webpack-plugin");
+const CopyWebpackPlugin = require("copy-webpack-plugin");
+const VueLoaderPlugin = require("vue-loader/lib/plugin");
+const webpack = require('webpack');
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const UglifyJsWebpackPlugin = require("uglifyjs-webpack-plugin");
+const OpimizeCss = require('optimize-css-assets-webpack-plugin')
+const { CleanWebpackPlugin } = require('clean-webpack-plugin');
+const resolve = dir => path.resolve(__dirname, '../' + dir);
+
+module.exports = {
+    devtool: "none", //source-map // none
+    entry: {
+        app: ['babel-polyfill', './src/views/main.js'],
+    },
+    output: {
+        publicPath: process.env.NODE_ENV === 'development' ? '' : '../',
+        path: path.resolve(__dirname, "../dist"), //编译文件根位置
+        filename: 'Content/scripts/dashboard/[name].js',
+    },
+    devServer: {
+        contentBase: './dist',
+        hot: true,
+        port: 8888,
+        host: 'localhost', // can be overwritten by process.env.HOST
+        //显示打包编译进度
+        progress: true,
+        compress: true,
+        proxy: {
+            '/api': {
+                //target: 'http://192.168.18.51/MEMS',
+                //target: 'http://223.166.75.18:81/MEMS',
+                target: 'http://localhost:63381/',
+                changeOrigin: true,
+                pathRewrite: {
+                    '^/api': ''
+                }
+            }
+        }
+    },
+    resolve: {
+        extensions: ['.js', '.vue', '.json'],
+        alias: { '@': resolve('src'), }
+    },
+    module: {
+        rules: [{
+                test: /\.vue$/,
+                loader: 'vue-loader',
+            },
+            {
+                test: /\.(woff2?|eot|ttf|otf)(\?.*)?$/,
+                loader: 'url-loader',
+                options: {
+                    limit: 100000,
+                    name: "Content/fonts/[name].[hash:7].[ext]",
+                }
+            },
+            {
+                test: /\.less$/,
+                loader: "style-loader!css-loader!less-loader"
+            },
+            {
+                test: /\.css$/,
+                use: [
+                    "style-loader",
+                    MiniCssExtractPlugin.loader,
+                    'css-loader'
+                ]
+            },
+            {
+                test: /\.js$/,
+                exclude: /node_modules/, // 处理除了nodde_modules里的js文件
+                loader: 'babel-loader',
+                options: {
+                    plugins: ['syntax-dynamic-import'],
+                    //presets: [`@babel/preset-env`], //es6转es5
+                }
+            },
+            {
+                test: /node_modules[\\\/]vis[\\\/].*\.js$/,
+                loader: 'babel-loader',
+                query: {
+                    cacheDirectory: true,
+                    presets: ["babel-preset-es2015"].map(require.resolve),
+                    plugins: [
+                        "transform-es3-property-literals", // #2452
+                        "transform-es3-member-expression-literals", // #2566
+                        "transform-runtime" // #2566
+                    ]
+                }
+            },
+            {
+                test: /\.(png|jpe?g|gif|svg)(\?.*)?$/,
+                loader: 'url-loader',
+                options: {
+                    esModule: false,
+                    limit: 10000,
+                    name: 'Content/img/[name].[ext]'
+                }
+            },
+            {
+                test: /\.(mp4|webm|ogg|mp3|wav|flac|aac)(\?.*)?$/,
+                loader: 'url-loader',
+                options: {
+                    limit: 10000,
+                    name: 'Content/media/[name].[hash:7].[ext]'
+                }
+            },
+        ]
+    },
+    plugins: [
+        new CleanWebpackPlugin({
+            dry: process.env.NODE_ENV === 'development', //默认false  dry为true时，模拟删除，加删除，不会真的删掉文件
+            verbose: false, // 默认false verbose为true时 显示日志， 当dry为true时，总是会打印日志，不管verbose是什么值
+            cleanStaleWebpackAssets: false, //自动删除未被使用的webpack资源
+
+            // cleanOnceBeforeBuildPatterns打包前做的一些事，
+            // 忽略掉不需要删除的文件，相当于exclude,被忽略的文件需要在开头加上 "!"号，数组中必须带有"**/*"通配符
+            // 否则dist下的文件都不会被删除
+            // 删除指定文件/文件夹   path.resolve(__dirname, 'test6')
+            // cleanOnceBeforeBuildPatterns: [
+            //     path.resolve(__dirname, 'test6'),
+            //     "**/*", "!1.js", "!images",
+            //     path.resolve(__dirname, 'test5')
+            // ]
+        }),
+        new HtmlWebpackPlugin({
+            title: "home",
+            template: "./src/Views/Home/index.html",
+            filename: process.env.NODE_ENV === 'development' ? 'index.html' : 'Views/Home/Home.cshtml',
+            inject: true,
+            hash: false,
+            minify: {
+                collapseWhitespace: true,
+                removeComments: true, 
+                removeAttributeQuotes: false,
+                removeEmptyAttributes: true
+            },
+        }),
+        new MiniCssExtractPlugin({　　 filename: "Content/css/dashboard/[name].min.css"　　 }),
+        new VueLoaderPlugin(),
+        //copy custom static assets
+        new CopyWebpackPlugin(
+            process.env.NODE_ENV === 'development' ? [{
+                from: path.resolve(__dirname, '../src/Content'),
+                to: 'Content',
+                ignore: ['.*']
+            }] : []
+        )
+    ],
+    optimization: {
+        splitChunks: {
+            // chunks: "async", // 共有三个值可选：initial(初始模块)、async(按需加载模块)和all(全部模块)
+            // minSize: 30000, // 模块超过30k自动被抽离成公共模块
+            // minChunks: 1, // 模块被引用>=1次，便分割
+            // maxAsyncRequests: 5,  // 异步加载chunk的并发请求数量<=5
+            // maxInitialRequests: 3, // 一个入口并发加载的chunk数量<=3
+            // name: true, // 默认由模块名+hash命名，名称相同时多个模块将合并为1个，可以设置为function
+            // automaticNameDelimiter: '~', // 命名分隔符
+            cacheGroups: {
+                common: {
+                    chunks: 'all',
+                    name: 'common',
+                    minSize: 0,
+                    minChunks: 2
+                },
+                vendor: {
+                    priority: 1,
+                    chunks: 'all',
+                    test: /node_modules/,
+                    name: 'vendor',
+                    minSize: 0,
+                    minChunks: 2
+                },
+            }
+        },
+        // splitChunks: {
+        //     cacheGroups: { // 缓存组，会继承和覆盖splitChunks的配置
+        //         default: { // 模块缓存规则，设置为false，默认缓存组将禁用
+        //             minChunks: 2, // 模块被引用>=2次，拆分至vendors公共模块
+        //             priority: -20, // 优先级
+        //             reuseExistingChunk: true, // 默认使用已有的模块
+        //         },
+        //         vendors: {
+        //             test: /[\\/]node_modules[\\/]/, // 表示默认拆分node_modules中的模块
+        //             priority: -10
+        //         }
+        //     }
+        // },
+        // minimize: env === 'production' ? true : false, // 开发环境不压缩
+        minimizer: [
+            new UglifyJsWebpackPlugin({
+                cache: true, //是否缓存
+                parallel: true, //是否并发打包，同时打包多个文件
+                sourceMap: false, //打包后的代码与源码的映射，方便调试
+                uglifyOptions: {
+                    compress: {
+                        drop_console: true,
+                        drop_debugger:true,
+                    }
+                },
+            }),
+            new OpimizeCss(),
+        ],
+    },
+}

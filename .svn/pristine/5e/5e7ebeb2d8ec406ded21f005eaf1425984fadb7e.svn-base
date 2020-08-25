@@ -1,0 +1,152 @@
+const path = require("path")
+const HtmlWebpackPlugin = require("html-webpack-plugin");
+const CopyWebpackPlugin = require("copy-webpack-plugin");
+const VueLoaderPlugin = require("vue-loader/lib/plugin");
+const webpack = require('webpack');
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const { CleanWebpackPlugin } = require('clean-webpack-plugin');
+const resolve = dir => path.resolve(__dirname, '../' + dir);
+
+module.exports = {
+    devtool: "none", //source-map // none
+    entry: {
+        app: ['babel-polyfill', './src/main.js'],
+    },
+    output: {
+        publicPath: process.env.NODE_ENV === 'development' ? '' : './../../',
+        path: path.resolve(__dirname, "../dist"), //编译文件根位置
+        filename: 'Content/scripts/dashboard/[name].js',
+    },
+    devServer: {
+        contentBase: './dist',
+        hot: true,
+        port: 8080,
+        host: 'localhost', // can be overwritten by process.env.HOST
+        //显示打包编译进度
+        progress: true,
+        compress: true,
+        proxy: {
+            '/api': {
+                target: 'http://192.168.18.51/MEMS',
+                changeOrigin: true,
+                pathRewrite: {
+                    '^/api': ''
+                }
+            }
+        }
+    },
+    resolve: {
+        extensions: ['.js', '.vue', '.json'],
+        alias: { '@': resolve('src'), }
+    },
+    module: {
+        rules: [{
+                test: /\.vue$/,
+                loader: 'vue-loader',
+                //options: vueLoaderConfig
+            },
+            {
+                test: /\.(woff2?|eot|ttf|otf)(\?.*)?$/,
+                loader: 'url-loader',
+                options: {
+                    limit: 100000,
+                    name: "Content/fonts/[name].[hash:7].[ext]",
+                }
+            },
+            {
+                test: /\.less$/,
+                loader: "style-loader!css-loader!less-loader"
+            },
+            {
+                test: /\.css$/,
+                use: [
+                    "style-loader",
+                    MiniCssExtractPlugin.loader,
+                    "css-loader"
+                ]
+            },
+            {
+                test: /\.js$/,
+                exclude: /node_modules/, // 处理除了nodde_modules里的js文件
+                loader: 'babel-loader',
+                options: {
+                    plugins: ['syntax-dynamic-import']
+                }
+            },
+            {
+                test: /node_modules[\\\/]vis[\\\/].*\.js$/,
+                loader: 'babel-loader',
+                query: {
+                    cacheDirectory: true,
+                    presets: ["babel-preset-es2015"].map(require.resolve),
+                    plugins: [
+                        "transform-es3-property-literals", // #2452
+                        "transform-es3-member-expression-literals", // #2566
+                        "transform-runtime" // #2566
+                    ]
+                }
+            },
+            {
+                test: /\.(png|jpe?g|gif|svg)(\?.*)?$/,
+                loader: 'url-loader',
+                options: {
+                    esModule: false,
+                    limit: 10000,
+                    name: 'Content/img/[name].[ext]'
+                }
+            },
+            {
+                test: /\.(mp4|webm|ogg|mp3|wav|flac|aac)(\?.*)?$/,
+                loader: 'url-loader',
+                options: {
+                    limit: 10000,
+                    name: 'Content/media/[name].[hash:7].[ext]'
+                }
+            },
+        ]
+    },
+    plugins: [
+        new CleanWebpackPlugin(),
+        new HtmlWebpackPlugin({
+            title: "home",
+            template: "./src/Views/Home/index.html",
+            filename: process.env.NODE_ENV === 'development' ? 'index.html' : 'Views/Home/Home.cshtml',
+            inject: true,
+            hash: false,
+            minify: {
+                collapseWhitespace: true,
+                removeComments: true,
+                removeAttributeQuotes: false,
+                removeEmptyAttributes: true
+            },
+        }),
+        new MiniCssExtractPlugin({　　 filename: "Content/css/dashboard/[name].min.css"　　 }),
+        new VueLoaderPlugin(),
+        //copy custom static assets
+        // new CopyWebpackPlugin([{
+        //     from: path.resolve(__dirname, '../src/Content'),
+        //     to: 'Content',
+        //     ignore: ['.*']
+        // }])
+    ],
+    optimization: {
+        splitChunks: {
+            cacheGroups: {
+                common: {
+                    chunks: 'all',
+                    name: 'common',
+                    minSize: 0,
+                    minChunks: 2
+                },
+                vendor: {
+                    priority: 1,
+                    chunks: 'all',
+                    test: /node_modules/,
+                    name: 'vendor',
+                    minSize: 0,
+                    minChunks: 2
+                }
+            }
+        }
+    },
+}

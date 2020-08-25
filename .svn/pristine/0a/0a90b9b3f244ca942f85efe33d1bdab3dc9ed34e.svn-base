@@ -1,0 +1,302 @@
+body,
+div,
+span,
+header,
+footer,
+nav,
+section,
+aside,
+article,
+ul,
+dl,
+dt,
+dd,
+li,
+a,
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+i,
+b,
+textarea,
+button,
+input,
+select,
+figure,
+figcaption {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+    font-style: normal;
+    text-decoration: none;
+    border: none;
+    outline: none;
+    box-sizing: border-box;
+    /*-webkit-tap-highlight-color: transparent;*/
+    /*-webkit-font-smoothing: antialiased;*/
+    /*-moz-osx-font-smoothing: grayscale;*/
+    line-height: 1;
+    /*-webkit-overflow-scrolling: touch*/
+}
+
+html,
+body {
+    height: 100%;
+    width: 100%;
+    color: #000;
+    font-weight: normal;
+    text-align: left;
+    background-color: #fff;
+    /* background: #d7e0ee; */
+    font-family: PingFang SC, Microsoft YaHei, "sans-serif";
+}
+
+.modal-open {
+    position: fixed;
+    width: 100%;
+}
+
+.container {
+    height: auto;
+    width: 100%;
+}
+
+img {
+    display: block;
+    max-width: 100%;
+    box-sizing: border-box;
+    /*margin: auto;*/
+}
+
+.clearfix:after {
+    content: '';
+    display: block;
+    clear: both;
+}
+
+.clearfix {
+    zoom: 1;
+}
+
+.f-left {
+    float: left;
+}
+
+.f-right {
+    float: right;
+}
+
+.hide {
+    display: none;
+}
+
+.show {
+    display: block;
+}
+
+.abs {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
+
+.center-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.elip {
+    overflow: hidden;
+    line-height: 25px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.touch-tap {
+    position: relative;
+}
+
+.touch-tap:before {
+    position: absolute;
+    content: '';
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    transform: scale(2);
+}
+
+.main-header {
+    opacity: 0;
+    height: 60px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    color: #fff;
+    background: linear-gradient(to right, #5579c4, #7accc6);
+    justify-content: space-between;
+}
+
+.main-header-name {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    height: 100%;
+}
+
+.main-name-logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    width: 200px;
+}
+
+.main-name-img {
+    width: 70%;
+}
+
+.main-name-master {
+    min-width: 250px;
+    text-align: left;
+}
+
+.main-name-master span {
+    font-size: 18px;
+}
+
+.main-header-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex: 1;
+    height: 100%;
+    padding: 0 20px 0;
+}
+
+.main-content-times {
+    display: flex;
+    font-weight: normal;
+    flex-direction: row;
+    align-items: center;
+    font-size: 14px;
+}
+
+.main-header-user {
+    height: 100%;
+    font-size: 14px;
+    font-weight: bold;
+    min-width: 350px;
+    text-align: right;
+    padding-right: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: space-evenly;
+}
+
+.header-user-top,
+.header-user-bottom {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.user-top-right,
+.user-bottom-right {
+    width: 80px;
+}
+
+.main-body {
+    width: 100%;
+    height: calc(100% - 60px)
+}
+
+.linkFile {
+    color: #17A2B8;
+}
+
+.icon {
+    width: 2em;
+    height: 2em;
+    vertical-align: -0.15em;
+    fill: currentColor;
+    overflow: hidden;
+}
+
+#app {
+    height: 100%;
+    width: 100%;
+    min-width: 1500px;
+    margin: 0 auto;
+    position: relative;
+    background: #D7E0EE;
+}
+
+
+/*定义滚动条高宽及背景 高宽分别对应横竖滚动条的尺寸*/
+
+ ::-webkit-scrollbar {
+    width: 0.32rem;
+    height: 0.32rem;
+    background-color: #F5F5F5;
+}
+
+
+/*定义滚动条轨道 内阴影+圆角*/
+
+ ::-webkit-scrollbar-track {
+    -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+    border-radius: 0.2rem;
+    background-color: #F5F5F5;
+}
+
+
+/*定义滑块 内阴影+圆角*/
+
+ ::-webkit-scrollbar-thumb {
+    border-radius: 0.2rem;
+    -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, .3);
+}
+
+.el-icon-refresh-right:hover {
+    cursor: pointer;
+}
+
+.datepicker-poper {
+    opacity: 0.4;
+    padding: 2px;
+    min-width: 100px;
+    margin-top: 4px !important;
+}
+
+.datepicker-poper .el-date-editor {
+    width: 100px;
+}
+
+.datepicker-poper .el-date-editor .el-input__inner {
+    padding-right: 0;
+    height: 22px;
+}
+
+.datepicker-poper .el-date-editor .el-input__prefix .el-icon-date {
+    width: 22px;
+    line-height: 22px;
+}
+
+.el-button {
+    padding: 0
+}
+
+.el-icon-refresh-right {
+    margin: 0 4px;
+}

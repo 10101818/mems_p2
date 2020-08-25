@@ -1,0 +1,107 @@
+body, div, span, header, footer, nav, section, aside, article, ul, dl, dt, dd, li, a, p, h1, h2, h3, h4, h5, h6, i, b, textarea, button, input, select, figure, figcaption {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+  font-style: normal;
+  text-decoration: none;
+  border: none;
+  outline: none;
+
+  box-sizing: border-box;
+  /*-webkit-tap-highlight-color: transparent;*/
+  /*-webkit-font-smoothing: antialiased;*/
+  /*-moz-osx-font-smoothing: grayscale;*/
+  line-height: 1;
+
+  /*-webkit-overflow-scrolling: touch*/
+}
+
+html, body {
+  height: 100%;
+  width: 100%;
+  color: #000;
+  font-weight: normal;
+
+  text-align: left;
+  background-color: #fff;
+  font-family: PingFang SC, Microsoft YaHei, "sans-serif";
+}
+
+.modal-open {
+  position: fixed;
+  width: 100%;
+}
+
+.container {
+  height: auto;
+  width: 100%;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+  box-sizing: border-box;
+  /*margin: auto;*/
+}
+
+.clearfix:after {
+  content: '';
+  display: block;
+  clear: both;
+}
+
+.clearfix {
+  zoom: 1;
+}
+
+.f-left {
+  float: left;
+}
+
+.f-right {
+  float: right;
+}
+
+.hide {
+  display: none;
+}
+
+.show {
+  display: block;
+}
+
+.abs {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+.center-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.elip {
+  overflow: hidden;
+  line-height: 25px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.touch-tap {
+  position: relative;
+}
+
+.touch-tap:before {
+  position: absolute;
+  content: '';
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  transform: scale(2);
+}
+

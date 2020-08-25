@@ -1,0 +1,2315 @@
+﻿@{
+    ViewBag.Title = ViewBag.ActionName;
+    Layout = "~/Views/Shared/_SubMain.cshtml";
+
+    int SuperAdmin = BusinessObjects.Domain.UserRole.SuperAdmin;
+    int Admin = BusinessObjects.Domain.UserRole.Admin;
+    BusinessObjects.Domain.UserInfo user = (BusinessObjects.Domain.UserInfo)Session[MedicalEquipmentHostingSystem.Controllers.BaseController.SESSION_KEY_USER];
+    int id = ViewBag.ID;
+    int dispatchID = ViewBag.DispatchID;
+    int dispatchJournalID = ViewBag.DispatchJournalID;
+    string actionName = ViewBag.ActionName;
+    int requestType = ViewBag.RequestType;
+    int otherRequest = BusinessObjects.Domain.RequestInfo.RequestTypes.Others;
+    int OnSiteInspection = BusinessObjects.Domain.RequestInfo.RequestTypes.OnSiteInspection;
+    int stock_Source = BusinessObjects.Domain.ReportAccessoryInfo.SourceType.Stock;
+    int external_Suppliers = BusinessObjects.Domain.ReportAccessoryInfo.SourceType.External_Suppliers;
+    List<BusinessObjects.Domain.KeyValueInfo> resultStatus = BusinessObjects.Manager.LookupManager.GetSolutionResultStatus();
+    List<BusinessObjects.Domain.KeyValueInfo> dispatchReportType = BusinessObjects.Manager.LookupManager.GetDispatchReportTypes();
+    List<BusinessObjects.Domain.KeyValueInfo> accessorySources = BusinessObjects.Manager.LookupManager.GetAccessorySourceType();
+    List<BusinessObjects.Domain.KeyValueInfo> serviceProviders = BusinessObjects.Domain.DispatchReportInfo.ServiceProviders.GetServiceProviders();
+    List<BusinessObjects.Domain.KeyValueInfo> equipmentStatus = BusinessObjects.Domain.MachineStatuses.GetMachineStatuses();
+
+}
+<div id="dispatchReportVue" v-cloak class="tblDiv">
+    <div><a class="linkFile backPage" href="#" onclick="Back()">&lt;&lt;@BusinessObjects.Domain.Constants.BACKLIST</a></div>
+    <div class="title">
+        <p v-if="!ReadOnlyOrShow">填写作业报告</p>
+        <p v-else-if="Approvable">审核作业报告</p>
+        <p v-else>查看作业报告</p>
+    </div>
+    <div style="width:1000px;height:35px;text-align:right" v-if="!ReadOnlyOrShow">
+        <span style="float:right;">作业报告类型：<button class="btn btn-link linkFile" onclick="OpenDispatchReportTypeDialog()">{{DispatchReport.Type.Name}}</button></span>
+    </div>
+    <div style="width:1000px;height:35px;text-align:right" v-else>
+        <span style="float:right;">作业报告类型：<span class="tdReadOnly">{{DispatchReport.Type.Name}}</span></span>
+    </div>
+    <div class="tblDiv">
+        <!-- 设备信息 -->
+        <div class="radiusOnly" v-show="Dispatch.Request.RequestType.ID != @BusinessObjects.Domain.RequestInfo.RequestTypes.Others">
+            <table border="1" class="tblDetail" v-if="Dispatch.Request.RequestType.ID != @BusinessObjects.Domain.RequestInfo.RequestTypes.OnSiteInspection && Dispatch.Request.RequestType.ID != @BusinessObjects.Domain.RequestInfo.RequestTypes.Inventory" frame="void">
+                <tr>
+                    <td colspan="6" class="tblName">设备基本信息</td>
+                </tr>
+                <tr>
+                    <th class="tdrequired" width="15px"><span class="required"></span></th>
+                    <th width="189px">系统编号</th>
+                    <td class="tdReadOnly" width="289px">{{Dispatch.Request.Equipment.OID}}</td>
+                    <th class="tdrequired" width="15px"><span class="required"></span></th>
+                    <th width="189px">资产编号</th>
+                    <td class="tdReadOnly" width="289px">{{Dispatch.Request.Equipment.AssetCode}}</td>
+                </tr>
+                <tr>
+                    <th class="tdrequired" width="15px"><span class="required"></span></th>
+                    <th>名称</th>
+                    <td class="tdReadOnly linkFile cursor" v-on:click="btnTimeLine(Dispatch.Request.Equipment.ID)">{{Dispatch.Request.Equipment.Name}}</td>
+                    <th class="tdrequired" width="15px"><span class="required"></span></th>
+                    <th>使用科室</th>
+                    <td class="tdReadOnly">{{Dispatch.Request.Equipment.Department.Name}}</td>
+                </tr>
+                <tr>
+                    <th class="tdrequired" width="15px"><span class="required"></span></th>
+                    <th>型号</th>
+                    <td class="tdReadOnly">{{Dispatch.Request.Equipment.EquipmentCode}}</td>
+                    <th class="tdrequired" width="15px"><span class="required"></span></th>
+                    <th>安装地点</th>
+                    <td class="tdReadOnly">{{Dispatch.Request.Equipment.InstalSite}}</td>
+                </tr>
+                <tr>
+                    <th class="tdrequired" width="15px"><span class="required"></span></th>
+                    <th>序列号</th>
+                    <td class="tdReadOnly">{{Dispatch.Request.Equipment.SerialCode}}</td>
+                    <th class="tdrequired" width="15px"><span class="required"></span></th>
+                    <th>维保状态</th>
+                    <td class="tdReadOnly">{{Dispatch.Request.Equipment.WarrantyStatus}}</td>
+                </tr>
+                <tr>
+                    <th class="tdrequired" width="15px"><span class="required"></span></th>
+                    <th>设备厂商</th>
+                    <td class="tdReadOnly">{{Dispatch.Request.Equipment.Manufacturer.Name}}</td>
+                    <th class="tdrequired" width="15px"><span class="required"></span></th>
+                    <th>服务范围</th>
+                    <td class="tdReadOnly">{{Dispatch.Request.Equipment.ContractScope.Name}}</td>
+                </tr>
+            </table>
+            <table class="tblDetail" border="1" v-if="Dispatch.Request.RequestType.ID == @BusinessObjects.Domain.RequestInfo.RequestTypes.OnSiteInspection || Dispatch.Request.RequestType.ID == @BusinessObjects.Domain.RequestInfo.RequestTypes.Inventory" frame="void">
+                <tr>
+                    <td colspan="10" class="tblName">
+                        设备
+                    </td>
+                </tr>
+                <tr>
+                    <th width="95px">系统编号</th>
+                    <th style="min-width:50px;">资产编号</th>
+                    <th>名称</th>
+                    <th>设备型号</th>
+                    <th>序列号</th>
+                    <th style="min-width:70px;">设备厂商</th>
+                    <th style="min-width:70px;">使用科室</th>
+                    <th style="min-width:70px;">安装地点</th>
+                    <th style="min-width:70px;">维保状态</th>
+                    <th style="min-width:70px;">服务范围</th>
+                </tr>
+                <tr v-for="info in Dispatch.Request.Equipments" style="font-size:10px">
+                    <td>{{info.OID}}</td>
+                    <td>{{info.AssetCode}}</td>
+                    <td style="white-space:normal;word-break:break-all;" class="linkFile cursor" v-on:click="btnTimeLine(info.ID)">{{info.Name}}</td>
+                    <td style="white-space:normal;word-break:break-all;">{{info.EquipmentCode}}</td>
+                    <td style="white-space:normal;word-break:break-all;">{{info.SerialCode}}</td>
+                    <td style="white-space:normal;word-break:break-all;">{{info.Manufacturer.Name}}</td>
+                    <td style="white-space:normal;word-break:break-all;">{{info.Department.Name}}</td>
+                    <td style="white-space:normal;word-break:break-all;">{{info.InstalSite}}</td>
+                    <td style="white-space:normal;word-break:break-all;">{{info.WarrantyStatus}}</td>
+                    <td style="white-space:normal;word-break:break-all;">{{info.ContractScope.Name}}</td>
+                </tr>
+            </table>
+        </div><br v-show="Dispatch.Request.RequestType.ID != @BusinessObjects.Domain.RequestInfo.RequestTypes.Others" />
+        <!-- 请求详情信息 -->
+        <div class="radiusOnly">
+            <table class="tblDetail" border="1" frame="void">
+                <tr class="headtr">
+                    <td colspan="6" class="tblName">请求详细信息</td>
+                </tr>
+                <tr>
+                    <th class="tdrequired" width="15px"><span class="required"></span></th>
+                    <th width="189px">服务申请编号</th>
+                    <td class="tdReadOnly" colspan="4">{{Dispatch.Request.OID}}</td>
+                </tr>
+                <tr>
+                    <th class="tdrequired" width="15px"><span class="required"></span></th>
+                    <th width="189px">类型</th>
+                    <td class="tdReadOnly" width="289px">{{Dispatch.Request.SourceType}}</td>
+                    <th class="tdrequired" width="15px"><span class="required"></span></th>
+                    <th width="189px">请求人</th>
+                    <td class="tdReadOnly" width="289px">{{Dispatch.Request.RequestUser.Name}}</td>
+                </tr>
+                <tr>
+                    <th class="tdrequired" width="15px"><span class="required"></span></th>
+                    <th width="189px">请求状态</th>
+                    <td class="tdReadOnly" width="289px">{{Dispatch.Request.Status.Name}}</td>
+                    <th class="tdrequired" width="15px"><span class="required"></span></th>
+                    <th width="189px">请求日期</th>
+                    <td class="tdReadOnly" width="289px">{{Dispatch.Request.RequestDate}}</td>
+                </tr>
+                <tr>
+                    <th class="tdrequired" width="15px"><span class="required"></span></th>
+                    <th width="189px">主题</th>
+                    <td width="289px" colspan="4" v-if="Dispatch.Request.RequestType.ID != @BusinessObjects.Domain.RequestInfo.RequestTypes.Repair &&Dispatch.Request.RequestType.ID != @BusinessObjects.Domain.RequestInfo.RequestTypes.Maintain && Dispatch.Request.RequestType.ID != @BusinessObjects.Domain.RequestInfo.RequestTypes.Inspection && Dispatch.Request.RequestType.ID != @BusinessObjects.Domain.RequestInfo.RequestTypes.AdverseEvent">
+                        <label class="tdReadOnly" v-if="Dispatch.Request.Equipments.length == 1">{{Dispatch.Request.Equipment.Name}}--{{Dispatch.Request.RequestType.Name}}</label>
+                        <label class="tdReadOnly" v-else-if="Dispatch.Request.Equipments.length == 0">{{Dispatch.Request.RequestType.Name}}</label>
+                        <label class="tdReadOnly" v-else>多设备--{{Dispatch.Request.RequestType.Name}}</label>
+                    </td>
+                    <td width="289px" v-else>
+                        <label class="tdReadOnly" v-if="Dispatch.Request.Equipments.length == 1">{{Dispatch.Request.Equipment.Name}}--{{Dispatch.Request.RequestType.Name}}</label>
+                        <label class="tdReadOnly" v-else-if="Dispatch.Request.Equipments.length == 0">{{Dispatch.Request.RequestType.Name}}</label>
+                        <label class="tdReadOnly" v-else>多设备--{{Dispatch.Request.RequestType.Name}}</label>
+                    </td>
+                    <th class="tdrequired" width="15px" v-if="Dispatch.Request.RequestType.ID == @BusinessObjects.Domain.RequestInfo.RequestTypes.Repair"><span class="required"></span></th>
+                    <th v-if="Dispatch.Request.RequestType.ID == @BusinessObjects.Domain.RequestInfo.RequestTypes.Repair" width="189px">机器状态</th>
+                    <td v-if="Dispatch.Request.RequestType.ID == @BusinessObjects.Domain.RequestInfo.RequestTypes.Repair" width="289px"><label class="tdReadOnly">{{Dispatch.Request.MachineStatus.Name}}</label></td>
+                    <th class="tdrequired" width="15px" v-if="Dispatch.Request.RequestType.ID == @BusinessObjects.Domain.RequestInfo.RequestTypes.Maintain"><span class="required"></span></th>
+                    <th v-if="Dispatch.Request.RequestType.ID == @BusinessObjects.Domain.RequestInfo.RequestTypes.Maintain" width="189px">保养类型</th>
+                    <td v-if="Dispatch.Request.RequestType.ID == @BusinessObjects.Domain.RequestInfo.RequestTypes.Maintain" width="289px"><label class="tdReadOnly">{{Dispatch.Request.FaultType.Name}}</label></td>
+                    <th class="tdrequired" width="15px" v-if="Dispatch.Request.RequestType.ID == @BusinessObjects.Domain.RequestInfo.RequestTypes.Inspection"><span class="required"></span></th>
+                    <th v-if="Dispatch.Request.RequestType.ID == @BusinessObjects.Domain.RequestInfo.RequestTypes.Inspection" width="189px">强检原因</th>
+                    <td v-if="Dispatch.Request.RequestType.ID == @BusinessObjects.Domain.RequestInfo.RequestTypes.Inspection" width="289px"><label class="tdReadOnly">{{Dispatch.Request.FaultType.Name}}</label></td>
+                    <th class="tdrequired" width="15px" v-if="Dispatch.Request.RequestType.ID == @BusinessObjects.Domain.RequestInfo.RequestTypes.AdverseEvent"><span class="required"></span></th>
+                    <th v-if="Dispatch.Request.RequestType.ID == @BusinessObjects.Domain.RequestInfo.RequestTypes.AdverseEvent" width="189px">来源</th>
+                    <td v-if="Dispatch.Request.RequestType.ID == @BusinessObjects.Domain.RequestInfo.RequestTypes.AdverseEvent" width="289px"><label class="tdReadOnly">{{Dispatch.Request.FaultType.Name}}</label></td>
+                </tr>
+                <tr v-if="Dispatch.Request.RequestType.ID == @BusinessObjects.Domain.RequestInfo.RequestTypes.Inspection">
+                    <th class="tdrequired" width="15px"><span class="required"></span></th>
+                    <th width="189px">是否召回</th>
+                    <td colspan="4" class="tdReadOnly">{{Dispatch.Request.IsRecall?"是":"否"}}</td>
+                </tr>
+                <tr>
+                    <th class="tdrequired" width="15px"><span class="required"></span></th>
+                    <th width="189px">请求来源</th>
+                    <td class="tdReadOnly" colspan="4">{{Dispatch.Request.Source.Name}}</td>
+                </tr>
+                <tr>
+                    <th class="tdrequired" width="15px"><span class="required"></span></th>
+                    <th width="189px">处理方式</th>
+                    <td class="tdReadOnly" colspan="4">{{Dispatch.Request.DealType.Name}}</td>
+                </tr>
+            </table>
+        </div>
+        <br />
+        <!-- 派工单信息 -->
+        <div class="radiusOnly">
+            <table border="1" class="tblDetail" frame="void">
+                <tr>
+                    <td colspan="6" class="tblName">派工内容</td>
+                </tr>
+                <tr>
+                    <th class="tdrequired" width="15px"><span class="required"></span></th>
+                    <th width="189px">派工单编号</th>
+                    <td class="tdReadOnly" width="289px"><a class="linkFile cursor" href="#" v-on:click="GotoDispatchResponse()">{{Dispatch.OID}}</a></td>
+                    <th class="tdrequired" width="15px"><span class="required"></span></th>
+                    <th width="189px">紧急程度</th>
+                    <td class="tdReadOnly" width="289px">{{Dispatch.Urgency.Name}}</td>
+                </tr>
+                <tr v-if="Dispatch.RequestType.ID != @BusinessObjects.Domain.RequestInfo.RequestTypes.Others">
+                    <th class="tdrequired" width="15px"><span class="required"></span></th>
+                    <th>派工类型</th>
+                    <td class="tdReadOnly">{{Dispatch.RequestType.Name}}</td>
+                    <th class="tdrequired" width="15px"><span class="required"></span></th>
+                    <th>机器状态</th>
+                    <td class="tdReadOnly">{{Dispatch.MachineStatus.Name}}</td>
+                </tr>
+                <tr v-else>
+                    <th class="tdrequired" width="15px"><span class="required"></span></th>
+                    <th>派工类型</th>
+                    <td class="tdReadOnly" colspan="4">{{Dispatch.RequestType.Name}}</td>
+                </tr>
+                <tr>
+                    <th class="tdrequired" width="15px"><span class="required"></span></th>
+                    <th>工程师姓名</th>
+                    <td class="tdReadOnly">{{Dispatch.Engineer.Name}}</td>
+                    <th class="tdrequired" width="15px"><span class="required"></span></th>
+                    <th>出发时间</th>
+                    <td class="tdReadOnly" id="ScheduleDate">{{Dispatch.ScheduleDate}}</td>
+                </tr>
+                <tr>
+                    <th class="tdrequired" width="15px"><span class="required"></span></th>
+                    <th>派工单状态</th>
+                    <td class="tdReadOnly" colspan="4">{{Dispatch.Status.Name}}</td>
+                </tr>
+                <tr>
+                    <th class="tdrequired" width="15px"><span class="required"></span></th>
+                    <th>备注</th>
+                    <td class="tdReadOnly" colspan="4">{{Dispatch.LeaderComments}}</td>
+                </tr>
+            </table>
+        </div><br>
+        <!--维修作业报告信息-->
+        <div class="radiusOnly" v-if="DispatchReport.Type.ID == @BusinessObjects.Domain.DispatchReportInfo.DispatchReportTypes.Repair">
+            <table border="1" class="tblDetail" frame="void">
+                <tr>
+                    <td colspan="6" class="tblName">作业报告信息</td>
+                </tr>
+                <tr>
+                    <th class="tdrequired" width="15px"><span class="required"></span></th>
+                    <th width="189px">作业报告编号</th>
+                    <td width="298px" class="tdReadOnly"><label>{{DispatchReport.OID}}</label></td>
+                    <th class="tdrequired" width="15px"><span class="required"></span></th>
+                    <th width="189px">作业报告类型</th>
+                    <td width="298px" class="tdReadOnly"><label>{{DispatchReport.Type.Name}}</label></td>
+                </tr>
+                <tr>
+                    <th class="tdrequired"><span class="required"></span></th>
+                    <th>开始时间/日期</th>
+                    <td class="tdReadOnly" id="startDate" >{{Dispatch.StartDate}}</td>
+                    <th class="tdrequired"><span v-if="!ReadOnlyOrShow" class="required">*</span></th>
+                    <th>错误代码</th>
+                    <td v-if="ReadOnlyOrShow" class="tdReadOnly">{{DispatchReport.FaultCode}}</td>
+                    <td v-else>
+                        <input maxlength="20" v-model="DispatchReport.FaultCode" id="FaultCode" style="width:97%;" />
+                        <label class="required tips" id="reqFaultCode"></label>
+                    </td>                    
+                </tr>
+                <tr>
+                    <th class="tdrequired"><span class="required"></span></th>
+                    <th>设备状态（报修）</th>
+                    <td class="tdReadOnly">{{Dispatch.MachineStatus.Name}}</td>
+                    <th class="tdrequired"><span class="required" v-if="DispatchReport.Status.ID == @BusinessObjects.Domain.DispatchInfo.DocStatus.New">*</span></th>
+                    <th>设备状态（离场）</th>
+                    <td v-if="ReadOnlyOrShow" class="tdReadOnly">{{DispatchReport.EquipmentStatus.Name}}</td>
+                    <td v-else>
+                        <select id="EquipmentStatus" v-model="DispatchReport.EquipmentStatus.ID" style="width:150px;">
+                            @foreach (var item in equipmentStatus)
+                            {
+                            <option value="@item.ID">@item.Name</option>
+                            }
+                        </select>
+                        <label class="required tips" id="reqEquipmentStatus"></label>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="tdrequired"><span class="required"></span></th>
+                    <th>详细故障描述</th>
+                    <td v-if="ReadOnlyOrShow" class="tdReadOnly" colspan="4">{{DispatchReport.FaultDesc}}</td>
+                    <td v-else colspan="4"><textarea maxlength="500" v-model="DispatchReport.FaultDesc"></textarea></td>
+                </tr>
+                <tr>
+                    <th class="tdrequired"><span class="required" v-if="!ReadOnlyOrShow">*</span></th>
+                    <th>分析原因</th>
+                    <td v-if="ReadOnlyOrShow" class="tdReadOnly" colspan="4"><label>{{DispatchReport.SolutionCauseAnalysis}}</label></td>
+                    <td v-else colspan="4">
+                        <textarea type="text" v-model="DispatchReport.SolutionCauseAnalysis" maxlength="500" id="SolutionCauseAnalysis"></textarea>
+                        <label class="required tips" id="reqSolutionCauseAnalysis"></label>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="tdrequired"><span class="required" v-if="!ReadOnlyOrShow">*</span></th>
+                    <th>详细处理方法</th>
+                    <td v-if="ReadOnlyOrShow" class="tdReadOnly" colspan="4"><label>{{DispatchReport.SolutionWay}}</label></td>
+                    <td v-else colspan="4">
+                        <textarea type="text" v-model="DispatchReport.SolutionWay" maxlength="500" id="SolutionWay"></textarea>
+                        <label class="required tips" id="reqSolutionWay"></label>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="tdrequired"><span class="required" v-if="!ReadOnlyOrShow">*</span></th>
+                    <th>结果</th>
+                    <td v-if="ReadOnlyOrShow" class="tdReadOnly" colspan="4"><label>{{DispatchReport.Result}}</label></td>
+                    <td v-else colspan="4">
+                        <textarea type="text" v-model="DispatchReport.Result" maxlength="500" id="Result"></textarea>
+                        <label class="required tips" id="reqResult"></label>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="tdrequired"><span class="required" v-show="!ReadOnlyOrShow || Approvable">*</span></th>
+                    <th>作业报告结果</th>
+                    <td v-if="ReadOnlyOrShow & !Approvable" class="tdReadOnly" colspan="4"><label>{{DispatchReport.SolutionResultStatus.Name}}</label></td>
+                    <td v-else colspan="4">
+                        <select v-model="DispatchReport.SolutionResultStatus.ID" id="SolutionResultStatus" style="width:150px;" onchange="changeResultStatus()">
+                            @foreach (var temp in resultStatus)
+                            {
+                                <option value="@temp.ID">@temp.Name</option>
+                            }
+                        </select>
+                        <label id="reqSolutionResultStatus" class="required tips"></label>
+                    </td>
+                </tr>
+                <tr v-if="DispatchReport.SolutionResultStatus.ID == @BusinessObjects.Domain.DispatchReportInfo.SolutionResultStatuses.Problem_Escalation">
+                    <th class="tdrequired"><span class="required" v-show="!ReadOnlyOrShow || Approvable">*</span></th>
+                    <th>问题升级</th>
+                    <td colspan="4" v-if="!ReadOnlyOrShow || Approvable">
+                        <textarea id="SolutionUnsolvedComments" v-model="DispatchReport.SolutionUnsolvedComments" type="text" maxlength="500"></textarea>
+                        <label id="reqSolutionUnsolvedComments" class="required tips"></label>
+                    </td>
+                    <td v-else class="tdReadOnly" colspan="4"><label>{{DispatchReport.SolutionUnsolvedComments}}</label></td>
+                </tr>
+                <tr v-show="DispatchReport.SolutionResultStatus.ID == @BusinessObjects.Domain.DispatchReportInfo.SolutionResultStatuses.Waitting_Thirdparty">
+                    <th class="tdrequired"><span class="required" v-show="!ReadOnlyOrShow || Approvable">*</span></th>
+                    <th>服务提供方</th>
+                    <td v-if="ReadOnlyOrShow && !Approvable" class="tdReadOnly" colspan="4"><label>{{DispatchReport.ServiceProvider.Name}}</label></td>
+                    <td v-else colspan="4">
+                        <select v-model="DispatchReport.ServiceProvider.ID" style="width:150px;">
+                            @foreach (var temp in serviceProviders)
+                            {
+                                <option value="@temp.ID">@temp.Name</option>
+                            }
+                        </select>
+                        <label class="required tips" id="reqServiceProvider"></label>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="tdrequired"><span class="required"></span></th>
+                    <th>状态</th>
+                    <td class="tdReadOnly" colspan="4">{{DispatchReport.Status.Name}}</td>
+                </tr>
+                <tr>
+                    <th class="tdrequired"><span class="required" v-if="!ReadOnlyOrShow"></span></th>
+                    <th>备注</th>
+                    <td v-if="ReadOnlyOrShow" class="tdReadOnly" colspan="4"><label>{{DispatchReport.Comments}}</label></td>
+                    <td v-else colspan="4"><textarea type="text" v-model="DispatchReport.Comments" maxlength="500"></textarea></td>
+                </tr>
+                <tr v-show="Dispatch.Request.IsDelay">
+                    <th class="tdrequired"><span class="required" v-show="!ReadOnlyOrShow ">*</span></th>
+                    <th>误工说明</th>
+                    <td v-if="ReadOnlyOrShow" colspan="4" class="tdReadOnly"><label>{{DispatchReport.DelayReason}}</label></td>
+                    <td v-else colspan="4">
+                        <textarea type="text" id="DelayReason" v-model="DispatchReport.DelayReason" maxlength="500"></textarea>
+                        <label class="required tips" id="reqDelayReason"></label>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="tdrequired"><span class="required"></span></th>
+                    <th>附件</th>
+                    <td colspan="4">
+                        <input type="text" readonly class="linkFile" id="FileDispatchReport" onclick="OpenLocalFile('FileDispatchReport','@BusinessObjects.Domain.ObjectTypes.DispatchReport')" style="width:85%;" />
+                        <img src="~/Content/img/upload.png" class="cursor icon-upload" v-if="!ReadOnlyOrShow || Approvable" onclick="fileFileDispatchReport.click()" />
+                        <img src="~/Content/img/delete.png" class="cursor icon-delete" alt="delete" v-if="!ReadOnlyOrShow || Approvable" onclick="DeleteUploadFileData('FileDispatchReport')" />
+                        <input type="file" id="fileFileDispatchReport" style="display:none" onchange="UploadFile(@BusinessObjects.Domain.DispatchReportInfo.FileTypes.DispatchReportFile,'FileDispatchReport','@id')">
+                        <input type="hidden" id="FileDispatchReportID" />
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <!--保养作业报告-->
+        <div class="radiusOnly" v-else-if="DispatchReport.Type.ID == @BusinessObjects.Domain.DispatchReportInfo.DispatchReportTypes.Maintenance">
+            <table border="1" class="tblDetail" v-if="DispatchReport.Type.ID == @BusinessObjects.Domain.DispatchReportInfo.DispatchReportTypes.Maintenance" frame="void">
+                <tr>
+                    <td colspan="6" class="tblName">作业报告信息</td>
+                </tr>
+                <tr>
+                    <th class="tdrequired" width="15px"><span class="required"></span></th>
+                    <th width="189px">作业报告编号</th>
+                    <td width="298px" class="tdReadOnly"><label>{{DispatchReport.OID}}</label></td>
+                    <th class="tdrequired" width="15px"><span class="required"></span></th>
+                    <th width="189px">作业报告类型</th>
+                    <td width="298px" class="tdReadOnly"><label>{{DispatchReport.Type.Name}}</label></td>
+                </tr>
+                <tr>
+                    <th class="tdrequired"><span class="required"></span></th>
+                    <th>开始时间/日期</th>
+                    <td class="tdReadOnly" colspan="4" id="startDate">{{Dispatch.StartDate}}</td>
+                </tr>
+                <tr>
+                    <th class="tdrequired"><span class="required" v-if="!ReadOnlyOrShow">*</span></th>
+                    <th>报告明细</th>
+                    <td v-if="ReadOnlyOrShow" class="tdReadOnly" colspan="4"><label>{{DispatchReport.SolutionCauseAnalysis}}</label></td>
+                    <td v-else colspan="4">
+                        <textarea type="text" v-model="DispatchReport.SolutionCauseAnalysis" maxlength="500" id="SolutionCauseAnalysis"></textarea>
+                        <label class="required tips" id="reqSolutionCauseAnalysis"></label>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="tdrequired"><span class="required" v-if="!ReadOnlyOrShow">*</span></th>
+                    <th>结果</th>
+                    <td v-if="ReadOnlyOrShow" class="tdReadOnly" colspan="4"><label>{{DispatchReport.Result}}</label></td>
+                    <td v-else colspan="4">
+                        <textarea type="text" v-model="DispatchReport.Result" maxlength="500" id="Result"></textarea>
+                        <label class="required tips" id="reqResult"></label>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="tdrequired"><span class="required" v-show="!ReadOnlyOrShow || Approvable">*</span></th>
+                    <th>作业报告结果</th>
+                    <td v-if="ReadOnlyOrShow & !Approvable" class="tdReadOnly" colspan="4"><label>{{DispatchReport.SolutionResultStatus.Name}}</label></td>
+                    <td v-else colspan="4">
+                        <select v-model="DispatchReport.SolutionResultStatus.ID" id="SolutionResultStatus" style="width:150px;" onchange="changeResultStatus()">
+                            @foreach (var temp in resultStatus)
+                            {
+                                <option value="@temp.ID">@temp.Name</option>
+                            }
+                        </select>
+                        <label id="reqSolutionResultStatus" class="required tips"></label>
+                    </td>
+                </tr>
+                <tr v-if="DispatchReport.SolutionResultStatus.ID == @BusinessObjects.Domain.DispatchReportInfo.SolutionResultStatuses.Problem_Escalation">
+                    <th class="tdrequired"><span class="required" v-show="!ReadOnlyOrShow || Approvable">*</span></th>
+                    <th>问题升级</th>
+                    <td colspan="4" v-if="!ReadOnlyOrShow || Approvable">
+                        <textarea id="SolutionUnsolvedComments" v-model="DispatchReport.SolutionUnsolvedComments" type="text" maxlength="500"></textarea>
+                        <label id="reqSolutionUnsolvedComments" class="required tips"></label>
+                    </td>
+                    <td v-else class="tdReadOnly" colspan="4"><label>{{DispatchReport.SolutionUnsolvedComments}}</label></td>
+                </tr>
+                <tr v-show = "DispatchReport.SolutionResultStatus.ID == @BusinessObjects.Domain.DispatchReportInfo.SolutionResultStatuses.Waitting_Thirdparty">
+                    <th class="tdrequired"><span class="required" v-show = "!ReadOnlyOrShow || Approvable">*</span></th>
+                    <th>服务提供方</th>
+                    <td v-if="ReadOnlyOrShow && !Approvable" class="tdReadOnly" colspan="4"><label>{{DispatchReport.ServiceProvider.Name}}</label></td>
+                    <td v-else colspan="4">
+                        <select v-model="DispatchReport.ServiceProvider.ID" style="width:150px;">
+                            @foreach (var temp in serviceProviders)
+                            {
+                                <option value="@temp.ID">@temp.Name</option>
+                            }
+                        </select>
+                        <label class="required tips" id="reqServiceProvider"></label>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="tdrequired"><span class="required"></span></th>
+                    <th>状态</th>
+                    <td class="tdReadOnly" colspan="4">{{DispatchReport.Status.Name}}</td>
+                </tr>
+                <tr>
+                    <th class="tdrequired"><span class="required"></span></th>
+                    <th>备注</th>
+                    <td v-if="ReadOnlyOrShow" class="tdReadOnly" colspan="4"><label>{{DispatchReport.Comments}}</label></td>
+                    <td v-else colspan="4"><textarea type="text" v-model="DispatchReport.Comments" maxlength="500"></textarea></td>
+                </tr>
+                <tr>
+                    <th class="tdrequired"><span class="required" v-if="(!ReadOnlyOrShow || Approvable) && DispatchReport.ServiceProvider.ID != @BusinessObjects.Domain.DispatchReportInfo.ServiceProviders.Management_Party && DispatchReport.SolutionResultStatus.ID == @BusinessObjects.Domain.DispatchReportInfo.SolutionResultStatuses.Waitting_Thirdparty">*</span></th>
+                    <th>附件</th>
+                    <td colspan="4">
+                        <input type="text" readonly class="linkFile" id="FileDispatchReport" onclick="OpenLocalFile('FileDispatchReport','@BusinessObjects.Domain.ObjectTypes.DispatchReport')" style="width:85%;" />
+                        <img src="~/Content/img/upload.png" class="cursor icon-upload" v-if="!ReadOnlyOrShow || Approvable" onclick="fileFileDispatchReport.click()" />
+                        <img src="~/Content/img/delete.png" class="cursor icon-delete" alt="delete" v-if="!ReadOnlyOrShow || Approvable" onclick="DeleteUploadFileData('FileDispatchReport')" />
+                        <input type="file" id="fileFileDispatchReport" style="display:none" onchange="UploadFile(@BusinessObjects.Domain.DispatchReportInfo.FileTypes.DispatchReportFile,'FileDispatchReport','@id')">
+                        <input type="hidden" id="FileDispatchReportID" />
+                        <label id="reqFile" class="required tips"></label>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <!--强检作业报告-->
+        <div class="radiusOnly" v-else-if="DispatchReport.Type.ID == @BusinessObjects.Domain.DispatchReportInfo.DispatchReportTypes.MandatoryInspection">
+            <table border="1" class="tblDetail" frame="void">
+                <tr>
+                    <td colspan="6" class="tblName">作业报告信息</td>
+                </tr>
+                <tr>
+                    <th class="tdrequired" width="15px"><span class="required"></span></th>
+                    <th width="189px">作业报告编号</th>
+                    <td width="298px" class="tdReadOnly"><label>{{DispatchReport.OID}}</label></td>
+                    <th class="tdrequired" width="15px"><span class="required"></span></th>
+                    <th width="189px">作业报告类型</th>
+                    <td width="298px" class="tdReadOnly"><label>{{DispatchReport.Type.Name}}</label></td>
+                </tr>
+                <tr>
+                    <th class="tdrequired"><span class="required"></span></th>
+                    <th>开始时间/日期</th>
+                    <td class="tdReadOnly" colspan="4" id="startDate">{{Dispatch.StartDate}}</td>
+                </tr>
+                <tr>
+                    <th class="tdrequired"><span class="required" v-if="!ReadOnlyOrShow">*</span></th>
+                    <th>强检要求</th>
+                    <td v-if="ReadOnlyOrShow" class="tdReadOnly" colspan="4"><label>{{DispatchReport.FaultDesc}}</label></td>
+                    <td v-else colspan="4">
+                        <textarea type="text" v-model="DispatchReport.FaultDesc" maxlength="500" id="FaultDesc" placeholder="FDA,厂家要求,政府要求等"></textarea>
+                        <label class="required tips" id="reqFaultDesc"></label>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="tdrequired"><span class="required" v-if="!ReadOnlyOrShow">*</span></th>
+                    <th>报告明细</th>
+                    <td v-if="ReadOnlyOrShow" class="tdReadOnly " colspan="4"><label>{{DispatchReport.SolutionCauseAnalysis}}</label></td>
+                    <td v-else colspan="4">
+                        <textarea type="text" v-model="DispatchReport.SolutionCauseAnalysis" maxlength="500" id="SolutionCauseAnalysis"></textarea>
+                        <label class="required tips" id="reqSolutionCauseAnalysis"></label>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="tdrequired"><span class="required" v-if="!ReadOnlyOrShow">*</span></th>
+                    <th>结果</th>
+                    <td v-if="ReadOnlyOrShow" class="tdReadOnly" colspan="4"><label>{{DispatchReport.Result}}</label></td>
+                    <td v-else colspan="4">
+                        <textarea v-model="DispatchReport.Result" maxlength="500" id="Result"></textarea>
+                        <label class="required tips" id="reqResult"></label>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="tdrequired"><span class="required" v-if="!ReadOnlyOrShow">*</span></th>
+                    <th>专用报告</th>
+                    <td v-if="ReadOnlyOrShow" class="tdReadOnly" colspan="4"><label>{{DispatchReport.IsPrivate == 'true'?"是":"否"}}</label></td>
+                    <td v-else colspan="4">
+                        <input name="select" type="radio" value="true" v-model="DispatchReport.IsPrivate" />是&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                        <input name="select" type="radio" value="false" v-model="DispatchReport.IsPrivate" />否
+                    </td>
+                </tr>
+                <tr>
+                    <th class="tdrequired"><span class="required" v-if="!ReadOnlyOrShow">*</span></th>
+                    <th>待召回</th>
+                    <td v-if="ReadOnlyOrShow" class="tdReadOnly" colspan="4"><label>{{DispatchReport.IsRecall == 'true' ?"是":"否"}}</label></td>
+                    <td v-else colspan="4">
+                        <input type="radio" value="true" v-model="DispatchReport.IsRecall" />是&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                        <input type="radio" value="false" v-model="DispatchReport.IsRecall" />否
+                    </td>
+                </tr>
+                <tr>
+                    <th class="tdrequired"><span class="required" v-show="!ReadOnlyOrShow || Approvable">*</span></th>
+                    <th>作业报告结果</th>
+                    <td v-if="ReadOnlyOrShow & !Approvable" class="tdReadOnly" colspan="4"><label>{{DispatchReport.SolutionResultStatus.Name}}</label></td>
+                    <td v-else colspan="4">
+                        <select v-model="DispatchReport.SolutionResultStatus.ID" id="SolutionResultStatus" style="width:150px;" onchange="changeResultStatus()">
+                            @foreach (var temp in resultStatus)
+                            {
+                                <option value="@temp.ID">@temp.Name</option>
+                            }
+                        </select>
+                        <label id="reqSolutionResultStatus" class="required tips"></label>
+                    </td>
+                </tr>
+                <tr v-if="DispatchReport.SolutionResultStatus.ID == @BusinessObjects.Domain.DispatchReportInfo.SolutionResultStatuses.Problem_Escalation">
+                    <th class="tdrequired"><span class="required" v-show="!ReadOnlyOrShow || Approvable">*</span></th>
+                    <th>问题升级</th>
+                    <td colspan="4" v-if="!ReadOnlyOrShow || Approvable">
+                        <textarea id="SolutionUnsolvedComments" v-model="DispatchReport.SolutionUnsolvedComments" type="text" maxlength="500"></textarea>
+                        <label id="reqSolutionUnsolvedComments" class="required tips"></label>
+                    </td>
+                    <td v-else class="tdReadOnly" colspan="4"><label>{{DispatchReport.SolutionUnsolvedComments}}</label></td>
+                </tr>
+                <tr v-show="DispatchReport.SolutionResultStatus.ID == @BusinessObjects.Domain.DispatchReportInfo.SolutionResultStatuses.Waitting_Thirdparty">
+                    <th class="tdrequired"><span class="required" v-show="!ReadOnlyOrShow || Approvable">*</span></th>
+                    <th>服务提供方</th>
+                    <td v-if="ReadOnlyOrShow && !Approvable" class="tdReadOnly" colspan="4"><label>{{DispatchReport.ServiceProvider.Name}}</label></td>
+                    <td v-else colspan="4">
+                        <select v-model="DispatchReport.ServiceProvider.ID" style="width:150px;">
+                            @foreach (var temp in serviceProviders)
+                            {
+                                <option value="@temp.ID">@temp.Name</option>
+                            }
+                        </select>
+                        <label class="required tips" id="reqServiceProvider"></label>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="tdrequired"><span class="required"></span></th>
+                    <th>状态</th>
+                    <td class="tdReadOnly" colspan="4">{{DispatchReport.Status.Name}}</td>
+                </tr>
+                <tr>
+                    <th class="tdrequired"><span class="required"></span></th>
+                    <th>备注</th>
+                    <td v-if="ReadOnlyOrShow" class="tdReadOnly" colspan="4"><label>{{DispatchReport.Comments}}</label></td>
+                    <td v-else colspan="4"><textarea type="text" v-model="DispatchReport.Comments" maxlength="500" style="width:97%"></textarea></td>
+                </tr>
+                <tr>
+                    <th class="tdrequired">
+                        <span class="required" v-if="!ReadOnlyOrShow && DispatchReport.IsPrivate == 'true'">*</span>
+                    </th>
+                    <th>附件</th>
+                    <td colspan="4">
+                        <input type="text" readonly class="linkFile" id="FileDispatchReport" onclick="OpenLocalFile('FileDispatchReport','@BusinessObjects.Domain.ObjectTypes.DispatchReport')" style="width:85%;" />
+                        <img src="~/Content/img/upload.png" class="cursor icon-upload" v-if="!ReadOnlyOrShow || Approvable" onclick="fileFileDispatchReport.click()" />
+                        <img src="~/Content/img/delete.png" class="cursor icon-delete" alt="delete" v-if="!ReadOnlyOrShow || Approvable" onclick="DeleteUploadFileData('FileDispatchReport')" />
+                        <input type="file" id="fileFileDispatchReport" style="display:none" onchange="UploadFile(@BusinessObjects.Domain.DispatchReportInfo.FileTypes.DispatchReportFile,'FileDispatchReport','@id')">
+                        <input type="hidden" id="FileDispatchReportID" />
+                        <label id="reqFile" class="required tips"></label>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <!--巡检作业报告-->
+        <div class="radiusOnly" v-else-if="DispatchReport.Type.ID == @BusinessObjects.Domain.DispatchReportInfo.DispatchReportTypes.RegularParol">
+            <table border="1" class="tblDetail" frame="void">
+                <tr>
+                    <td colspan="6" class="tblName">作业报告信息</td>
+                </tr>
+                <tr>
+                    <th class="tdrequired" width="15px"><span class="required"></span></th>
+                    <th width="189px">作业报告编号</th>
+                    <td width="298px" class="tdReadOnly"><label>{{DispatchReport.OID}}</label></td>
+                    <th class="tdrequired" width="15px"><span class="required"></span></th>
+                    <th width="189px">作业报告类型</th>
+                    <td width="298px" class="tdReadOnly"><label>{{DispatchReport.Type.Name}}</label></td>
+                </tr>
+                <tr>
+                    <th class="tdrequired"><span class="required"></span></th>
+                    <th>开始时间/日期</th>
+                    <td class="tdReadOnly" colspan="4" id="startDate">{{Dispatch.StartDate}}</td>
+                </tr>
+                <tr>
+                    <th class="tdrequired"><span class="required" v-if="!ReadOnlyOrShow">*</span></th>
+                    <th>报告明细</th>
+                    <td v-if="ReadOnlyOrShow" class="tdReadOnly" colspan="4"><label>{{DispatchReport.SolutionCauseAnalysis}}</label></td>
+                    <td v-else colspan="4">
+                        <textarea type="text" v-model="DispatchReport.SolutionCauseAnalysis" maxlength="500" id="SolutionCauseAnalysis"></textarea>
+                        <label class="required tips" id="reqSolutionCauseAnalysis"></label>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="tdrequired"><span class="required" v-if="!ReadOnlyOrShow">*</span></th>
+                    <th>结果</th>
+                    <td v-if="ReadOnlyOrShow" class="tdReadOnly" colspan="4"><label>{{DispatchReport.Result}}</label></td>
+                    <td v-else colspan="4">
+                        <textarea type="text" v-model="DispatchReport.Result" maxlength="500" id="Result"></textarea>
+                        <label class="required tips" id="reqResult"></label>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="tdrequired"><span class="required" v-show="!ReadOnlyOrShow || Approvable">*</span></th>
+                    <th>作业报告结果</th>
+                    <td v-if="ReadOnlyOrShow & !Approvable" class="tdReadOnly" colspan="4"><label>{{DispatchReport.SolutionResultStatus.Name}}</label></td>
+                    <td v-else colspan="4">
+                        <select v-model="DispatchReport.SolutionResultStatus.ID" id="SolutionResultStatus" style="width:150px;" onchange="changeResultStatus()">
+                            @foreach (var temp in resultStatus)
+                            {
+                                <option value="@temp.ID">@temp.Name</option>
+                            }
+                        </select>
+                        <label id="reqSolutionResultStatus" class="required tips"></label>
+                    </td>
+                </tr>
+                <tr v-if="DispatchReport.SolutionResultStatus.ID == @BusinessObjects.Domain.DispatchReportInfo.SolutionResultStatuses.Problem_Escalation">
+                    <th class="tdrequired"><span class="required" v-show="!ReadOnlyOrShow || Approvable">*</span></th>
+                    <th>问题升级</th>
+                    <td colspan="4" v-if="!ReadOnlyOrShow || Approvable">
+                        <textarea id="SolutionUnsolvedComments" v-model="DispatchReport.SolutionUnsolvedComments" type="text" maxlength="500"></textarea>
+                        <label id="reqSolutionUnsolvedComments" class="required tips"></label>
+                    </td>
+                    <td v-else class="tdReadOnly" colspan="4"><label>{{DispatchReport.SolutionUnsolvedComments}}</label></td>
+                </tr>
+                <tr v-show="DispatchReport.SolutionResultStatus.ID == @BusinessObjects.Domain.DispatchReportInfo.SolutionResultStatuses.Waitting_Thirdparty">
+                    <th class="tdrequired"><span class="required" v-show="!ReadOnlyOrShow || Approvable">*</span></th>
+                    <th>服务提供方</th>
+                    <td v-if="ReadOnlyOrShow && !Approvable" class="tdReadOnly" colspan="4"><label>{{DispatchReport.ServiceProvider.Name}}</label></td>
+                    <td v-else colspan="4">
+                        <select v-model="DispatchReport.ServiceProvider.ID" style="width:150px;">
+                            @foreach (var temp in serviceProviders)
+                            {
+                                <option value="@temp.ID">@temp.Name</option>
+                            }
+                        </select>
+                        <label class="required tips" id="reqServiceProvider"></label>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="tdrequired"><span class="required"></span></th>
+                    <th>状态</th>
+                    <td class="tdReadOnly" colspan="4">{{DispatchReport.Status.Name}}</td>
+                </tr>
+                <tr>
+                    <th class="tdrequired"><span class="required"></span></th>
+                    <th>备注</th>
+                    <td v-if="ReadOnlyOrShow" class="tdReadOnly" colspan="4"><label>{{DispatchReport.Comments}}</label></td>
+                    <td v-else colspan="4"><textarea type="text" v-model="DispatchReport.Comments" maxlength="500"></textarea></td>
+                </tr>
+                <tr>
+                    <th class="tdrequired"><span class="required"></span></th>
+                    <th>附件</th>
+                    <td colspan="4">
+                        <input type="text" readonly class="linkFile" id="FileDispatchReport" onclick="OpenLocalFile('FileDispatchReport','@BusinessObjects.Domain.ObjectTypes.DispatchReport')" style="width:85%;" />
+                        <img src="~/Content/img/upload.png" class="cursor icon-upload" v-if="!ReadOnlyOrShow || Approvable" onclick="fileFileDispatchReport.click()" />
+                        <img src="~/Content/img/delete.png" class="cursor icon-delete" alt="delete" v-if="!ReadOnlyOrShow || Approvable" onclick="DeleteUploadFileData('FileDispatchReport')" />
+                        <input type="file" id="fileFileDispatchReport" style="display:none" onchange="UploadFile(@BusinessObjects.Domain.DispatchReportInfo.FileTypes.DispatchReportFile,'FileDispatchReport','@id')" />
+                        <input type="hidden" id="FileDispatchReportID" />
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <!--校准作业报告-->
+        <div class="radiusOnly" v-else-if="DispatchReport.Type.ID == @BusinessObjects.Domain.DispatchReportInfo.DispatchReportTypes.Correcting">
+            <table border="1" class="tblDetail" frame="void">
+                <tr>
+                    <td colspan="6" class="tblName">作业报告信息</td>
+                </tr>
+                <tr>
+                    <th class="tdrequired" width="15px"><span class="required"></span></th>
+                    <th width="189px">作业报告编号</th>
+                    <td width="298px" class="tdReadOnly"><label>{{DispatchReport.OID}}</label></td>
+                    <th class="tdrequired" width="15px"><span class="required"></span></th>
+                    <th width="189px">作业报告类型</th>
+                    <td width="298px" class="tdReadOnly"><label>{{DispatchReport.Type.Name}}</label></td>
+                </tr>
+                <tr>
+                    <th class="tdrequired"><span class="required"></span></th>
+                    <th>开始时间/日期</th>
+                    <td class="tdReadOnly" colspan="4" id="startDate">{{Dispatch.StartDate}}</td>
+                </tr>
+                <tr>
+                    <th class="tdrequired"><span class="required" v-if="!ReadOnlyOrShow">*</span></th>
+                    <th>报告明细</th>
+                    <td v-if="ReadOnlyOrShow" class="tdReadOnly" colspan="4"><label>{{DispatchReport.SolutionCauseAnalysis}}</label></td>
+                    <td v-else colspan="4">
+                        <textarea type="text" v-model="DispatchReport.SolutionCauseAnalysis" maxlength="500" id="SolutionCauseAnalysis"></textarea>
+                        <label class="required tips" id="reqSolutionCauseAnalysis"></label>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="tdrequired"><span class="required" v-if="!ReadOnlyOrShow">*</span></th>
+                    <th>结果</th>
+                    <td v-if="ReadOnlyOrShow" class="tdReadOnly" colspan="4"><label>{{DispatchReport.Result}}</label></td>
+                    <td v-else colspan="4">
+                        <textarea type="text" v-model="DispatchReport.Result" maxlength="500" id="Result"></textarea>
+                        <label class="required tips" id="reqResult"></label>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="tdrequired"><span class="required" v-show="!ReadOnlyOrShow || Approvable">*</span></th>
+                    <th>作业报告结果</th>
+                    <td v-if="ReadOnlyOrShow & !Approvable" class="tdReadOnly" colspan="4"><label>{{DispatchReport.SolutionResultStatus.Name}}</label></td>
+                    <td v-else colspan="4">
+                        <select v-model="DispatchReport.SolutionResultStatus.ID" id="SolutionResultStatus" style="width:150px;" onchange="changeResultStatus()">
+                            @foreach (var temp in resultStatus)
+                            {
+                                <option value="@temp.ID">@temp.Name</option>
+                            }
+                        </select>
+                        <label id="reqSolutionResultStatus" class="required tips"></label>
+                    </td>
+                </tr>
+                <tr v-if="DispatchReport.SolutionResultStatus.ID == @BusinessObjects.Domain.DispatchReportInfo.SolutionResultStatuses.Problem_Escalation">
+                    <th class="tdrequired"><span class="required" v-show="!ReadOnlyOrShow || Approvable">*</span></th>
+                    <th>问题升级</th>
+                    <td colspan="4" v-if="!ReadOnlyOrShow || Approvable">
+                        <textarea id="SolutionUnsolvedComments" v-model="DispatchReport.SolutionUnsolvedComments" type="text" maxlength="500"></textarea>
+                        <label id="reqSolutionUnsolvedComments" class="required tips"></label>
+                    </td>
+                    <td v-else class="tdReadOnly" colspan="4"><label>{{DispatchReport.SolutionUnsolvedComments}}</label></td>
+                </tr>
+                <tr v-show="DispatchReport.SolutionResultStatus.ID == @BusinessObjects.Domain.DispatchReportInfo.SolutionResultStatuses.Waitting_Thirdparty">
+                    <th class="tdrequired"><span class="required" v-show="!ReadOnlyOrShow || Approvable">*</span></th>
+                    <th>服务提供方</th>
+                    <td v-if="ReadOnlyOrShow && !Approvable" class="tdReadOnly" colspan="4"><label>{{DispatchReport.ServiceProvider.Name}}</label></td>
+                    <td v-else colspan="4">
+                        <select v-model="DispatchReport.ServiceProvider.ID" style="width:150px;">
+                            @foreach (var temp in serviceProviders)
+                            {
+                                <option value="@temp.ID">@temp.Name</option>
+                            }
+                        </select>
+                        <label class="required tips" id="reqServiceProvider"></label>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="tdrequired"><span class="required"></span></th>
+                    <th>状态</th>
+                    <td class="tdReadOnly" colspan="4">{{DispatchReport.Status.Name}}</td>
+                </tr>
+                <tr>
+                    <th class="tdrequired"><span class="required"></span></th>
+                    <th>备注</th>
+                    <td v-if="ReadOnlyOrShow" class="tdReadOnly" colspan="4"><label>{{DispatchReport.Comments}}</label></td>
+                    <td v-else colspan="4"><textarea type="text" v-model="DispatchReport.Comments" maxlength="500"></textarea></td>
+                </tr>
+                <tr>
+                    <th class="tdrequired"><span class="required"></span></th>
+                    <th>附件</th>
+                    <td colspan="4">
+                        <input type="text" readonly class="linkFile" id="FileDispatchReport" onclick="OpenLocalFile('FileDispatchReport','@BusinessObjects.Domain.ObjectTypes.DispatchReport')" style="width:85%;" />
+                        <img src="~/Content/img/upload.png" class="cursor icon-upload" v-if="!ReadOnlyOrShow || Approvable" onclick="fileFileDispatchReport.click()" />
+                        <img src="~/Content/img/delete.png" class="cursor icon-delete" alt="delete" v-if="!ReadOnlyOrShow || Approvable" onclick="DeleteUploadFileData('FileDispatchReport')" />
+                        <input type="file" id="fileFileDispatchReport" style="display:none" onchange="UploadFile(@BusinessObjects.Domain.DispatchReportInfo.FileTypes.DispatchReportFile,'FileDispatchReport','@id')" />
+                        <input type="hidden" id="FileDispatchReportID" />
+                    </td>
+                </tr>
+            </table>
+
+        </div>
+        <!--新增设备作业报告-->
+        <div class="radiusOnly" v-else-if="DispatchReport.Type.ID == @BusinessObjects.Domain.DispatchReportInfo.DispatchReportTypes.AddEquipment">
+            <table border="1" class="tblDetail" frame="void">
+                <tr>
+                    <td colspan="6" class="tblName">作业报告信息</td>
+                </tr>
+                <tr>
+                    <th class="tdrequired" width="15px"><span class="required"></span></th>
+                    <th width="189px">作业报告编号</th>
+                    <td width="298px" class="tdReadOnly"><label>{{DispatchReport.OID}}</label></td>
+                    <th class="tdrequired" width="15px"><span class="required"></span></th>
+                    <th width="189px">作业报告类型</th>
+                    <td width="298px" class="tdReadOnly"><label>{{DispatchReport.Type.Name}}</label></td>
+                </tr>
+                <tr>
+                    <th class="tdrequired"><span class="required"></span></th>
+                    <th>开始时间/日期</th>
+                    <td class="tdReadOnly" id="startDate">{{Dispatch.StartDate}}</td>
+                    <th class="tdrequired"><span class="required" v-if="!ReadOnlyOrShow">*</span></th>
+                    <th>资产金额</th>
+                    <td class="tdReadOnly" v-if="ReadOnlyOrShow " id="startDate">{{DispatchReport.PurchaseAmount}}</td>
+                    <td v-else>
+                        <input type="text" v-model="DispatchReport.PurchaseAmount" id="PurchaseAmount" />
+                        <label class="required tips" id="reqPurchaseAmount"></label>
+                    </td>
+                </tr>
+                <tr v-if="@user.Role.ID == @SuperAdmin">
+                    <th class="tdrequired"><span class="required" v-if="Approvable">*</span></th>
+                    <th>整包范围</th>
+                    <td class="tdReadOnly" v-if="ReadOnlyOrShow && !Approvable" id="startDate">{{DispatchReport.ServiceScope == null ? "" : DispatchReport.ServiceScope ? '是' : '否' }}</td>
+                    <td v-else-if="@user.Role.ID == @SuperAdmin">
+                        <input type="radio" id="ServiceScope" value="true" v-model="DispatchReport.ServiceScope" />是&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                        <input type="radio" value="false" v-model="DispatchReport.ServiceScope" />否
+                        <label class="required tips" id="reqServiceScope"></label>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="tdrequired"><span class="required" v-if="!ReadOnlyOrShow">*</span></th>
+                    <th>报告明细</th>
+                    <td v-if="ReadOnlyOrShow" class="tdReadOnly" colspan="4"><label>{{DispatchReport.SolutionCauseAnalysis}}</label></td>
+                    <td v-else colspan="4">
+                        <textarea type="text" v-model="DispatchReport.SolutionCauseAnalysis" maxlength="500" id="SolutionCauseAnalysis"></textarea>
+                        <label class="required tips" id="reqSolutionCauseAnalysis"></label>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="tdrequired"><span class="required" v-if="!ReadOnlyOrShow">*</span></th>
+                    <th>结果</th>
+                    <td v-if="ReadOnlyOrShow" class="tdReadOnly" colspan="4"><label>{{DispatchReport.Result}}</label></td>
+                    <td v-else colspan="4">
+                        <textarea type="text" v-model="DispatchReport.Result" maxlength="500" id="Result"></textarea>
+                        <label class="required tips" id="reqResult"></label>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="tdrequired"><span class="required" v-show="!ReadOnlyOrShow || Approvable">*</span></th>
+                    <th>作业报告结果</th>
+                    <td v-if="ReadOnlyOrShow & !Approvable" class="tdReadOnly" colspan="4"><label>{{DispatchReport.SolutionResultStatus.Name}}</label></td>
+                    <td v-else colspan="4">
+                        <select v-model="DispatchReport.SolutionResultStatus.ID" id="SolutionResultStatus" style="width:150px;" onchange="changeResultStatus()">
+                            @foreach (var temp in resultStatus)
+                            {
+                                <option value="@temp.ID">@temp.Name</option>
+                            }
+                        </select>
+                        <label id="reqSolutionResultStatus" class="required tips"></label>
+                    </td>
+                </tr>
+                <tr v-if="DispatchReport.SolutionResultStatus.ID == @BusinessObjects.Domain.DispatchReportInfo.SolutionResultStatuses.Problem_Escalation">
+                    <th class="tdrequired"><span class="required" v-show="!ReadOnlyOrShow || Approvable">*</span></th>
+                    <th>问题升级</th>
+                    <td colspan="4" v-if="!ReadOnlyOrShow || Approvable">
+                        <textarea id="SolutionUnsolvedComments" v-model="DispatchReport.SolutionUnsolvedComments" type="text" maxlength="500"></textarea>
+                        <label id="reqSolutionUnsolvedComments" class="required tips"></label>
+                    </td>
+                    <td v-else class="tdReadOnly" colspan="4"><label>{{DispatchReport.SolutionUnsolvedComments}}</label></td>
+                </tr>
+                <tr v-show="DispatchReport.SolutionResultStatus.ID == @BusinessObjects.Domain.DispatchReportInfo.SolutionResultStatuses.Waitting_Thirdparty">
+                    <th class="tdrequired"><span class="required" v-show="!ReadOnlyOrShow || Approvable">*</span></th>
+                    <th>服务提供方</th>
+                    <td v-if="ReadOnlyOrShow && !Approvable" class="tdReadOnly" colspan="4"><label>{{DispatchReport.ServiceProvider.Name}}</label></td>
+                    <td v-else colspan="4">
+                        <select v-model="DispatchReport.ServiceProvider.ID" style="width:150px;">
+                            @foreach (var temp in serviceProviders)
+                            {
+                                <option value="@temp.ID">@temp.Name</option>
+                            }
+                        </select>
+                        <label class="required tips" id="reqServiceProvider"></label>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="tdrequired"><span class="required"></span></th>
+                    <th>状态</th>
+                    <td class="tdReadOnly" colspan="4">{{DispatchReport.Status.Name}}</td>
+                </tr>
+                <tr>
+                    <th class="tdrequired"><span class="required"></span></th>
+                    <th>备注</th>
+                    <td v-if="ReadOnlyOrShow" class="tdReadOnly" colspan="4"><label>{{DispatchReport.Comments}}</label></td>
+                    <td v-else colspan="4"><textarea type="text" v-model="DispatchReport.Comments" maxlength="500"></textarea></td>
+                </tr>
+                <tr>
+                    <th class="tdrequired"><span class="required"></span></th>
+                    <th>附件</th>
+                    <td colspan="4">
+                        <input type="text" readonly class="linkFile" id="FileDispatchReport" onclick="OpenLocalFile('FileDispatchReport','@BusinessObjects.Domain.ObjectTypes.DispatchReport')" style="width:85%;" />
+                        <img src="~/Content/img/upload.png" class="cursor icon-upload" v-if="!ReadOnlyOrShow || Approvable" onclick="fileFileDispatchReport.click()" />
+                        <img src="~/Content/img/delete.png" class="cursor icon-delete" alt="delete" v-if="!ReadOnlyOrShow || Approvable" onclick="DeleteUploadFileData('FileDispatchReport')" />
+                        <input type="file" id="fileFileDispatchReport" style="display:none" onchange="UploadFile(@BusinessObjects.Domain.DispatchReportInfo.FileTypes.DispatchReportFile,'FileDispatchReport','@id')" />
+                        <input type="hidden" id="FileDispatchReportID" />
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <!--不良事件作业报告-->
+        <div class="radiusOnly" v-else-if="DispatchReport.Type.ID == @BusinessObjects.Domain.DispatchReportInfo.DispatchReportTypes.AdverseEvent">
+            <table border="1" class="tblDetail" frame="void">
+                <tr>
+                    <td colspan="6" class="tblName">作业报告信息</td>
+                </tr>
+                <tr>
+                    <th class="tdrequired" width="15px"><span class="required"></span></th>
+                    <th width="189px">作业报告编号</th>
+                    <td width="298px" class="tdReadOnly"><label>{{DispatchReport.OID}}</label></td>
+                    <th class="tdrequired" width="15px"><span class="required"></span></th>
+                    <th width="189px">作业报告类型</th>
+                    <td width="298px" class="tdReadOnly"><label>{{DispatchReport.Type.Name}}</label></td>
+                </tr>
+                <tr>
+                    <th class="tdrequired"><span class="required"></span></th>
+                    <th>开始时间/日期</th>
+                    <td class="tdReadOnly" colspan="4" id="startDate">{{Dispatch.StartDate}}</td>
+                </tr>
+                <tr>
+                    <th class="tdrequired"><span class="required" v-if="!ReadOnlyOrShow">*</span></th>
+                    <th>报告明细</th>
+                    <td v-if="ReadOnlyOrShow" class="tdReadOnly" colspan="4"><label>{{DispatchReport.SolutionCauseAnalysis}}</label></td>
+                    <td v-else colspan="4">
+                        <textarea type="text" v-model="DispatchReport.SolutionCauseAnalysis" maxlength="500" id="SolutionCauseAnalysis"></textarea>
+                        <label class="required tips" id="reqSolutionCauseAnalysis"></label>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="tdrequired"><span class="required" v-if="!ReadOnlyOrShow">*</span></th>
+                    <th>结果</th>
+                    <td v-if="ReadOnlyOrShow" class="tdReadOnly" colspan="4"><label>{{DispatchReport.Result}}</label></td>
+                    <td v-else colspan="4">
+                        <textarea type="text" v-model="DispatchReport.Result" maxlength="500" id="Result"></textarea>
+                        <label class="required tips" id="reqResult"></label>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="tdrequired"><span class="required" v-show="!ReadOnlyOrShow || Approvable">*</span></th>
+                    <th>作业报告结果</th>
+                    <td v-if="ReadOnlyOrShow & !Approvable" class="tdReadOnly" colspan="4"><label>{{DispatchReport.SolutionResultStatus.Name}}</label></td>
+                    <td v-else colspan="4">
+                        <select v-model="DispatchReport.SolutionResultStatus.ID" id="SolutionResultStatus" style="width:150px;" onchange="changeResultStatus()">
+                            @foreach (var temp in resultStatus)
+                            {
+                                <option value="@temp.ID">@temp.Name</option>
+                            }
+                        </select>
+                        <label id="reqSolutionResultStatus" class="required tips"></label>
+                    </td>
+                </tr>
+                <tr v-if="DispatchReport.SolutionResultStatus.ID == @BusinessObjects.Domain.DispatchReportInfo.SolutionResultStatuses.Problem_Escalation">
+                    <th class="tdrequired"><span class="required" v-show="!ReadOnlyOrShow || Approvable">*</span></th>
+                    <th>问题升级</th>
+                    <td colspan="4" v-if="!ReadOnlyOrShow || Approvable">
+                        <textarea id="SolutionUnsolvedComments" v-model="DispatchReport.SolutionUnsolvedComments" type="text" maxlength="500"></textarea>
+                        <label id="reqSolutionUnsolvedComments" class="required tips"></label>
+                    </td>
+                    <td v-else class="tdReadOnly" colspan="4"><label>{{DispatchReport.SolutionUnsolvedComments}}</label></td>
+                </tr>
+                <tr v-show="DispatchReport.SolutionResultStatus.ID == @BusinessObjects.Domain.DispatchReportInfo.SolutionResultStatuses.Waitting_Thirdparty">
+                    <th class="tdrequired"><span class="required" v-show="!ReadOnlyOrShow || Approvable">*</span></th>
+                    <th>服务提供方</th>
+                    <td v-if="ReadOnlyOrShow && !Approvable" class="tdReadOnly" colspan="4"><label>{{DispatchReport.ServiceProvider.Name}}</label></td>
+                    <td v-else colspan="4">
+                        <select v-model="DispatchReport.ServiceProvider.ID" style="width:150px;">
+                            @foreach (var temp in serviceProviders)
+                            {
+                                <option value="@temp.ID">@temp.Name</option>
+                            }
+                        </select>
+                        <label class="required tips" id="reqServiceProvider"></label>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="tdrequired"><span class="required"></span></th>
+                    <th>状态</th>
+                    <td class="tdReadOnly" colspan="4">{{DispatchReport.Status.Name}}</td>
+                </tr>
+                <tr>
+                    <th class="tdrequired"><span class="required"></span></th>
+                    <th>备注</th>
+                    <td v-if="ReadOnlyOrShow" class="tdReadOnly" colspan="4"><label>{{DispatchReport.Comments}}</label></td>
+                    <td v-else colspan="4"><textarea type="text" v-model="DispatchReport.Comments" maxlength="500"></textarea></td>
+                </tr>
+                <tr>
+                    <th class="tdrequired"><span class="required"></span></th>
+                    <th>附件</th>
+                    <td colspan="4">
+                        <input type="text" readonly class="linkFile" id="FileDispatchReport" onclick="OpenLocalFile('FileDispatchReport','@BusinessObjects.Domain.ObjectTypes.DispatchReport')" style="width:85%;" />
+                        <img src="~/Content/img/upload.png" class="cursor icon-upload" v-if="!ReadOnlyOrShow || Approvable" onclick="fileFileDispatchReport.click()" />
+                        <img src="~/Content/img/delete.png" class="cursor icon-delete" alt="delete" v-if="!ReadOnlyOrShow || Approvable" onclick="DeleteUploadFileData('FileDispatchReport')" />
+                        <input type="file" id="fileFileDispatchReport" style="display:none" onchange="UploadFile(@BusinessObjects.Domain.DispatchReportInfo.FileTypes.DispatchReportFile,'FileDispatchReport','@id')" />
+                        <input type="hidden" id="FileDispatchReportID" />
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <!--验收作业报告-->
+        <div class="radiusOnly" v-else-if="DispatchReport.Type.ID == @BusinessObjects.Domain.DispatchReportInfo.DispatchReportTypes.Accetance">
+            <table border="1" class="tblDetail" frame="void">
+                <tr>
+                    <td colspan="6" class="tblName">作业报告信息</td>
+                </tr>
+                <tr>
+                    <th class="tdrequired" width="15px"><span class="required"></span></th>
+                    <th width="189px">作业报告编号</th>
+                    <td width="298px" class="tdReadOnly"><label>{{DispatchReport.OID}}</label></td>
+                    <th class="tdrequired" width="15px"><span class="required"></span></th>
+                    <th width="189px">作业报告类型</th>
+                    <td width="298px" class="tdReadOnly"><label>{{DispatchReport.Type.Name}}</label></td>
+                </tr>
+                <tr>
+                    
+                </tr>
+                <tr>
+                    <th class="tdrequired"><span class="required"></span></th>
+                    <th>开始时间/日期</th>
+                    <td class="tdReadOnly" colspan="4" id="startDate">{{Dispatch.StartDate}}</td>
+                </tr>
+                <tr>
+                    <th class="tdrequired"><span class="required" v-if="!ReadOnlyOrShow">*</span></th>
+                    <th>报告明细</th>
+                    <td v-if="ReadOnlyOrShow" class="tdReadOnly" colspan="4"><label>{{DispatchReport.SolutionCauseAnalysis}}</label></td>
+                    <td v-else colspan="4">
+                        <textarea v-model="DispatchReport.SolutionCauseAnalysis" maxlength="500" id="SolutionCauseAnalysis"></textarea>
+                        <label class="required tips" id="reqSolutionCauseAnalysis"></label>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="tdrequired"><span class="required" v-if="!ReadOnlyOrShow">*</span></th>
+                    <th>结果</th>
+                    <td v-if="ReadOnlyOrShow" class="tdReadOnly" colspan="4"><label>{{DispatchReport.Result}}</label></td>
+                    <td v-else colspan="4">
+                        <textarea type="text" v-model="DispatchReport.Result" maxlength="500" id="Result"></textarea>
+                        <label class="required tips" id="reqResult"></label>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="tdrequired"><span class="required" v-if="!ReadOnlyOrShow">*</span></th>
+                    <th>验收日期</th>
+                    <td v-if="ReadOnlyOrShow" class="tdReadOnly" colspan="4"><label>{{DispatchReport.AcceptanceDate}}</label></td>
+                    <td v-else colspan="4">
+                        <input type="text" class="datePicker" id="AcceptanceDate" placeholder="YYYY-MM-DD" style="width:150px" />
+                        <label class="required tips" id="reqAcceptanceDate"></label>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="tdrequired"><span class="required" v-show="!ReadOnlyOrShow || Approvable">*</span></th>
+                    <th>作业报告结果</th>
+                    <td v-if="ReadOnlyOrShow & !Approvable" class="tdReadOnly" colspan="4"><label>{{DispatchReport.SolutionResultStatus.Name}}</label></td>
+                    <td v-else colspan="4">
+                        <select v-model="DispatchReport.SolutionResultStatus.ID" id="SolutionResultStatus" style="width:150px;" onchange="changeResultStatus()">
+                            @foreach (var temp in resultStatus)
+                            {
+                                <option value="@temp.ID">@temp.Name</option>
+                            }
+                        </select>
+                        <label id="reqSolutionResultStatus" class="required tips"></label>
+                    </td>
+                </tr>
+                <tr v-if="DispatchReport.SolutionResultStatus.ID == @BusinessObjects.Domain.DispatchReportInfo.SolutionResultStatuses.Problem_Escalation">
+                    <th class="tdrequired"><span class="required" v-show="!ReadOnlyOrShow || Approvable">*</span></th>
+                    <th>问题升级</th>
+                    <td colspan="4" v-if="!ReadOnlyOrShow || Approvable">
+                        <textarea id="SolutionUnsolvedComments" v-model="DispatchReport.SolutionUnsolvedComments" type="text" maxlength="500"></textarea>
+                        <label id="reqSolutionUnsolvedComments" class="required tips"></label>
+                    </td>
+                    <td v-else class="tdReadOnly" colspan="4"><label>{{DispatchReport.SolutionUnsolvedComments}}</label></td>
+                </tr>
+                <tr v-show="DispatchReport.SolutionResultStatus.ID == @BusinessObjects.Domain.DispatchReportInfo.SolutionResultStatuses.Waitting_Thirdparty">
+                    <th class="tdrequired"><span class="required" v-show="!ReadOnlyOrShow || Approvable">*</span></th>
+                    <th>服务提供方</th>
+                    <td v-if="ReadOnlyOrShow && !Approvable" class="tdReadOnly" colspan="4"><label>{{DispatchReport.ServiceProvider.Name}}</label></td>
+                    <td v-else colspan="4">
+                        <select v-model="DispatchReport.ServiceProvider.ID" style="width:150px;">
+                            @foreach (var temp in serviceProviders)
+                            {
+                                <option value="@temp.ID">@temp.Name</option>
+                            }
+                        </select>
+                        <label class="required tips" id="reqServiceProvider"></label>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="tdrequired"><span class="required"></span></th>
+                    <th>状态</th>
+                    <td class="tdReadOnly" colspan="4">{{DispatchReport.Status.Name}}</td>
+                </tr>
+                <tr>
+                    <th class="tdrequired"><span class="required"></span></th>
+                    <th>备注</th>
+                    <td v-if="ReadOnlyOrShow" class="tdReadOnly" colspan="4"><label>{{DispatchReport.Comments}}</label></td>
+                    <td v-else colspan="4"><textarea type="text" v-model="DispatchReport.Comments" maxlength="500"></textarea></td>
+                </tr>
+                <tr>
+                    <th class="tdrequired"><span class="required"></span></th>
+                    <th>附件</th>
+                    <td colspan="4">
+                        <input type="text" readonly class="linkFile" id="FileDispatchReport" onclick="OpenLocalFile('FileDispatchReport','@BusinessObjects.Domain.ObjectTypes.DispatchReport')" style="width:85%;" />
+                        <img src="~/Content/img/upload.png" class="cursor icon-upload" v-if="!ReadOnlyOrShow || Approvable" onclick="fileFileDispatchReport.click()" />
+                        <img src="~/Content/img/delete.png" class="cursor icon-delete" alt="delete" v-if="!ReadOnlyOrShow || Approvable" onclick="DeleteUploadFileData('FileDispatchReport')" />
+                        <input type="file" id="fileFileDispatchReport" style="display:none" onchange="UploadFile(@BusinessObjects.Domain.DispatchReportInfo.FileTypes.DispatchReportFile,'FileDispatchReport','@id')" />
+                        <input type="hidden" id="FileDispatchReportID" />
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <!--通用作业报告-->
+        <div class="radiusOnly" v-else>
+            <table border="1" class="tblDetail" frame="void">
+                <tr>
+                    <td colspan="6" class="tblName">作业报告信息</td>
+                </tr>
+                <tr>
+                    <th class="tdrequired" width="15px"><span class="required"></span></th>
+                    <th width="189px">作业报告编号</th>
+                    <td width="298px" class="tdReadOnly"><label>{{DispatchReport.OID}}</label></td>
+                    <th class="tdrequired" width="15px"><span class="required"></span></th>
+                    <th width="189px">作业报告类型</th>
+                    <td width="298px" class="tdReadOnly"><label>{{DispatchReport.Type.Name}}</label></td>
+                </tr>
+                <tr>
+                    <th class="tdrequired"><span class="required"></span></th>
+                    <th>开始时间/日期</th>
+                    <td class="tdReadOnly" colspan="4" id="startDate">{{Dispatch.StartDate}}</td>
+                </tr>
+                <tr>
+                    <th class="tdrequired"><span class="required" v-if="!ReadOnlyOrShow">*</span></th>
+                    <th>报告明细</th>
+                    <td v-if="ReadOnlyOrShow" class="tdReadOnly" colspan="4"><label>{{DispatchReport.SolutionCauseAnalysis}}</label></td>
+                    <td v-else colspan="4">
+                        <textarea type="text" v-model="DispatchReport.SolutionCauseAnalysis" maxlength="500" id="SolutionCauseAnalysis"></textarea>
+                        <label class="required tips" id="reqSolutionCauseAnalysis"></label>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="tdrequired"><span class="required" v-if="!ReadOnlyOrShow">*</span></th>
+                    <th>结果</th>
+                    <td v-if="ReadOnlyOrShow" class="tdReadOnly" colspan="4"><label>{{DispatchReport.Result}}</label></td>
+                    <td v-else colspan="4">
+                        <textarea type="text" v-model="DispatchReport.Result" maxlength="500" id="Result"></textarea>
+                        <label class="required tips" id="reqResult"></label>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="tdrequired"><span class="required" v-show="!ReadOnlyOrShow || Approvable">*</span></th>
+                    <th>作业报告结果</th>
+                    <td v-if="ReadOnlyOrShow & !Approvable" class="tdReadOnly" colspan="4"><label>{{DispatchReport.SolutionResultStatus.Name}}</label></td>
+                    <td v-else colspan="4">
+                        <select v-model="DispatchReport.SolutionResultStatus.ID" id="SolutionResultStatus" style="width:150px;" onchange="changeResultStatus()">
+                            @foreach (var temp in resultStatus)
+                            {
+                                <option value="@temp.ID">@temp.Name</option>
+                            }
+                        </select>
+                        <label id="reqSolutionResultStatus" class="required tips"></label>
+                    </td>
+                </tr>
+                <tr v-if="DispatchReport.SolutionResultStatus.ID == @BusinessObjects.Domain.DispatchReportInfo.SolutionResultStatuses.Problem_Escalation">
+                    <th class="tdrequired"><span class="required" v-show="!ReadOnlyOrShow || Approvable">*</span></th>
+                    <th>问题升级</th>
+                    <td colspan="4" v-if="!ReadOnlyOrShow || Approvable">
+                        <textarea id="SolutionUnsolvedComments" v-model="DispatchReport.SolutionUnsolvedComments" type="text" maxlength="500"></textarea>
+                        <label id="reqSolutionUnsolvedComments" class="required tips"></label>
+                    </td>
+                    <td v-else class="tdReadOnly" colspan="4"><label>{{DispatchReport.SolutionUnsolvedComments}}</label></td>
+                </tr>
+                <tr v-show="DispatchReport.SolutionResultStatus.ID == @BusinessObjects.Domain.DispatchReportInfo.SolutionResultStatuses.Waitting_Thirdparty">
+                    <th class="tdrequired"><span class="required" v-show="!ReadOnlyOrShow || Approvable">*</span></th>
+                    <th>服务提供方</th>
+                    <td v-if="ReadOnlyOrShow && !Approvable" class="tdReadOnly" colspan="4"><label>{{DispatchReport.ServiceProvider.Name}}</label></td>
+                    <td v-else colspan="4">
+                        <select v-model="DispatchReport.ServiceProvider.ID" style="width:150px;">
+                            @foreach (var temp in serviceProviders)
+                            {
+                                <option value="@temp.ID">@temp.Name</option>
+                            }
+                        </select>
+                        <label class="required tips" id="reqServiceProvider"></label>
+                    </td>
+                </tr>
+                <tr v-show="Dispatch.Request.IsDelay">
+                    <th class="tdrequired"><span class="required" v-show="!ReadOnlyOrShow ">*</span></th>
+                    <th>误工说明</th>
+                    <td v-if="ReadOnlyOrShow" colspan="4" class="tdReadOnly"><label>{{DispatchReport.DelayReason}}</label></td>
+                    <td v-else colspan="4">
+                        <textarea type="text" id="DelayReason" v-model="DispatchReport.DelayReason" maxlength="500"></textarea>
+                        <label class="required tips" id="reqDelayReason"></label>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="tdrequired"><span class="required"></span></th>
+                    <th>状态</th>
+                    <td class="tdReadOnly" colspan="4">{{DispatchReport.Status.Name}}</td>
+                </tr>
+                <tr>
+                    <th class="tdrequired"><span class="required"></span></th>
+                    <th>备注</th>
+                    <td v-if="ReadOnlyOrShow" class="tdReadOnly" colspan="4"><label>{{DispatchReport.Comments}}</label></td>
+                    <td v-else colspan="4"><textarea type="text" v-model="DispatchReport.Comments" maxlength="500"></textarea></td>
+                </tr>
+                <tr>
+                    <th class="tdrequired"><span class="required"></span></th>
+                    <th>附件</th>
+                    <td colspan="4">
+                        <input type="text" readonly class="linkFile" id="FileDispatchReport" onclick="OpenLocalFile('FileDispatchReport','@BusinessObjects.Domain.ObjectTypes.DispatchReport')" style="width:85%;" />
+                        <img src="~/Content/img/upload.png" class="cursor icon-upload" v-if="!ReadOnlyOrShow || Approvable" onclick="fileFileDispatchReport.click()" />
+                        <img src="~/Content/img/delete.png" class="cursor icon-delete" alt="delete" v-if="!ReadOnlyOrShow || Approvable" onclick="DeleteUploadFileData('FileDispatchReport')" />
+                        <input type="file" id="fileFileDispatchReport" style="display:none" onchange="UploadFile(@BusinessObjects.Domain.DispatchReportInfo.FileTypes.DispatchReportFile,'FileDispatchReport','@id')" />
+                        <input type="hidden" id="FileDispatchReportID" />
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <br />
+        <!-- 零配件信息 多设备、无设备 不可添加-->
+        <div class="radiusOnly" id="accessoriesBtn">
+            <table border="1" class="tblDetail" bordercolor="000000" cellpadding="0" cellspacing="0" frame="void">
+                <thead>
+                    <tr>
+                        <!--巡检、盘点、其它服务，不可填零配件-->
+                        <th colspan="9" style="cursor: not-allowed;" class="tblName" v-if="AccessoryNoShow">
+                            零配件信息
+                        </th>
+                        <td colspan="9" class="tblName" v-else>
+                            零配件信息
+                            <img src="~/Content/img/open.png" style="vertical-align: middle;" class="icon-sm" onclick="openAccessories()" />
+                        </td>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+        <!--展示零配件-->
+        <div class="radiusOnly" style="display:none" id="accessories">
+            <!--有零配件时显示-->
+            <table border="1" class="tblDetail" v-if="DispatchReport.ReportAccessories!=null && DispatchReport.ReportAccessories.length != 0" bordercolor="000000" cellpadding="0" cellspacing="0" frame="void">
+                <thead>
+                    <tr>
+                        <td colspan="9" class="tblName" v-if="!ReadOnlyOrShow">
+                            零配件信息
+                            <img src="~/Content/img/collect.png" style="vertical-align: middle;" class="icon-sm" onclick="closeAccessories()" />
+                            <span style="color:dimgrey;float: right">
+                                <button class="btn btn-outline-info btn-sm" onclick="OpenAddAccessoryDialog()">
+                                    新增零配件
+                                </button>
+                            </span>
+                        </td>
+                        <td colspan="8" class="tblName" v-else>
+                            零配件信息
+                            <img src="~/Content/img/collect.png" style="vertical-align: middle;" class="icon-sm" onclick="closeAccessories()" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <th style="width:200px;">名称</th>
+                        <th style="width:70px;">来源</th>
+                        <th>外部供应商</th>
+                        <th style="width:100px;">金额(元/件)</th>
+                        <th style="width:80px;">数量(件)</th>
+                        <th style="width:60px;">类型</th>
+                        <th style="width:100px;">编号</th>
+                        <th style="width:200px;">附件</th>
+                        <th v-if="!ReadOnlyOrShow" style="width:50px;">移除</th>
+                    </tr>
+                </thead>
+                <tbody v-for="(reportAccessory,index) in DispatchReport.ReportAccessories">
+                    <tr>
+                        <td rowspan="2" class="tdReadOnly">
+                            <label>{{reportAccessory.Name}}</label>
+                        </td>
+                        <td rowspan="2" class="tdReadOnly">
+                            <label>{{reportAccessory.Source.Name}}</label>
+                        </td>
+                        <td rowspan="2" class="tdReadOnly">
+                            <label>{{reportAccessory.Supplier.Name}}</label>
+                        </td>
+                        <td rowspan="2" class="tdReadOnly">
+                            <label>{{reportAccessory.Amount}}</label>
+                        </td>
+                        <td rowspan="2" class="tdReadOnly">
+                            <label>{{reportAccessory.Qty}}</label>
+                        </td>
+                        <th>
+                            新装
+                        </th>
+                        <td class="tdReadOnly">
+                            <label>{{reportAccessory.NewSerialCode}}</label>
+                        </td>
+                        <td>
+                            <input type="text" readonly class="linkFile" v-bind:id="'FileNewReportAccessory'+index" v-on:click="OpenLocalFile('FileNewReportAccessory'+index,'@BusinessObjects.Domain.ObjectTypes.ReportAccessory')" />
+                            <input type="hidden" v-bind:id="'FileNewReportAccessory'+index+'ID'" />
+                        </td>
+                        <td rowspan="2" v-if="!ReadOnlyOrShow" style="text-align:center;">
+                            <img src="~/Content/img/delete.png" class="cursor icon-delete" v-on:click="DeleteReportAccessory(reportAccessory.ID,index)" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>
+                            拆下
+                        </th>
+                        <td class="tdReadOnly">
+                            <label>{{reportAccessory.OldSerialCode}}</label>
+                        </td>
+                        <td>
+                            <input type="text" readonly class="linkFile" v-bind:id="'FileOldReportAccessory'+index" v-on:click="OpenLocalFile('FileOldReportAccessory'+index,'@BusinessObjects.Domain.ObjectTypes.ReportAccessory')" />
+                            <input type="hidden" v-bind:id="'FileOldReportAccessory'+index+'ID'" />
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <!--无零配件时显示-->
+            <table border="1" class="tblDetail" v-if="DispatchReport.ReportAccessories.length == 0" frame="void">
+                <thead>
+                    <tr>
+                        <td colspan="9" class="tblName" v-if="!ReadOnlyOrShow">
+                            零配件信息
+                            <img src="~/Content/img/collect.png" style="vertical-align: middle;" class="icon-sm" onclick="closeAccessories()" />
+                            <span style="color:dimgrey;float: right">
+                                <button class="btn btn-outline-info btn-sm" onclick="OpenAddAccessoryDialog()">
+                                    新增零配件
+                                </button>
+                            </span>
+                        </td>
+                        <td colspan="8" class="tblName" v-else>
+                            零配件信息
+                            <img src="~/Content/img/collect.png" style="vertical-align: middle;" class="icon-sm" onclick="closeAccessories()" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <th style="width:200px;">名称</th>
+                        <th style="width:70px;">来源</th>
+                        <th>外部供应商</th>
+                        <th style="width:100px;">金额(元/件)</th>
+                        <th style="width:80px;">数量(件)</th>
+                        <th style="width:60px;">类型</th>
+                        <th style="width:100px;">编号</th>
+                        <th style="width:200px;">附件</th>
+                        <th v-if="!ReadOnlyOrShow">移除</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-if="!ReadOnlyOrShow">
+                        <td colspan="9" align="center">无零配件</td>
+                    </tr>
+                    <tr v-else>
+                        <td colspan="8" align="center">无零配件</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <br />
+        <!--审批备注 退回时填写、审批时显示-->
+        <div class="radiusOnly" v-if="DispatchReport.FujiComments != '' || Approvable">
+            <table class="tblDetail" width="970" border="1" frame="void">
+                <tr>
+                    <td class="tblName" colspan="3">审批备注 </td>
+                </tr>
+                <tr>
+                    <th class="tdrequired" width="15px"><span class="required"></span></th>
+                    <th width="189px">审批备注</th>
+                    <td v-if="Approvable">
+                        <textarea maxlength="200" id="comments" v-model="DispatchReport.FujiComments"></textarea>
+                        <label class="required tips" id="commentsMSG"></label>
+                    </td>
+                    <td class="tdReadOnly" v-else> <label>{{DispatchReport.FujiComments}}</label></td>
+                </tr>
+            </table>
+        </div>
+        <br v-if="DispatchReport.FujiComments != '' || Approvable" />
+        <!--流程信息 第一次填写时不显示-->
+        <div class="radiusOnly" v-if="DispatchReport.FormatHistory != null">
+            <table class="tblDetail" width="800" border="1" frame="void">
+                <tr>
+                    <td class="tblName" colspan="3">审批流程</td>
+                </tr>
+                <tr>
+                    <th class="tdrequired" width="15px"><span class="required"></span></th>
+                    <th width="189px">流程信息</th>
+                    <td>
+                        <textarea readonly>{{DispatchReport.FormatHistory}}</textarea>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <br v-if="DispatchReport.FormatHistory != null" />
+        <!--button-->
+        <table class="tblDetail" style="text-align: center; margin: 20px auto 5%;width: 800px;" >
+            <tr>
+                <td align="center" v-if="Approvable"><button class="btn btn-info" id="btnPass" onclick="DoPassDispatchReport()">通过</button></td>
+                <td align="center" v-if="Approvable"><button class="btn btn-info" id="btnReject" onclick="DoRejectDispatchReport()">退回</button></td>
+                <td align="center" v-if="!ReadOnlyOrShow && !Approvable"><button class="btn btn-info" id="btnSave" onclick="DoSaveDispatchReport()">保存</button></td>
+                <td align="center" v-if="!ReadOnlyOrShow && !Approvable"><button class="btn btn-info" id="btnReceipt" onclick="DoSubmitDispatchReport()">保存并提交</button></td>
+                <td align="center"><button class="btn btn-info" id="btnBack" onclick="Back()">返回</button></td>
+            </tr>
+        </table>
+        <!-- 新增零配件弹窗 -->
+        <div class="ui-dialog-content ui-widget-content" id="dialog-form-addAccessory" tabindex="-1" style="display:none">
+            <div class="dialog-body">
+                <table class="table" style="text-align: left;">
+                    <tbody>
+                        <tr>
+                            <td class="tdrequired" width="15px"><span class="required">*</span></td>
+                            <td width="150px">名称</td>
+                            <td width=""><input type="text" id="name" v-model="ReportAccessory.Name" maxlength="50" style="width:250px;" /> <label id="nameMSG" class="tips required"></label></td>
+                        </tr>
+                        <tr>
+                            <td class="tdrequired" width="15px"><span class="required">*</span></td>
+                            <td>来源</td>
+                            <td>
+                                <select v-model="ReportAccessory.Source.ID" id="source" style="width:150px;">
+                                    @foreach (var temp in accessorySources)
+                                    {
+                                        <option value="@temp.ID">@temp.Name</option>
+                                    }
+                                </select><label id="sourceMSG" class="tips required"></label>
+                                <input type="hidden" id="sourceType" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="tdrequired" width="15px"><span class="required">*</span></td>
+                            <td>外部供应商</td>
+                            <td>
+                                <input disabled v-if="ReportAccessory.Source.ID == '@stock_Source'" type="text" style="width:250px;" />
+                                <input v-else type="text" id="supplier" v-model="ReportAccessory.Supplier.Name" v-on:click="OpenSupplierSelection(callback);" style="width:250px;" />
+                                <img v-if="ReportAccessory.Source.ID != '@stock_Source'" style="vertical-align: middle;" id="AddSupplierBtn" class="icon-sm cursor" v-on:click="OpenSupplierSelection(callback);" src="~/Content/img/add.png">
+                                <label id="supplierMSG" class="tips required"></label>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="tdrequired" width="15px"><span class="required">*</span></td>
+                            <td>新装编号</td>
+                            <td><input type="text" id="new" v-model="ReportAccessory.NewSerialCode" maxlength="30" style="width:250px;" /><label id="newMSG" class="tips required"></label></td>
+
+                        </tr>
+                        <tr>
+                            <td class="tdrequired" width="15px"><span class="required">*</span></td>
+                            <td>新装部件金额(元/件)</td>
+                            <td><input type="text" id="amount" v-model="ReportAccessory.Amount" maxlength="11" style="width:250px;" /><label id="amountMSG" class="tips required"></label></td>
+                        </tr>
+                        <tr>
+                            <td class="tdrequired" width="15px"><span class="required">*</span></td>
+                            <td>数量(件)</td>
+                            <td><input type="number" id="qty" v-model="ReportAccessory.Qty" maxlength="5" style="width:250px;" /><label id="qtyMSG" class="tips required"></label></td>
+                        </tr>
+                        <tr>
+                            <td class="tdrequired" width="15px"><span class="required"></span></td>
+                            <td>附件图</td>
+                            <td>
+                                <input type="text" readonly class="linkFile" id="FileNewReportAccessory" onclick="OpenLocalFile('FileNewReportAccessory','@BusinessObjects.Domain.ObjectTypes.ReportAccessory')" style="width:250px;" />
+                                <img src="~/Content/img/upload.png" class="cursor icon-upload" onclick="fileFileNewReportAccessory.click()" />
+                                <img src="~/Content/img/delete.png" class="cursor icon-delete" alt="delete" onclick="DeleteUploadFileData('FileNewReportAccessory')" />
+                                <input type="file" id="fileFileNewReportAccessory" style="display: none; width: 250px;" onchange="UploadFile(@BusinessObjects.Domain.ReportAccessoryInfo.FileTypes.New,'FileNewReportAccessory','0')" />
+                                <input type="hidden" id="FileNewReportAccessoryID" style="width:250px;" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="tdrequired" width="15px"><span class="required">*</span></td>
+                            <td>拆下编号</td>
+                            <td><input type="text" id="old" v-model="ReportAccessory.OldSerialCode" maxlength="30" style="width:250px;" /><label id="oldMSG" class="tips required"></label></td>
+                        </tr>
+                        <tr>
+                            <td class="tdrequired" width="15px"><span class="required"></span></td>
+                            <td>附件图</td>
+                            <td>
+                                <input type="text" readonly class="linkFile" id="FileOldReportAccessory" onclick="OpenLocalFile('FileOldReportAccessory','@BusinessObjects.Domain.ObjectTypes.ReportAccessory')" style="width:250px;" />
+                                <img src="~/Content/img/upload.png" class="cursor icon-upload" onclick="fileFileOldReportAccessory.click()" />
+                                <img src="~/Content/img/delete.png" class="cursor icon-delete" alt="delete" onclick="DeleteUploadFileData('FileOldReportAccessory')" />
+                                <input type="file" id="fileFileOldReportAccessory" style="display: none; width: 250px;" onchange="UploadFile(@BusinessObjects.Domain.ReportAccessoryInfo.FileTypes.Old,'FileOldReportAccessory','0')" />
+                                <input type="hidden" id="FileOldReportAccessoryID" style="width:200px;" />
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 作业报告类型选择 -->
+        <div class="ui-dialog-content ui-widget-content" id="dialog-form-reportType" tabindex="-1" style="display:none">
+               <table cellspacing="7" cellpadding="0" style="margin:10px auto;text-align:center;">
+                    <tr style="margin-top: 50%; vertical-align: auto;">
+                        @foreach (BusinessObjects.Domain.KeyValueInfo type in dispatchReportType)
+                        {
+                            <td width="150px" v-if="(@type.ID == DispatchReport.TypeID || @type.ID == @BusinessObjects.Domain.DispatchReportInfo.DispatchReportTypes.Common )&& @type.ID != DispatchReport.Type.ID" style="vertical-align:auto;"><button class="btn btn-info" onclick="SaveDispatchReportType(@type.ID,'@type.Name')">@type.Name</button></td>
+                        }
+                    </tr>
+                    <input type="hidden" id="selectedType" />
+                </table>
+        </div>
+    </div>
+</div>
+@{ Html.RenderPartial("Supplier_Selection"); }
+<script>
+    var dispatchReportVue = new Vue({
+        el: "#dispatchReportVue",
+        data: {
+            DispatchReport: {
+                Type: {ID :1,Name:"通用作业报告"},
+                SolutionResultStatus: {ID:'@BusinessObjects.Domain.DispatchReportInfo.SolutionResultStatuses.Resolved'},
+                EquipmentStatus:{ID:1},
+                Status: {},
+                FileInfo: {},
+                ReportAccessories:[],
+                TypeID:0,
+                ServiceProvider:{ID:'@BusinessObjects.Domain.DispatchReportInfo.ServiceProviders.Management_Party'},
+                IsRecall:null,
+                IsPrivate:null,
+                ServiceScope:null,
+            },
+            Dispatch: {
+                
+                Request: {
+                    RequestUser: {},
+                    DealType: {},
+                    FaultType: {},
+                    Priority: {},
+                    RequestType: {},
+                    Equipments: [],
+                    Status: {},
+                    FaultType: {},
+                    Source: {},
+                    MachineStatus: {},
+                    Equipment: {
+                        AssetLevel: {},
+                        Department: {},
+                        Manufacturer: {},
+                        ContractScope: {}
+                    },
+                },
+                RequestType: {},
+                Urgency: {},
+                MachineStatus: {},
+                Engineer: {},
+                Status: {},
+                DispatchJournalID:'@dispatchJournalID'
+            },
+            ReportAccessory:{
+                DispatchReportID:'@id',
+                Source:{ID:1},
+                Supplier:{},
+                FileInfos:[]
+            },
+            ReadOnlyOrShow:true,
+            Approvable:false,
+            AccessoryNoShow:false,
+        },
+        //修改时格式化验收日期的插件
+        watch:{
+            'DispatchReport.Type.ID': function() {
+                this.$nextTick(function(){
+                    InitDateForm();
+                })
+            }
+        },
+        //渲染页面时加载零配件信息
+        updated:function(){
+            LoadReportAccessories();
+        }
+    })
+</script>
+
+<script>
+    $(function () {
+        LoadDispatchInfo();
+        InitDialogForm();
+    })
+    //根据派工单id加载派工单、请求信息
+    function LoadDispatchInfo() {
+        SetPageWaiting(true);
+        $.get(
+            "@Url.Action("GetDispatchByID", "Dispatch")",
+            {dispatchID: '@dispatchID'},
+            function (response) {
+                SetPageWaiting(false);
+                if (response.ResultCode != "00") {
+                    processResponseError(response.ResultCode, response.ResultMessage);
+                } else if(response.Data!=null){
+                    dispatchReportVue.Dispatch = response.Data;
+
+                    dispatchReportVue.Dispatch.Request.RequestDate = parseAndFormatJsonDateTime(dispatchReportVue.Dispatch.Request.RequestDate);
+                    if (response.Data.Request.Equipments.length == 1)
+                        dispatchReportVue.Dispatch.Request.Equipment = response.Data.Request.Equipments[0];
+
+                    dispatchReportVue.Dispatch.ScheduleDate = parseAndFormatJsonDateTime(dispatchReportVue.Dispatch.ScheduleDate);
+                    dispatchReportVue.Dispatch.StartDate = parseAndFormatJsonDateTime(dispatchReportVue.Dispatch.StartDate);
+                    if(response.Data.Request.Equipments.length != 0 && response.Data.Request.RequestType.ID != '@BusinessObjects.Domain.RequestInfo.RequestTypes.Others'){
+                        dispatchReportVue.Dispatch.Request.Equipment = response.Data.Request.Equipments[0];
+                    }
+                    else{
+                        dispatchReportVue.Dispatch.Request.Equipment = {
+                            AssetLevel:{},
+                            Department:{},
+                            Manufacturer:{},
+                            ContractScope:{}
+                        };
+                    }
+                    dispatchReportVue.Dispatch.DispatchJournalID = '@dispatchJournalID';
+                    dispatchReportVue.AccessoryNoShow = dispatchReportVue.Dispatch.RequestType.ID == '@BusinessObjects.Domain.RequestInfo.RequestTypes.Others' || dispatchReportVue.Dispatch.RequestType.ID == '@BusinessObjects.Domain.RequestInfo.RequestTypes.OnSiteInspection' ||dispatchReportVue.Dispatch.RequestType.ID == '@BusinessObjects.Domain.RequestInfo.RequestTypes.Inventory'
+                    if('@id' > 0){
+                        LoadDispatchReportInfo();
+                    }
+                }
+            })
+    }
+    //根据作业报告id加载作业报告信息
+    function LoadDispatchReportInfo() {
+        SetPageWaiting(true);
+        $.get(
+            "@Url.Action("GetDispatchReportByID", "DispatchReport")",
+            {dispatchReportID : '@id'},
+            function (response) {
+                SetPageWaiting(false);
+                if (response.ResultCode != "00") {
+                    processResponseError(response.ResultCode, response.ResultMessage);
+                }else if(response.Data!=null){
+                    dispatchReportVue.DispatchReport = response.Data;
+                    dispatchReportVue.ReadOnlyOrShow = ((dispatchReportVue.DispatchReport.Status.ID != '@BusinessObjects.Domain.DispatchReportInfo.DispatchReportStatus.New') || (dispatchReportVue.DispatchReport.Status.ID == '@BusinessObjects.Domain.DispatchReportInfo.DispatchReportStatus.New' && '@user.ID' != dispatchReportVue.Dispatch.Engineer.ID) ||dispatchReportVue.Dispatch.Status.ID == '@BusinessObjects.Domain.DispatchInfo.Statuses.New');
+
+                    dispatchReportVue.Approvable = ('@user.Role.ID' == '@SuperAdmin' && dispatchReportVue.DispatchReport.Status.ID == '@BusinessObjects.Domain.DispatchInfo.DocStatus.Pending' && dispatchReportVue.Dispatch.Status.ID != '@BusinessObjects.Domain.DispatchInfo.Statuses.Cancelled');
+
+                    dispatchReportVue.DispatchReport.TypeID = '@BusinessObjects.Domain.DispatchReportInfo.DispatchReportTypes.GetDispatchReportTypeID(@requestType)';
+                    dispatchReportVue.DispatchReport.Dispatch = dispatchReportVue.Dispatch;
+                    initform();
+                }
+            }
+        )
+    }
+    //初始化部分数据
+    function initform(){
+        dispatchReportVue.DispatchReport.IsPrivate = dispatchReportVue.DispatchReport.IsPrivate ? 'true':'false';
+        dispatchReportVue.DispatchReport.IsRecall = dispatchReportVue.DispatchReport.IsRecall ? 'true':'false';
+        dispatchReportVue.DispatchReport.SolutionResultStatus.ID = dispatchReportVue.DispatchReport.SolutionResultStatus.ID == 0 ? '@BusinessObjects.Domain.DispatchReportInfo.SolutionResultStatuses.Resolved' : dispatchReportVue.DispatchReport.SolutionResultStatus.ID;
+        dispatchReportVue.DispatchReport.ServiceProvider.ID = dispatchReportVue.DispatchReport.ServiceProvider.ID == 0 ? '@BusinessObjects.Domain.DispatchReportInfo.ServiceProviders.Management_Party' : dispatchReportVue.DispatchReport.ServiceProvider.ID;
+        dispatchReportVue.DispatchReport.EquipmentStatus.ID = dispatchReportVue.DispatchReport.Type.ID == '@BusinessObjects.Domain.DispatchReportInfo.DispatchReportTypes.Repair' ? (dispatchReportVue.DispatchReport.EquipmentStatus.ID == 0 ? '@BusinessObjects.Domain.MachineStatuses.Normal' : dispatchReportVue.DispatchReport.EquipmentStatus.ID): 0;
+        if(dispatchReportVue.DispatchReport.Histories == null || dispatchReportVue.DispatchReport.Histories.length == 1 )
+            dispatchReportVue.DispatchReport.ServiceScope = null;
+        if((dispatchReportVue.ReadOnlyOrShow || dispatchReportVue.Approvable ) && !dispatchReportVue.AccessoryNoShow)
+            openAccessories();
+        else
+            closeAccessories();
+        dispatchReportVue.DispatchReport.AcceptanceDate = dispatchReportVue.DispatchReport.AcceptanceDate == undefined ? dispatchReportVue.DispatchReport.AcceptanceDate : parseAndFormatJsonDate(dispatchReportVue.DispatchReport.AcceptanceDate);
+        if(dispatchReportVue.DispatchReport.FileInfo != null){
+            $("#FileDispatchReport").val(dispatchReportVue.DispatchReport.FileInfo.FileName);
+            $("#FileDispatchReportID").val(dispatchReportVue.DispatchReport.FileInfo.ID);
+        }
+    }
+    //加载零配件信息
+    function LoadReportAccessories(){
+        $.each(dispatchReportVue.DispatchReport.ReportAccessories, function (index, reportAccessory) {
+            $.each(reportAccessory.FileInfos, function(idx, file){
+                switch(file.FileType){
+                    case @BusinessObjects.Domain.ReportAccessoryInfo.FileTypes.New:
+                        $("#FileNewReportAccessory"+index).val(file.FileName);
+                        $("#FileNewReportAccessory"+index+"ID").val(file.ID);
+                        break;
+                    case @BusinessObjects.Domain.ReportAccessoryInfo.FileTypes.Old:
+                        $("#FileOldReportAccessory"+index).val(file.FileName);
+                        $("#FileOldReportAccessory"+index+"ID").val(file.ID);
+                        break;
+                    default:
+                        return false;
+                }
+            })
+        })
+    }
+    //获取作业报告附件信息
+    function GetFileInfo(){
+        $.ajax({
+            type:'get',
+            async:false,
+            url:'@Url.Action("GetFileInfo","DispatchReport")',
+            data:{
+                objectTypeId:'@BusinessObjects.Domain.ObjectTypes.DispatchReport',
+                id:dispatchReportVue.DispatchReport.ID
+            },
+            dataType:'json',
+            success:function(response){
+                dispatchReportVue.DispatchReport.FileInfo = response.Data;
+            }
+        })
+    }
+
+    function UploadFile(fileType, fileElementId,objectID) {
+        PreviewUploadFile('@BusinessObjects.Domain.ObjectTypes.DispatchReport', Number(objectID), fileType,'', fileElementId,singleFileUpload);
+    }
+
+    function OpenLocalFile(fieldElementId,objectTypeId) {
+        if ($("#" + fieldElementId).val() != "")
+            DownloadFile(objectTypeId, $("#" + fieldElementId+"ID").val());
+    }
+
+    function DeleteUploadFileData(fieldElementId) {
+        if ($("#" + fieldElementId).val() != "")
+            DeleteUploadFile('@BusinessObjects.Domain.ObjectTypes.DispatchReport', fieldElementId,$("#"+fieldElementId+"ID").val(),singleFileDelete);
+    }
+
+    function singleFileUpload(fileElementId,id){
+        $("#"+fileElementId+"ID").val(id);
+    }
+
+    function singleFileDelete(fileElementId){
+        $("input[id *=" + fileElementId + "]").val("");
+    }
+    function changeResultStatus()
+    {
+        dispatchReportVue.DispatchReport.ServiceProvider.ID = dispatchReportVue.DispatchReport.ServiceProvider.ID == 0 ? '@BusinessObjects.Domain.DispatchReportInfo.ServiceProviders.Management_Party' : dispatchReportVue.DispatchReport.ServiceProvider.ID;
+    }
+
+    //切换作业报告类型，报告详细信息清空，附件及零配件不请空
+    function SaveDispatchReportType(id,name){
+        GetFileInfo();
+        $(".tips").html("");
+        dispatchReportVue.DispatchReport = {
+            ID:'@ViewBag.ID',
+            OID:dispatchReportVue.DispatchReport.OID,
+            Type: {ID :1,Name:"通用作业报告"},
+            SolutionResultStatus: {ID:'@BusinessObjects.Domain.DispatchReportInfo.SolutionResultStatuses.Resolved'},
+            EquipmentStatus:{ID:0},
+            Status: dispatchReportVue.DispatchReport.Status,
+            ReportAccessories:[],
+            TypeID:0,
+            ServiceProvider:{ID:'@BusinessObjects.Domain.DispatchReportInfo.ServiceProviders.Management_Party'},
+            IsRecall:null,
+            IsPrivate:null,
+            Dispatch:dispatchReportVue.Dispatch,
+            FormatHistory:dispatchReportVue.DispatchReport.FormatHistory,
+            FujiComments:dispatchReportVue.DispatchReport.FujiComments,
+            ReportAccessories:dispatchReportVue.DispatchReport.ReportAccessories,
+            FileInfo:dispatchReportVue.DispatchReport.FileInfo
+        }
+        dispatchReportVue.DispatchReport.TypeID = '@BusinessObjects.Domain.DispatchReportInfo.DispatchReportTypes.GetDispatchReportTypeID(@requestType)';
+        dispatchReportVue.DispatchReport.Type.ID = id;
+        dispatchReportVue.DispatchReport.Type.Name = name;
+        initform();
+        $("#dialog-form-reportType").dialog("close");
+    }
+
+    function callback(objectVue){
+        dispatchReportVue.ReportAccessory.Supplier=objectVue
+    }
+
+    function InitDialogForm(){
+        InitAddAccessoryDialog();
+        InitDispatchReportTypeDialog();
+    }
+
+    function InitDateForm(){
+        var dateFields = $([]).add($("#AcceptanceDate"));
+        dateFields.datepicker({
+            changeMonth: true,
+            changeYear: true
+        });
+        dateFields.datepicker("option", "dateFormat", "yy-mm-dd");
+        $("#AcceptanceDate").val(dispatchReportVue.DispatchReport.AcceptanceDate);
+    }
+
+    function InitAddAccessoryDialog(){
+        var dialog = $("#dialog-form-addAccessory").dialog({
+            autoOpen: false,
+            height: 550,
+            width: 700,
+            modal: true,
+            buttons: {
+                "保存": function () { SaveReportAccessory(); },
+                "关闭": function () { dialog.dialog("close"); }
+            }
+        });
+    }
+
+    function InitDispatchReportTypeDialog(){
+        var dialog = $("#dialog-form-reportType").dialog({
+            autoOpen: false,
+            height: 150,
+            width: 280,
+            modal: true,
+        });
+    }
+    function InitReportAccessoryForm(){
+        $("#FileNewReportAccessory").val("");
+        $("#FileNewReportAccessoryID").val("");
+        $("#FileOldReportAccessory").val("");
+        $("#FileOldReportAccessoryID").val("");
+        dispatchReportVue.ReportAccessory={
+            DispatchReportID:'@id',
+            Source:{ID:1},
+            Supplier:{},
+            FileInfos:[]
+        }
+        $("#supplier").attr("disabled",false);
+        $("#AddSupplierBtn").show();
+    }
+
+    function OpenDispatchReportTypeDialog(){
+        if(checkReportType()) return;
+        InitDispatchReportTypeDialog();
+        $("#dialog-form-reportType").dialog({ title: "选择作业报告类型" });
+        $("#dialog-form-reportType").dialog("open");
+    }
+    //切换作业报告类型时判断是否有其它报告类型
+    function checkReportType(){
+        var HasOther = false;
+        if(dispatchReportVue.DispatchReport.TypeID == '@BusinessObjects.Domain.DispatchReportInfo.DispatchReportTypes.Common'){
+            jAlert("当前派工无可选报告类型","提示");
+            HasOther = true;
+        }
+        return HasOther;
+    }
+
+    function OpenAddAccessoryDialog(){
+        ClearSession();
+        $(".tips").html("");
+        InitReportAccessoryForm();
+        InitAddAccessoryDialog();
+        $("#dialog-form-addAccessory").dialog({ title: "添加零配件" });
+        $("#dialog-form-addAccessory").dialog("open");
+    }
+    function openAccessories(){
+        $("#accessoriesBtn").hide();
+        $("#accessories").show();
+    }
+    function closeAccessories(){
+        $("#accessoriesBtn").show();
+        $("#accessories").hide();
+    }
+    //保存作业报告信息
+    function DoSaveDispatchReport(){
+        dispatchReportVue.DispatchReport.Status.ID='@BusinessObjects.Domain.DispatchInfo.DocStatus.New';
+        dispatchReportVue.DispatchReport.AcceptanceDate = $("#AcceptanceDate").val();
+        dispatchReportVue.DispatchReport.SolutionUnsolvedComments = dispatchReportVue.DispatchReport.SolutionResultStatus.ID == '@BusinessObjects.Domain.DispatchReportInfo.SolutionResultStatuses.Problem_Escalation' ? dispatchReportVue.DispatchReport.SolutionUnsolvedComments : "";
+        dispatchReportVue.DispatchReport.ServiceProvider.ID = dispatchReportVue.DispatchReport.SolutionResultStatus.ID == '@BusinessObjects.Domain.DispatchReportInfo.SolutionResultStatuses.Waitting_Thirdparty' ? dispatchReportVue.DispatchReport.ServiceProvider.ID : '@BusinessObjects.Domain.DispatchReportInfo.ServiceProviders.Management_Party';
+        SetPageWaiting(true)
+        $.post(
+            '@Url.Action("SaveDispatchReport", "DispatchReport")',
+            dispatchReportVue.DispatchReport ,
+            function (response) {
+                SetPageWaiting(false)
+                if (response.ResultCode != "00") {
+                    processResponseError(response.ResultCode, response.ResultMessage);
+                } else {
+                    jAlert("保存成功", "保存",function(){
+                        RefreshDetail();
+                    });
+                }
+            })
+    }
+    //提交作业报告信息
+    function DoSubmitDispatchReport(){
+        dispatchReportVue.DispatchReport.FujiComments = "";
+        dispatchReportVue.DispatchReport.Status.ID = '@BusinessObjects.Domain.DispatchInfo.DocStatus.Pending';
+        dispatchReportVue.DispatchReport.AcceptanceDate = $("#AcceptanceDate").val();
+        dispatchReportVue.DispatchReport.SolutionUnsolvedComments = dispatchReportVue.DispatchReport.SolutionResultStatus.ID == '@BusinessObjects.Domain.DispatchReportInfo.SolutionResultStatuses.Problem_Escalation' ? dispatchReportVue.DispatchReport.SolutionUnsolvedComments : "";
+        dispatchReportVue.DispatchReport.ServiceProvider.ID = dispatchReportVue.DispatchReport.SolutionResultStatus.ID == '@BusinessObjects.Domain.DispatchReportInfo.SolutionResultStatuses.Waitting_Thirdparty' ? dispatchReportVue.DispatchReport.ServiceProvider.ID : 0;
+        if(!CheckReport()) return;
+        SetPageWaiting(true)
+        $.post(
+            '@Url.Action("SaveDispatchReport", "DispatchReport")',
+            dispatchReportVue.DispatchReport ,
+            function (response) {
+                SetPageWaiting(false)
+                if (response.ResultCode != "00") {
+                    processResponseError(response.ResultCode, response.ResultMessage);
+                } else {
+                    jAlert("提交成功", "提交",function(){
+                        Back();
+                    });
+                }
+            })
+    }
+    //审批通过作业报告
+    function DoPassDispatchReport(){
+        dispatchReportVue.DispatchReport.SolutionUnsolvedComments = dispatchReportVue.DispatchReport.SolutionResultStatus.ID == '@BusinessObjects.Domain.DispatchReportInfo.SolutionResultStatuses.Problem_Escalation' ? dispatchReportVue.DispatchReport.SolutionUnsolvedComments : "";
+        dispatchReportVue.DispatchReport.ServiceProvider.ID = dispatchReportVue.DispatchReport.SolutionResultStatus.ID == '@BusinessObjects.Domain.DispatchReportInfo.SolutionResultStatuses.Waitting_Thirdparty' ? dispatchReportVue.DispatchReport.ServiceProvider.ID : 0;
+        if (!CheckReport()) return;
+        SetPageWaiting(true)
+        $.post(
+            '@Url.Action("PassDispatchReport", "DispatchReport")',
+            {
+                info:dispatchReportVue.DispatchReport
+            },
+            function (response) {
+                SetPageWaiting(false)
+                if (response.ResultCode != "00") {
+                    processResponseError(response.ResultCode, response.ResultMessage);
+                } else {
+                    jAlert("通过成功", "审批",function(){
+                        Back();
+                    });
+                }
+            })
+    }
+    //审批拒绝作业报告，退回原因必输
+    function DoRejectDispatchReport(){
+        if(dispatchReportVue.DispatchReport.FujiComments.trim() == ""){
+            $("#commentsMSG").html('审批备注不能为空');
+            $("#comments").focus();
+            return;
+        }
+        dispatchReportVue.DispatchReport.Dispatch = dispatchReportVue.Dispatch;
+        dispatchReportVue.DispatchReport.SolutionUnsolvedComments = dispatchReportVue.DispatchReport.SolutionResultStatus.ID == '@BusinessObjects.Domain.DispatchReportInfo.SolutionResultStatuses.Problem_Escalation' ? dispatchReportVue.DispatchReport.SolutionUnsolvedComments : "";
+        dispatchReportVue.DispatchReport.ServiceProvider.ID = dispatchReportVue.DispatchReport.SolutionResultStatus.ID == '@BusinessObjects.Domain.DispatchReportInfo.SolutionResultStatuses.Waitting_Thirdparty' ? dispatchReportVue.DispatchReport.ServiceProvider.ID : 0;
+
+        if (!CheckReport()) return;
+
+        SetPageWaiting(true)
+        $.post(
+            '@Url.Action("RejectDispatchReport", "DispatchReport")',
+            {
+                info:dispatchReportVue.DispatchReport
+            },
+            function (response) {
+                SetPageWaiting(false)
+                if (response.ResultCode != "00") {
+                    processResponseError(response.ResultCode, response.ResultMessage);
+                } else {
+                    jAlert("退回成功", "审批",function(){
+                        Back();
+                    });
+                }
+            })
+    }
+    //添加零配件信息后，即存至数据库
+    function SaveReportAccessory(){
+        if(!CheckAccessory()){return;}
+
+        dispatchReportVue.ReportAccessory.Supplier.Name = dispatchReportVue.ReportAccessory.Source.ID == '@stock_Source' ? "" : dispatchReportVue.ReportAccessory.Supplier.Name;
+        dispatchReportVue.ReportAccessory.Supplier.ID = dispatchReportVue.ReportAccessory.Source.ID == '@stock_Source' ? 0 : dispatchReportVue.ReportAccessory.Supplier.ID;
+        SetPageWaiting(true)
+        $.post(
+            '@Url.Action("SaveReportAccessory", "DispatchReport")',
+            dispatchReportVue.ReportAccessory ,
+            function (response) {
+                SetPageWaiting(false)
+                if (response.ResultCode != "00") {
+                    processResponseError(response.ResultCode, response.ResultMessage,function(){RefreshDetail();});
+                } else {
+                    jAlert("保存成功", "保存",function(){
+                        response.Data.Source.Name=(response.Data.Source.ID=='@stock_Source')?'@BusinessObjects.Manager.LookupManager.GetAccessorySourceTypeDesc(@stock_Source)':'@BusinessObjects.Manager.LookupManager.GetAccessorySourceTypeDesc(@external_Suppliers)';
+                        InitReportAccessoryForm();
+                        dispatchReportVue.DispatchReport.ReportAccessories.push(response.Data);
+                        $("#dialog-form-addAccessory").dialog("close");
+                    }
+                    );
+                }
+            })
+    }
+    //删除零配件信息
+    function DeleteReportAccessory(reportAccessoryID,index){
+        SetPageWaiting(true)
+        $.post(
+            '@Url.Action("DeleteReportAccessory", "DispatchReport")',
+            {reportAccessoryID:reportAccessoryID},
+            function (response) {
+                SetPageWaiting(false)
+                if (response.ResultCode != "00") {
+                    processResponseError(response.ResultCode, response.ResultMessage);
+                } else {
+                    jAlert("删除成功", "删除",function(){
+                        dispatchReportVue.DispatchReport.ReportAccessories.splice(index,1);
+                        dispatchReportVue.updated;
+                    });
+                }
+            })
+    }
+
+    function Back(){
+        if('@actionName' == 'RequestList')
+            window.location.href="@Url.Action(actionName, "Request")";
+        else window.location.href="@Url.Action(actionName, "Dispatch")";
+    }
+
+    function RefreshDetail(){
+        window.location.href = "@Url.Action("DispatchReportDetail", "DispatchReport")" + "?" + $.param({ actionName:"@actionName", dispatchID:'@dispatchID', dispatchReportID:'@id',dispatchJournalID:'@ViewBag.DispatchJournalID',requestType:'@ViewBag.RequestType' });
+    }
+    function GotoDispatchResponse() {
+        window.open("@Url.Action("DispatchResponse", "Dispatch")" + "?" + $.param({ actionName: '@ViewBag.Title', dispatchID: dispatchReportVue.Dispatch.ID, requestType: '@ViewBag.RequestType'}))
+    }
+    function btnTimeLine(id) {
+        window.open('@Url.Action("EquipmentTimeLine", "Equipment")' + '?' + $.param({ id: id, actionName: 'EquipmentList' }));
+    }
+
+</script>
+<!--checkReportInfo-->
+<script>
+    //check作业报告必填项
+    function CheckReport(){
+        var flag=true;
+        $(".tips").html("");
+        //维修
+        if(dispatchReportVue.DispatchReport.Type.ID == '@BusinessObjects.Domain.DispatchReportInfo.DispatchReportTypes.Repair'){
+            if(dispatchReportVue.DispatchReport.FaultCode == undefined || dispatchReportVue.DispatchReport.FaultCode.trim() == ""){
+                $("#reqFaultCode").html("错误代码不能为空");
+                $("#FaultCode").focus();
+                flag = false;
+            }
+            if(dispatchReportVue.DispatchReport.EquipmentStatus.ID == 0){
+                $("#reqEquipmentStatus").html('设备状态（离场）不能为空');
+                $("#EquipmentStatus").focus();
+                flag = false;
+            }
+            if (dispatchReportVue.DispatchReport.SolutionCauseAnalysis == undefined || dispatchReportVue.DispatchReport.SolutionCauseAnalysis.trim() == "") {
+                $("#reqSolutionCauseAnalysis").html('分析原因不能为空');
+                $("#SolutionCauseAnalysis").focus();
+                flag = false;
+            }
+            if(dispatchReportVue.DispatchReport.SolutionWay == undefined || dispatchReportVue.DispatchReport.SolutionWay.trim() == ""){
+                $("#reqSolutionWay").html("详细处理方法不能为空");
+                $("#SolutionWay").focus();
+                flag = false;
+            }
+
+            if(dispatchReportVue.DispatchReport.SolutionResultStatus.ID == '@BusinessObjects.Domain.DispatchReportInfo.SolutionResultStatuses.Waitting_Thirdparty' && dispatchReportVue.DispatchReport.ServiceProvider.ID == 0){
+                $("#reqServiceProvider").html('服务提供方不能为空');
+                $("#ServiceProvider").focus();
+                flag = false;
+            }
+        }
+            //巡检
+        else if (dispatchReportVue.DispatchReport.Type.ID == '@BusinessObjects.Domain.DispatchReportInfo.DispatchReportTypes.RegularParol') {
+            if (dispatchReportVue.DispatchReport.SolutionCauseAnalysis == undefined || dispatchReportVue.DispatchReport.SolutionCauseAnalysis.trim() == "") {
+                $("#reqSolutionCauseAnalysis").html('报告明细不能为空');
+                $("#SolutionCauseAnalysis").focus();
+                flag = false;
+            }
+
+            if(dispatchReportVue.DispatchReport.SolutionResultStatus.ID == '@BusinessObjects.Domain.DispatchReportInfo.SolutionResultStatuses.Waitting_Thirdparty' && dispatchReportVue.DispatchReport.ServiceProvider.ID == 0){
+                $("#reqServiceProvider").html('服务提供方不能为空');
+                $("#ServiceProvider").focus();
+                flag = false;
+            }
+        }
+            //强检
+        else if (dispatchReportVue.DispatchReport.Type.ID == '@BusinessObjects.Domain.DispatchReportInfo.DispatchReportTypes.MandatoryInspection') {
+            if (dispatchReportVue.DispatchReport.FaultDesc == undefined || dispatchReportVue.DispatchReport.FaultDesc.trim() == "") {
+                $("#reqFaultDesc").html('强检要求不能为空');
+                $("#FaultDesc").focus();
+                flag = false;
+            }
+
+            if (dispatchReportVue.DispatchReport.SolutionCauseAnalysis == undefined || dispatchReportVue.DispatchReport.SolutionCauseAnalysis.trim() == "") {
+                $("#reqSolutionCauseAnalysis").html('报告明细不能为空');
+                $("#SolutionCauseAnalysis").focus();
+                flag = false;
+            }
+
+            if(dispatchReportVue.DispatchReport.SolutionResultStatus.ID == '@BusinessObjects.Domain.DispatchReportInfo.SolutionResultStatuses.Waitting_Thirdparty' && dispatchReportVue.DispatchReport.ServiceProvider.ID == 0){
+                $("#reqServiceProvider").html('服务提供方不能为空');
+                $("#ServiceProvider").focus();
+                flag = false;
+            }
+
+            if (dispatchReportVue.DispatchReport.IsPrivate == 'true') {
+                var fileID = $('#FileDispatchReportID').val();
+                if (fileID == null || fileID == "" || fileID == 0) {
+                    $("#reqFile").html("请上传附件");
+                    flag = false;
+                }
+            }
+        }
+            //保养
+        else if (dispatchReportVue.DispatchReport.Type.ID == '@BusinessObjects.Domain.DispatchReportInfo.DispatchReportTypes.Maintenance') {
+            if (dispatchReportVue.DispatchReport.SolutionCauseAnalysis == undefined || dispatchReportVue.DispatchReport.SolutionCauseAnalysis.trim() == "") {
+                $("#reqSolutionCauseAnalysis").html('报告明细不能为空');
+                $("#SolutionCauseAnalysis").focus();
+                flag = false;
+            }
+
+            if(dispatchReportVue.DispatchReport.SolutionResultStatus.ID == '@BusinessObjects.Domain.DispatchReportInfo.SolutionResultStatuses.Waitting_Thirdparty' && dispatchReportVue.DispatchReport.ServiceProvider.ID == 0){
+                $("#reqServiceProvider").html('服务提供方不能为空');
+                $("#ServiceProvider").focus();
+                flag = false;
+            }
+
+            if (dispatchReportVue.DispatchReport.ServiceProvider.ID != '@BusinessObjects.Domain.DispatchReportInfo.ServiceProviders.Management_Party' && dispatchReportVue.DispatchReport.SolutionResultStatus.ID == '@BusinessObjects.Domain.DispatchReportInfo.SolutionResultStatuses.Waitting_Thirdparty') {
+                var fileID = $('#FileDispatchReportID').val();
+                if (fileID == null || fileID == "" || fileID == 0) {
+                    $("#reqFile").html("请上传附件");
+                    flag = false;
+                }
+            }
+        }
+            //校准
+        else if(dispatchReportVue.DispatchReport.Type.ID == '@BusinessObjects.Domain.DispatchReportInfo.DispatchReportTypes.Correcting'){
+            if(dispatchReportVue.DispatchReport.SolutionCauseAnalysis == undefined || dispatchReportVue.DispatchReport.SolutionCauseAnalysis.trim() == "")
+            {
+                $("#reqSolutionCauseAnalysis").html("报告明细不能为空");
+                $("#SolutionCauseAnalysis").focus();
+                flag = false;
+            }
+
+            if(dispatchReportVue.DispatchReport.SolutionResultStatus.ID == '@BusinessObjects.Domain.DispatchReportInfo.SolutionResultStatuses.Waitting_Thirdparty' && dispatchReportVue.DispatchReport.ServiceProvider.ID == 0){
+                $("#reqServiceProvider").html('服务提供方不能为空');
+                $("#ServiceProvider").focus();
+                flag = false;
+            }
+        }
+            //不良事件
+        else if(dispatchReportVue.DispatchReport.Type.ID == '@BusinessObjects.Domain.DispatchReportInfo.DispatchReportTypes.AdverseEvent')
+        {
+            if(dispatchReportVue.DispatchReport.SolutionCauseAnalysis == undefined || dispatchReportVue.DispatchReport.SolutionCauseAnalysis.trim() == "")
+            {
+                $("#reqSolutionCauseAnalysis").html("报告明细不能为空");
+                $("#SolutionCauseAnalysis").focus();
+                flag = false;
+            }
+
+            if(dispatchReportVue.DispatchReport.SolutionResultStatus.ID == '@BusinessObjects.Domain.DispatchReportInfo.SolutionResultStatuses.Waitting_Thirdparty' && dispatchReportVue.DispatchReport.ServiceProvider.ID == 0){
+                $("#reqServiceProvider").html('服务提供方不能为空');
+                $("#ServiceProvider").focus();
+                flag = false;
+            }
+        }
+            //设备新增
+        else if(dispatchReportVue.DispatchReport.Type.ID == '@BusinessObjects.Domain.DispatchReportInfo.DispatchReportTypes.AddEquipment')
+        {
+            var patrn = /^([1-9]\d{0,9}|0)([.]?|(\.\d{1,2})?)$/;
+            if(dispatchReportVue.DispatchReport.PurchaseAmount == undefined || dispatchReportVue.DispatchReport.PurchaseAmount == "" || dispatchReportVue.DispatchReport.PurchaseAmount == 0){
+                $("#reqPurchaseAmount").html("资产金额不能为空");
+                $("#PurchaseAmount").focus();
+                flag = false;
+            }
+            else if(dispatchReportVue.DispatchReport.PurchaseAmount > 99999999.99){
+                $("#reqPurchaseAmount").html("资产金额最大为99999999.99");
+                $("#PurchaseAmount").focus();
+                flag = false;
+            }else if(!patrn.test(dispatchReportVue.DispatchReport.PurchaseAmount)){
+                $("#reqPurchaseAmount").html("资产金额格式有误");
+                $("#PurchaseAmount").focus();
+                flag = false;
+            }
+            if(dispatchReportVue.DispatchReport.ServiceScope == null && '@user.Role.ID' == '@SuperAdmin'){
+                $("#reqServiceScope").html("请选择整包范围");
+                $("#ServiceScope").focus();
+                flag = false;
+            }
+            if(dispatchReportVue.DispatchReport.SolutionCauseAnalysis == undefined || dispatchReportVue.DispatchReport.SolutionCauseAnalysis.trim() == "")
+            {
+                $("#reqSolutionCauseAnalysis").html("报告明细不能为空");
+                $("#SolutionCauseAnalysis").focus();
+                flag = false;
+            }
+
+            if(dispatchReportVue.DispatchReport.SolutionResultStatus.ID == '@BusinessObjects.Domain.DispatchReportInfo.SolutionResultStatuses.Waitting_Thirdparty' && dispatchReportVue.DispatchReport.ServiceProvider.ID == 0){
+                $("#reqServiceProvider").html('服务提供方不能为空');
+                $("#ServiceProvider").focus();
+                flag = false;
+            }
+        }
+            //验收安装
+        else if(dispatchReportVue.DispatchReport.Type.ID == '@BusinessObjects.Domain.DispatchReportInfo.DispatchReportTypes.Accetance'){
+            if(dispatchReportVue.DispatchReport.SolutionCauseAnalysis == undefined || dispatchReportVue.DispatchReport.SolutionCauseAnalysis.trim() == "")
+            {
+                $("#reqSolutionCauseAnalysis").html("报告明细不能为空");
+                $("#SolutionCauseAnalysis").focus();
+                flag = false;
+            }
+            if(CheckDatePicker("AcceptanceDate","验收日期") != "") {
+                $("#reqAcceptanceDate").html(CheckDatePicker("AcceptanceDate","验收日期"));
+                flag = false;
+            }
+
+            if(dispatchReportVue.DispatchReport.SolutionResultStatus.ID == '@BusinessObjects.Domain.DispatchReportInfo.SolutionResultStatuses.Waitting_Thirdparty' && dispatchReportVue.DispatchReport.ServiceProvider.ID == 0){
+                $("#reqServiceProvider").html('服务提供方不能为空');
+                $("#ServiceProvider").focus();
+                flag = false;
+            }
+        }
+            //通用
+        else {
+            if(dispatchReportVue.DispatchReport.SolutionCauseAnalysis == undefined || dispatchReportVue.DispatchReport.SolutionCauseAnalysis.trim() == "")
+            {
+                $("#reqSolutionCauseAnalysis").html("报告明细不能为空");
+                $("#SolutionCauseAnalysis").focus();
+                flag = false;
+            }
+            if(dispatchReportVue.DispatchReport.SolutionResultStatus.ID == '@BusinessObjects.Domain.DispatchReportInfo.SolutionResultStatuses.Waitting_Thirdparty' && dispatchReportVue.DispatchReport.ServiceProvider.ID == 0){
+                $("#reqServiceProvider").html('服务提供方不能为空');
+                $("#ServiceProvider").focus();
+                flag = false;
+            }
+        }
+
+        if(dispatchReportVue.DispatchReport.Result == undefined || dispatchReportVue.DispatchReport.Result.trim() == ""){
+            $("#reqResult").html("结果不能为空");
+            $("#Result").focus();
+            flag = false;
+        }
+        if(dispatchReportVue.DispatchReport.SolutionResultStatus.ID == 0){
+            $("#reqSolutionResultStatus").html("作业报告结果不能为空");
+            $("#SolutionResultStatus").focus();
+            flag = false;
+        }
+
+        if (dispatchReportVue.DispatchReport.SolutionResultStatus.ID == '@BusinessObjects.Domain.DispatchReportInfo.SolutionResultStatuses.Problem_Escalation') {
+            if (dispatchReportVue.DispatchReport.SolutionUnsolvedComments == undefined || dispatchReportVue.DispatchReport.SolutionUnsolvedComments.trim() == "") {
+                $("#reqSolutionUnsolvedComments").html('问题升级不能为空');
+                $("#SolutionUnsolvedComments").focus();
+                flag = false;
+            }
+        }
+
+        if (dispatchReportVue.Dispatch.Request.IsDelay) {
+            if (dispatchReportVue.DispatchReport.DelayReason == undefined || dispatchReportVue.DispatchReport.DelayReason.trim() == "") {
+                $("#reqDelayReason").html('误工说明不能为空');
+                $("#DelayReason").focus();
+                flag = false;
+            }
+        }
+
+        return flag;
+    }
+</script>
+<!--checkAccessory-->
+<script>
+    function CheckAccessory(){
+        var flag=true;
+        $(".tips").html('');
+
+        if(dispatchReportVue.ReportAccessory.Name == undefined || dispatchReportVue.ReportAccessory.Name.trim() == ""){
+            $("#nameMSG").html('名称不能为空');
+            $("#name").focus();
+            flag = false;
+        }
+
+        if(dispatchReportVue.ReportAccessory.Source.ID == 0){
+            $("#sourceMSG").html('来源不能为空');
+            $("#source").focus();
+            flag = false;
+        }
+
+        if(dispatchReportVue.ReportAccessory.Source.ID != '@stock_Source'){
+            if ($("#supplier").val() == '') {
+                $("#supplierMSG").html('供应商不能为空');
+                $("#supplier").focus();
+                flag = false;
+            }else if(dispatchReportVue.ReportAccessory.Supplier==null || dispatchReportVue.ReportAccessory.Supplier.ID==0 || dispatchReportVue.ReportAccessory.Supplier.ID==null){
+                $("#supplierMSG").html('供应商选择不存在');
+                $("#supplier").focus();
+                flag = false;
+            }
+        }
+
+        if(dispatchReportVue.ReportAccessory.NewSerialCode == undefined || dispatchReportVue.ReportAccessory.NewSerialCode.trim() == ""){
+            $("#newMSG").html('新装编号不能为空');
+            $("#new").focus();
+            flag = false;
+        }
+        //else if(!/^[A-Za-z0-9]{0,10}$/.test(dispatchReportVue.ReportAccessory.NewSerialCode)){
+        //    $("#newMSG").html('新装编号格式错误');
+        //    $("#new").focus();
+        //    flag = false;
+        //}
+
+        if(dispatchReportVue.ReportAccessory.Amount == undefined || dispatchReportVue.ReportAccessory.Amount.trim() == ""){
+            $("#amountMSG").html('价格不能为空');
+            $("#amount").focus();
+            flag = false;
+        }
+        else if ($("#amount").val() > 99999999.99){
+            $("#amountMSG").html('金额最大为99999999.99');
+            $("#amount").focus();
+            flag = false;
+        }else if(!/^([1-9]\d{0,9}|0)([.]?|(\.\d{1,2})?)$/.test(dispatchReportVue.ReportAccessory.Amount)){
+            $("#amountMSG").html('格式错误');
+            $("#amount").focus();
+            flag = false;
+        }
+
+        if(dispatchReportVue.ReportAccessory.Qty == undefined || dispatchReportVue.ReportAccessory.Qty == 0 || dispatchReportVue.ReportAccessory.Qty.trim() == ""){
+            $("#qtyMSG").html('数量不能为空');
+            $("#qty").focus();
+            flag = false;
+        }
+        else if(dispatchReportVue.ReportAccessory.Qty > 999999999){
+            $("#qtyMSG").html('数量最大为999999999');
+            $("#qty").focus();
+            flag = false;
+        }
+        else if (!/^([1-9]\d{0,8}|0)$/.test(dispatchReportVue.ReportAccessory.Qty)) {
+            $("#qtyMSG").html('格式错误');
+            $("#qty").focus();
+            flag = false;
+        }
+
+        if(dispatchReportVue.ReportAccessory.OldSerialCode == undefined || dispatchReportVue.ReportAccessory.OldSerialCode.trim() == ""){
+            $("#oldMSG").html('拆下编号不能为空');
+            $("#old").focus();
+            flag = false;
+        }
+        //else if(!/^[A-Za-z0-9]{0,10}$/.test(dispatchReportVue.ReportAccessory.OldSerialCode)){
+        //    $("#oldMSG").html('格式错误');
+        //    $("#old").focus();
+        //    flag = false;
+        //}
+
+        return flag;
+    }
+</script>

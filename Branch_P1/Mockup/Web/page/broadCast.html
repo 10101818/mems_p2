@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>广播设置</title>
+		<link rel="stylesheet" type="text/css" href="../css/bootstrap.min.css" />
+		<link rel="stylesheet" type="text/css" href="../style.css" />
+		<script src="../js/jquery-1.11.0.js"></script>
+		<script type="text/javascript" src="../js/bootstrap.min.js"></script>
+		
+	</head>
+	<body>
+		<div class="iframeBody">
+			<table class="filterTable">
+				<tr>
+					<td style="width:200px;">
+						<table class="toolsTable" cellspacing="0">
+							<tr>
+								<td>
+									<h3 align="left">广播列表</h3>
+								</td>
+							</tr>
+						</table>
+					</td>
+					<td>
+						<table cellspacing="0px" cellpadding="9px" class="hiddenTable">
+							<tr>
+								<td>
+									<button class="btn btn-sm btnFilter "><span class="btnContent">隐藏信息</span><span class="btnBadge">01</span></button>
+								</td>
+								<td>
+									<button class="btn btn-sm btnFilter "><span class="btnContent">隐藏信息</span><span class="btnBadge">02</span></button>
+								</td>
+							</tr>
+						</table>
+					</td>
+					<td width="1%">
+						<table style="width: 200px;" cellspacing="0" cellpadding="5px">
+							<tr>
+								<td>
+									<button class="btn btn-secondary  btn-sm">打印</button>
+								</td>
+								<td>
+									<button class="btn btn-secondary  btn-sm">导出</button>
+								</td>
+								<td>
+									<button class="btn btn-secondary btn-sm">刷新</button>
+								</td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+			</table>
+			<table class="operationTable" cellpadding="0" cellspacing="0">
+				<tr>
+					<td>
+						<table>
+							<tbody>
+								<tr>
+									<td>搜索：
+										<select>
+											<option>广播编号</option>
+											<option>广播名称</option>
+										</select>
+										<input><img src="../img/icons8-search-48.png" alt="" class="update" />&nbsp;&nbsp;
+									</td>
+								</tr>
+							</tbody>
+						</table>
+					</td>
+				</tr>
+			</table>
+			<table class="table broadCastTable" cellspacing="0px" cellpadding="0px">
+				<thead class="thead-light">
+					<tr>
+						<th scope="col">广播编号</th>
+						<th scope="col">广播名称</th>
+						<th scope="col">添加时间</th>
+						<th scope="col" width="40%">广播内容</th>
+						<th scope="col">备注</th>
+						<th scope="col">是否轮播</th>
+						<th scope="col">编辑</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td scope="row">GB00000001</td>
+						<td>系统通知</td>
+						
+						<td>2019-01-25</td>
+						<td>* 7月1日新系统正式上线，欢迎各位使用本系统！</td>
+						<td>第一次通知</td>
+						<td>
+							<button class="btn btn-info btn-sm disabled">是</button>
+						</td>
+						<td>
+							<img src="../img/edit.png" class="update btn-editContract" id="edit">
+						</td>
+					</tr>
+					<tr>
+						<td scope="row">GB00000002</td>
+						<td>节假日调休</td>
+						
+						<td>2019-02-10</td>
+						<td>* 喜迎五一！节假日调休通知！本周日(5.5)加班一天！！</td>
+						<td>通知内容</td>
+						<td>
+							<button class="btn btn-outline-info btn-sm ">否</button>
+						</td>
+						<td>
+							<img src="../img/edit.png" class="update btn-editContract" id="edit">
+						</td>
+					</tr>
+					<tr>
+						<td scope="row">GB00000003</td>
+						<td>更新信息</td>
+						
+						<td>2019-02-25</td>
+						<td>* 测试信息-测试广播信息传达，请大家看到此消息后登录账户更新！！</td>
+						<td>测试消息</td>
+						<td>
+							<button class="btn btn-outline-info btn-sm">否</button>
+						</td>
+						<td>
+							<img src="../img/edit.png" class="update btn-editContract" id="edit">
+						</td>
+					</tr>
+					<tr>
+						<td scope="row">GB00000004</td>
+						<td>公益</td>
+						
+						<td>2019-03-01</td>
+						<td>*健康是我们唯一的追求 ！！</td>
+						<td>公益宣传</td>
+						<td>
+							<button class="btn btn-outline-info btn-sm">否</button>
+						</td>
+						<td>
+							<img src="../img/edit.png" class="update btn-editContract" id="edit">
+						</td>
+					</tr>
+					<tr>
+						<td scope="row">GB00000005</td>
+						<td>公益</td>
+						
+						<td>2019-03-05</td>
+						<td>* 赶走痛苦，还您快乐!!</td>
+						<td>公益宣传</td>
+						<td>
+							<button class="btn btn-outline-info btn-sm">否</button>
+						</td>
+						<td>
+							<img src="../img/edit.png" class="update btn-editContract" id="edit">
+						</td>
+					</tr>
+					<tr>
+						<td scope="row">GB00000006</td>
+						<td>公益</td>
+						
+						<td>2019-04-01</td>
+						<td>* 小小手术刀，生命争夺战 !!</td>
+						<td>公益宣传</td>
+						<td>
+							<button class="btn btn-outline-info btn-sm">否</button>
+						</td>
+						<td>
+							<img src="../img/edit.png" class="update btn-editContract" id="edit">
+						</td>
+					</tr>
+					<tr>
+						<td scope="row">GB00000007</td>
+						<td>公益</td>
+						
+						<td>2019-04-05</td>
+						<td>* 一人一诊室，一勤一温情!!</td>
+						<td>公益宣传</td>
+						<td>
+							<button class="btn btn-outline-info btn-sm">否</button>
+						</td>
+						<td>
+							<img src="../img/edit.png" class="update btn-editContract" id="edit">
+						</td>
+					</tr>
+					<tr>
+						<td scope="row">GB00000008</td>
+						<td>公益</td>
+						
+						<td>2019-04-11</td>
+						<td>* 我负责健康，你负责幸福</td>
+						<td>公益宣传</td>
+						<td>
+							<button class="btn btn-outline-info btn-sm">否</button>
+						</td>
+						<td>
+							<img src="../img/edit.png" class="update btn-editContract" id="edit">
+						</td>
+					</tr>
+					<tr>
+						<td scope="row">GB00000009</td>
+						<td>公益</td>
+						
+						<td>2019-04-21</td>
+						<td>* 关爱你我他，健康暖天下 !!</td>
+						<td>公益宣传</td>
+						<td>
+							<button class="btn btn-outline-info btn-sm">否</button>
+						</td>
+						<td>
+							<img src="../img/edit.png" class="update btn-editContract" id="edit">
+						</td>
+					</tr>
+					<tr>
+						<td scope="row">GB00000010</td>
+						<td>公益</td>
+						
+						<td>2019-05-01</td>
+						<td>* 援你健康，一生平安</td>
+						<td>公益宣传</td>
+						<td>
+							<button class="btn btn-outline-info btn-sm">否</button>
+						</td>
+						<td>
+							<img src="../img/edit.png" class="update btn-editContract" id="edit">
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<div>
+								<button class="btn btn-info btn-sm btn-newContract" data-toggle="modal">新增广播</button>
+							</div>
+						</td>
+						<td colspan="7">
+							<div class="pagenationDiv">
+								<nav aria-lable="Page navigation example">
+									<ul class="pagination">
+										<li class="page-item">
+											<a class="page-link " href="#">首页</a>
+										</li>
+										<li class="page-item">
+											<a class="page-link" href="#">上一页</a>
+										</li>
+										<li class="page-item">
+											<a class="page-link" href="#">1</a>
+										</li>
+										<li class="page-item">
+											<a class="page-link" href="#">2</a>
+										</li>
+										<li class="page-item">
+											<a class="page-link" href="#">3</a>
+										</li>
+										<li class="page-item">
+											<a class="page-link" href="#">下一页</a>
+										</li>
+										<li class="page-item">
+											<a class="page-link" href="#">末页</a>
+										</li>
+									</ul>
+								</nav>
+							</div>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+		
+		<div class="modal fade" id="editModalCenter" tabindex="-1" role="dialog"
+			aria-lableledby="editModalCenterTitle" aria-hidden="true">
+			<div class="modal-dialog  modal-dialog-centered" role="document">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h6 class="modal-title" id="editModalLongTitle">编辑广播</h6>
+						<button type="button" class="close" data-dismiss="modal" aria-lable="Close"><span
+								class="modal-icon" aria-hidden="true">&times;</span></button>
+					</div>
+					<div class="modal-body"><table class="table table-sm table-input modal-table" style="text-align: left;">
+							<tbody>
+								<tr>
+									<td width="20%" style="color: #B2B2B2;"><span class="unrequiredItem"></span>广播编号:</td>
+									<td width="80%"><input type="text" class="input" value="GB00000001"  disabled />
+									</td>
+								</tr>
+								<tr>
+									<td><span class="requiredItem"></span>广播名称:</td>
+									<td><input type="text" class="input" value="系统通知"/></td>
+								</tr>
+								<tr>
+									<td><span class="requiredItem"></span>广播内容:</td>
+									<td>
+										<textarea class="input" >7月1日新系统正式上线，欢迎各位使用本系统！</textarea>
+									</td>
+								</tr>
+								<tr>
+									<td><span class="unrequiredItem"></span>备注:</td>
+									<td><textarea type="text" class="input" >第一次通知</textarea></td>
+								</tr>
+								<tr>
+									<td><span class="unrequiredItem"></span>是否轮播:</td>
+									<td>
+										<input type="radio" name="select2" checked />是
+										<input type="radio" name="select2" />否
+									</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-info btn-sm">保存</button>
+						<button type="button" class="btn btn-secondary btn-sm"
+							data-dismiss="modal">关闭</button>
+					</div>
+				</div>
+			</div>
+		</div>
+		<!-- New-Modal -->
+		<div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-lableledby="exampleModalCenterTitle"
+		 aria-hidden="true">
+			<div class="modal-dialog  modal-dialog-centered" role="document">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h6 class="modal-title" id="exampleModalLongTitle">添加新广播</h6>
+						<button type="button" class="close" data-dismiss="modal" aria-lable="Close"><span class="modal-icon" aria-hidden="true">&times;</span></button>
+					</div>
+					<div class="modal-body">
+						<table class="table table-sm table-input modal-table" style="text-align: left;">
+							<tbody>
+								<tr>
+									<td width="20%" style="color: #B2B2B2;"><span class="unrequiredItem"></span>广播编号:</td>
+									<td width="80%"><input type="text" class="input" value="系统自动生成" readonly disabled />
+									</td>
+								</tr>
+								<tr>
+									<td><span class="requiredItem"></span>广播名称:</td>
+									<td><input type="text" class="input" /></td>
+								</tr>
+								<tr>
+									<td><span class="requiredItem"></span>广播内容:</td>
+									<td>
+										<textarea class="input"></textarea>
+									</td>
+								</tr>
+								<tr>
+									<td><span class="unrequiredItem"></span>备注:</td>
+									<td><textarea type="text" class="input"></textarea></td>
+								</tr>
+								<tr>
+									<td><span class="unrequiredItem"></span>是否轮播:</td>
+									<td>
+										<!-- 		<div id="div1" class="open1" style="margin-left:5%;">
+                                        <div id="div2" class="open2"></div>
+                                    </div> -->
+										<input type="radio" name="select" checked />是
+										<input type="radio" name="select" />否
+									</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-info btn-sm" style="margin-right:20px">保存</button>
+						<button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">关闭</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</body>
+	<script>
+		$(function() {
+			$(".requiredItem").html("*");
+			$(".unrequiredItem").html("&nbsp;&nbsp;");
+			$(".requiredItem").css("color", "red");
+			var options = {};
+			$(".btn-newContract").click(function() {
+				$("#exampleModalCenter").modal(options);
+			})
+			$(".btn-editContract").click(function() {
+				$("#editModalCenter").modal(options);
+			})
+		})
+		window.onload = function() {
+			var div2 = document.getElementById("div2");
+			var div1 = document.getElementById("div1");
+		}
+	</script>
+
+</html>
