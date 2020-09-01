@@ -55,7 +55,7 @@ namespace BusinessObjects.DataAccess
         /// <param name="userRoleID">用户角色ID</param>
         /// <param name="statusList">状态ID</param>
         /// <param name="urgency">派工单紧急程度</param>
-        /// <param name="type">派工类型</param>
+        /// <param name="typeIDs">派工类型</param>
         /// <param name="filterField">搜索条件</param>
         /// <param name="filterText">搜索框填写内容</param>
         /// <param name="sortField">排序字段</param>
@@ -63,7 +63,7 @@ namespace BusinessObjects.DataAccess
         /// <param name="curRowNum">当前页数第一个数据的位置</param>
         /// <param name="pageSize">一页几条数据</param>
         /// <returns>派工单列表</returns>
-        public List<DispatchInfo> QueryDispatches(int userID,int userRoleID, List<int> statusList, int urgency, int type, string filterField, string filterText, string sortField, bool sortDirection, int curRowNum = 0, int pageSize = 0)
+        public List<DispatchInfo> QueryDispatches(int userID, int userRoleID, List<int> statusList, int urgency, List<int> typeIDs, string filterField, string filterText, string sortField, bool sortDirection, int curRowNum = 0, int pageSize = 0)
         {
             List<DispatchInfo> dispatches = new List<DispatchInfo>();
             sqlStr = "SELECT DISTINCT d.*, CONVERT(VARCHAR(10),d.CreateDate,112),j.ID as DispatchJournalID,dr.ID as DispatchReportID , j.StatusID AS DispatchJournalStatusID,dr.StatusID AS DispatchReportStatusID, " + DispatchReportInfo.GetOverDueSQL() + string.Format(", CASE WHEN d.StatusID = {0} THEN -1 ELSE d.StatusID END AS newStatusID ", DispatchInfo.Statuses.Responded) +
@@ -79,7 +79,10 @@ namespace BusinessObjects.DataAccess
             else sqlStr += " AND d.StatusID <> " + DispatchInfo.Statuses.Cancelled;
             
             if (urgency != 0) sqlStr += " AND d.UrgencyID=" + urgency;
-            if (type != 0) sqlStr += " AND d.RequestType=" + type;
+
+            if (typeIDs != null && typeIDs.Count > 1) sqlStr += " AND d.RequestType IN (" + SQLUtil.ConvertToInStr(typeIDs) + ")";
+            else if (typeIDs != null && typeIDs.Count == 1 && typeIDs[0] != 0)
+                sqlStr += " AND d.RequestType = " + typeIDs[0];
             if (userRoleID == BusinessObjects.Domain.UserRole.Admin) sqlStr += " AND d.EngineerID=" + userID;
 
             if (!string.IsNullOrEmpty(filterText))

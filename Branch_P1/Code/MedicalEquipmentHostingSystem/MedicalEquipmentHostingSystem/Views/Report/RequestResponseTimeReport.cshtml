@@ -144,20 +144,20 @@
                     for (var item in response.Data) {
                         let ele = {
                             "key": response.Data[item].Item1,
-                            "value": Number(response.Data[item].Item2.toFixed(2)),
+                            "value": Number(response.Data[item].Item2.toFixed(1)),
                         };
                         RequestResponseTimeReportVue.RequestResponseTime.push(ele);
                     }
-                    barChart();
+                    barChart(0);
                 }
             })
     }
 </script>
 <script>
-    function barChart() {
+    function barChart(typeID) {
         var chart = CreateChart();
 
-        var barView = BoundSlide2Chart(chart, 1000, RequestResponseTimeReportVue.RequestResponseTime, '@ViewBag.YName');
+        var barView = BoundSlide2Chart(chart, 1000, RequestResponseTimeReportVue.RequestResponseTime, '@ViewBag.YName', typeID);
 
         SetChartStyle(barView, '@ViewBag.YName');
 

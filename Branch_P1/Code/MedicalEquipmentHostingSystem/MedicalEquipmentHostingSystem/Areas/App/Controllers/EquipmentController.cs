@@ -373,7 +373,15 @@ namespace MedicalEquipmentHostingSystem.Areas.App.Controllers
                 Dictionary<string, double> costs = this.serviceHisDao.GetAccessoryExpenseByEquipmentID(id, type, year);
                 Dictionary<string, double> lastIncomes = this.serviceHisDao.GetServiceHisIncomesByEquipmentID(id, type, year - 1);
                 Dictionary<string, double> lastCosts = this.serviceHisDao.GetAccessoryExpenseByEquipmentID(id, type, year - 1);
-                foreach (string key in incomes.Keys.Union(costs.Keys))
+
+                DateTime curr = DateTime.Now;
+                var keys = new List<string> { "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12" };
+                if (type == ReportDimension.AcceptanceYear)
+                    keys = incomes.Keys.Union(costs.Keys).ToList();
+                else if (year == curr.Year)
+                    keys.RemoveRange(curr.Month, keys.Count - curr.Month);
+
+                foreach (string key in keys)
                 {
                     double income = 0, cost = 0;
                     if (incomes.ContainsKey(key))

@@ -52,15 +52,20 @@ namespace BusinessObjects.Manager
             {
                 statusList.Add(status);
             }
+            List<int> requestTypeList = new List<int>();
+            if (requestType != 0)
+            {
+                requestTypeList.Add(requestType);
+            }
 
-            return QueryRequestsList(statusList, requestType, isRecall, department, urgency, overDue, source, filterField, filterText, sortField, sortDirection, curRowNum, pageSize, startDate, endDate, requestUserID);
+            return QueryRequestsList(statusList, requestTypeList, isRecall, department, urgency, overDue, source, filterField, filterText, sortField, sortDirection, curRowNum, pageSize, startDate, endDate, requestUserID);
         }
 
         /// <summary>
         /// 获取请求列表信息
         /// </summary>
         /// <param name="statusList">请求状态集</param>
-        /// <param name="requestType">请求类型</param>
+        /// <param name="requestTypeList">请求类型</param>
         /// <param name="isRecall">是否召回</param>
         /// <param name="department">科室编号</param>
         /// <param name="urgency">请求紧急程度</param>
@@ -76,9 +81,9 @@ namespace BusinessObjects.Manager
         /// <param name="endDate">结束日期</param>
         /// <param name="requestUserID">请求人编号</param>
         /// <returns>请求列表信息</returns>
-        public List<RequestInfo> QueryRequestsList(List<int> statusList, int requestType, bool isRecall, int department, int urgency, bool overDue, int source, string filterField, string filterText, string sortField, bool sortDirection, int curRowNum, int pageSize, string startDate, string endDate, int requestUserID = 0)
+        public List<RequestInfo> QueryRequestsList(List<int> statusList, List<int> requestTypeList, bool isRecall, int department, int urgency, bool overDue, int source, string filterField, string filterText, string sortField, bool sortDirection, int curRowNum, int pageSize, string startDate, string endDate, int requestUserID = 0)
         {
-            List<RequestInfo> infos = this.requestDao.QueryRequestsList(statusList, requestType, isRecall, department, urgency, overDue, source, filterField, filterText, sortField, sortDirection, startDate, endDate, curRowNum, pageSize, requestUserID);
+            List<RequestInfo> infos = this.requestDao.QueryRequestsList(statusList, requestTypeList, isRecall, department, urgency, overDue, source, filterField, filterText, sortField, sortDirection, startDate, endDate, curRowNum, pageSize, requestUserID);
 
             if (infos.Count > 0)
             {

@@ -51,7 +51,10 @@ namespace BusinessObjects.Manager
             List<int> statusList = new List<int>();
             if (status != 0) statusList.Add(status);
 
-            return QueryDispatches(userID, userRoleID, statusList, urgency, type, filterField, filterText, sortField, sortDirection, curRowNum, pageSize);
+            List<int> typeIDs = new List<int>();
+            if (type != 0) typeIDs.Add(type);
+
+            return QueryDispatches(userID, userRoleID, statusList, urgency, typeIDs, filterField, filterText, sortField, sortDirection, curRowNum, pageSize);
         }
 
         /// <summary>
@@ -69,9 +72,9 @@ namespace BusinessObjects.Manager
         /// <param name="curRowNum">当前页数第一个数据的位置</param>
         /// <param name="pageSize">每页展示数据条数</param>
         /// <returns>派工单信息</returns>
-        public List<DispatchInfo> QueryDispatches(int userID, int userRoleID, List<int> statusList, int urgency, int type, string filterField, string filterText, string sortField, bool sortDirection, int curRowNum, int pageSize)
+        public List<DispatchInfo> QueryDispatches(int userID, int userRoleID, List<int> statusList, int urgency, List<int> typeIDs, string filterField, string filterText, string sortField, bool sortDirection, int curRowNum, int pageSize)
         {
-            List<DispatchInfo> dispatchInfos = dispatchDao.QueryDispatches(userID, userRoleID, statusList, urgency, type, filterField, filterText, sortField, sortDirection, curRowNum, pageSize);
+            List<DispatchInfo> dispatchInfos = dispatchDao.QueryDispatches(userID, userRoleID, statusList, urgency, typeIDs, filterField, filterText, sortField, sortDirection, curRowNum, pageSize);
 
             if (dispatchInfos.Count > 0)
             {

@@ -69,7 +69,7 @@ namespace MedicalEquipmentHostingSystem.Areas.App.Controllers
         /// <param name="pageSize">每页展示数据条数</param> 
         /// <param name="sessionID">当前请求所在设备储存的SessionID</param>
         /// <returns>请求信息</returns>
-        public JsonResult GetRequests(int userID, string sessionID, List<int> statusID, int typeID, bool isRecall = false, int department = -1, int urgency = 0, int source = 0, bool overDue = false, string filterField = "", string filterText = "", string sortField = "init", bool sortDirection = false, string startDate = "", string endDate = "", int curRowNum = 0, int pageSize = 0)
+        public JsonResult GetRequests(int userID, string sessionID, List<int> statusID, List<int> typeID, bool isRecall = false, int department = -1, int urgency = 0, int source = 0, bool overDue = false, string filterField = "", string filterText = "", string sortField = "init", bool sortDirection = false, string startDate = "", string endDate = "", int curRowNum = 0, int pageSize = 0)
         {
             ServiceResultModel<List<RequestInfo>> result = new ServiceResultModel<List<RequestInfo>>();
             try

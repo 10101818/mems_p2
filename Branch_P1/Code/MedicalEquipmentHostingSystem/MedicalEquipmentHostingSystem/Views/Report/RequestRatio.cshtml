@@ -165,16 +165,16 @@
                     processResponseError(response.ResultCode, response.ResultMessage);
                 } else {
                     RequestRatioVue.RequestRatioList = response.Data;
-                    barChart();
+                    barChart(RequestRatioVue.searchType.ID);
                 }
             })
     }
 </script>
 <script>
-    function barChart() {
+    function barChart(typeID) {
         var chart = CreateChart();
 
-        var barView = BoundSlide2Chart(chart, 950, RequestRatioVue.RequestRatioList, '@ViewBag.YName');
+        var barView = BoundSlide2Chart(chart, 950, RequestRatioVue.RequestRatioList, '@ViewBag.YName', typeID);
 
         SetChartStyle(barView, '@ViewBag.YName');
 

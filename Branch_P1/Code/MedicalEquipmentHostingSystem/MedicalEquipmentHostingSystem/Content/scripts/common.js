@@ -338,7 +338,7 @@ function SetChartStyle(barView, yName) {
     });
 }
 
-function BoundSlide2Chart(chart, sliderWidth, itemList, yName) {
+function BoundSlide2Chart(chart, sliderWidth, itemList, yName, typeID) {
     $("#sliderDiv").empty();
 
     var maxItems = getChartMaxItems();
@@ -349,8 +349,8 @@ function BoundSlide2Chart(chart, sliderWidth, itemList, yName) {
 
     const ds = new DataSet({
         state: {
-            from: itemList[0].key,
-            to: itemList[maxItems - 1].key
+            from: typeID == 1 ? itemList[itemList.length - maxItems].key : itemList[0].key,
+            to: typeID == 1 ? itemList[itemList.length - 1].key : itemList[maxItems - 1].key
         }
     })
 
@@ -375,13 +375,15 @@ function BoundSlide2Chart(chart, sliderWidth, itemList, yName) {
     const barView = chart.view()
     barView.source(dv, {});
 
-    chart.interact('slider', {
+    chart.interaction('slider', {
         container: 'sliderDiv',
         width: sliderWidth,
         height: 26,
         padding: [20, 90, 90, 90],
-        startRadio: 0,
-        endRadio: (maxItems - 1) / itemList.length,
+        //startRadio: 0,
+        //endRadio: (maxItems - 1) / itemList.length,
+        startRadio: typeID == 1 ? (itemList.length - maxItems) / itemList.length : 0,// 1代表'@BusinessObjects.Domain.ReportDimension.AcceptanceYear'
+        endRadio: typeID == 1 ? 1 : (maxItems - 1) / itemList.length, // 1代表'@BusinessObjects.Domain.ReportDimension.AcceptanceYear'
         data: itemList,
         xAxis: 'key',
         yAxis: yName,

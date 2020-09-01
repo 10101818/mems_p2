@@ -185,16 +185,16 @@
                     processResponseError(response.ResultCode, response.ResultMessage);
                 } else {
                     SupplierRequestRatioVue.SupplierRequestRatioList = response.Data;
-                    barChart();
+                    barChart(SupplierRequestRatioVue.searchType.ID);
                 }
             })
     }
 </script>
 <script>
-    function barChart() {
+    function barChart(typeID) {
         var chart = CreateChart();
 
-        var barView = BoundSlide2Chart(chart, 900, SupplierRequestRatioVue.SupplierRequestRatioList, '@ViewBag.YName');
+        var barView = BoundSlide2Chart(chart, 900, SupplierRequestRatioVue.SupplierRequestRatioList, '@ViewBag.YName', typeID);
 
         SetChartStyle(barView, '@ViewBag.YName');
 

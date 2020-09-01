@@ -451,13 +451,34 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
   }
 
   void getCheckPeriod(int typeId) async {
+    Map _data = {
+      'equipmentid': widget.equipment!=null?widget.equipment['ID']:0,
+      'typeid': typeId,
+    };
+    switch (typeId) {
+      case 2:
+        _data['MaintenancePeriod'] = maintainPeriod.text;
+        _data['MaintenanceType'] = {
+          "ID": model.PeriodType[currentMaintainPeriod]
+        };
+        break;
+      case 4:
+        _data['PatrolPeriod'] = patrolPeriod.text;
+        _data['PatrolType'] = {
+          "ID": model.PeriodType[currentPatrolPeriod]
+        };
+        break;
+      case 5:
+        _data['CorrectionPeriod'] = correctionPeriod.text;
+        _data['CorrectionType'] = {
+          "ID": model.PeriodType[currentCorrectionPeriod]
+        };
+        break;
+    }
     Map resp = await HttpRequest.request(
       '/equipment/getsysrequestlist',
-      method: HttpRequest.GET,
-      params: {
-        'equipmentid': widget.equipment['ID'],
-        'typeid': typeId
-      }
+      method: HttpRequest.POST,
+      data: _data
     );
     if (resp['ResultCode'] == '00') {
       setState(() {
@@ -473,7 +494,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
           children: <Widget>[
             new Container(
               width: 300.0,
-              height: periodList.length<=2?80:periodList.length*40.5,
+              height: periodList.length<=5?200:periodList.length*41.5,
               child: periodList.length==0?Center(
                 child: Text(
                     '暂无计划服务生成时间',
@@ -1159,6 +1180,30 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
 
   void switchAsset(value) {
     print(value);
+  }
+
+  void showPatrol() async {
+    if (currentPatrolPeriod == '无' || patrolPeriod.text == null || patrolPeriod.text == '') {
+      return;
+    }
+    await getCheckPeriod(4);
+    showPeriodSheet('一年内计划巡检');
+  }
+
+  void showMaintain() async {
+    if (currentMaintainPeriod == '无' || maintainPeriod.text == null || maintainPeriod.text == '') {
+      return;
+    }
+    await getCheckPeriod(2);
+    showPeriodSheet('一年内计划保养');
+  }
+
+  void showCorrection() async {
+    if (currentCorrectionPeriod == '无' || correctionPeriod.text == null || correctionPeriod.text == '') {
+      return;
+    }
+    await getCheckPeriod(5);
+    showPeriodSheet('一年内计划校准');
   }
 
   Future<Null> pickDate<T>(BuildContext context, initialTime) async {
@@ -2252,7 +2297,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                   ],
                 ),
               ):BuildWidget.buildRow('召回时间', displayDate(recallDate)),
-              widget.editable?BuildWidget.buildDropdownWithInput('巡检周期', patrolPeriod, currentPatrolPeriod, dropdownPatrolPeriod, changePatrolPeriod, inputType: TextInputType.number, focusNode: _focusEquip[6], context: context):Row(
+              widget.editable?BuildWidget.buildDropdownWithInput('巡检周期', patrolPeriod, currentPatrolPeriod, dropdownPatrolPeriod, changePatrolPeriod, showPatrol, inputType: TextInputType.number, focusNode: _focusEquip[6], context: context):Row(
                 children: <Widget>[
                   new Expanded(
                     flex: 4,
@@ -2307,6 +2352,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                   currentMaintainPeriod,
                   dropdownMandatoryPeriod,
                   changeMandatoryPeriod,
+                  showMaintain,
                   inputType: TextInputType.number, focusNode: _focusEquip[7], context: context):Row(
                 children: <Widget>[
                   new Expanded(
@@ -2362,6 +2408,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                   currentCorrectionPeriod,
                   dropdownCorrectionPeriod,
                   changeCorrectionPeriod,
+                  showCorrection,
                   inputType: TextInputType.number, focusNode: _focusEquip[8], context: context):Row(
                 children: <Widget>[
                   new Expanded(

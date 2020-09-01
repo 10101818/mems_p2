@@ -63,7 +63,12 @@ namespace MedicalEquipmentHostingSystem.Areas.App.Controllers
                     else if (userInfo.VerifyStatus.ID != BusinessObjects.Domain.VerifyStatus.Pass)
                     {
                         response.SetFailed(ResultCodes.ParameterError, "用户尚未通过审批");//用户尚未通过审批
-                    }else
+                    }
+                    else if (userInfo.Role.ID == UserRole.SuperUser)
+                    {
+                        response.SetFailed(ResultCodes.ParameterError, "角色不正确");
+                    }
+                    else
                     {
                         info.ID = userInfo.ID;
                         userInfo.SessionID = sessionID;
@@ -461,6 +466,7 @@ namespace MedicalEquipmentHostingSystem.Areas.App.Controllers
                 SmtpInfo smtpInfo = ControlManager.GetSmtpInfo();
                 dic.Add("AppValidVersion", smtpInfo.AppValidVersion);
                 dic.Add("AutoAssetCode", WebConfig.AutoAssetCode);
+                dic.Add("LimitEngineer", WebConfig.LIMIT_ENGINEER);
 
                 result.Data = dic;
             }

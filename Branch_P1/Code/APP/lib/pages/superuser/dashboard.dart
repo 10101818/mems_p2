@@ -13,6 +13,8 @@ import 'package:atoi/utils/common.dart';
 import 'package:atoi/pages/superuser/equipment_carousel.dart';
 import 'package:atoi/utils/constants.dart';
 import 'package:atoi/pages/superuser/super_request.dart';
+import 'dart:convert';
+import 'package:atoi/utils/report_dimensions.dart';
 
 class Dashboard extends StatefulWidget {
   final int equipmentId;
@@ -53,7 +55,7 @@ class _DashboardState extends State<Dashboard> {
   List departmentData;
   List equipmentData;
   int sortBy = 0;
-  String sortName = '科室';
+  String sortName;
   int filter = 0;
   String filterName = '所有科室';
   List requestList;
@@ -63,6 +65,9 @@ class _DashboardState extends State<Dashboard> {
   List mandatoryEvents;
   List overdueEvents;
   Map kpi;
+  String timeType = '月';
+  List years;
+  int currentYear;
 
   List<IncomeData> incomeData = [
     IncomeData(1, 100.0, -80.0, 0),
@@ -137,6 +142,37 @@ class _DashboardState extends State<Dashboard> {
     incomeData = _data.asMap().keys.map((index) {
       double _income = _data[index]['Incomes'];
       double _expense = _data[index]['Expenses'];
+      double _net = _income-_expense>=0?0:(_income-_expense);
+      if (_income == 0.0) {
+        _net = 0.0;
+      }
+      return new IncomeData(index/1.0, _income, _net==0.0?(0.0-_expense):(0.0-_income), _net);
+    }).toList();
+    setState(() {
+      incomeData = incomeData;
+    });
+  }
+
+  void setIncome(int sortId) {
+    String _encoded = jsonEncode(equipmentIncome);
+    List _data = List.from(jsonDecode(_encoded)['detail']);
+    switch (sortId) {
+      case 1:
+        _data.forEach((item) {
+          item['Item3'] = 0.0;
+        });
+        break;
+      case 2:
+        _data.forEach((item) {
+          item['Item2'] = 0.0;
+        });
+        break;
+      case 0:
+        break;
+    }
+    incomeData = _data.asMap().keys.map((index) {
+      double _income = _data[index]['Item2'];
+      double _expense = _data[index]['Item3'];
       double _net = _income-_expense>=0?0:(_income-_expense);
       if (_income == 0.0) {
         _net = 0.0;
@@ -270,6 +306,17 @@ class _DashboardState extends State<Dashboard> {
       if (requestList.length == 0) {
         requestData.clear();
         requestData.add(RequestData('1', 1, Color(0xff385A95)));
+      } else {
+        Map _departs = {};
+        requestList.forEach((item) {
+          if (!_departs.containsKey(item['DepartmentName'])) {
+            _departs[item['DepartmentName']] = 1;
+          } else {
+            _departs[item['DepartmentName']] += _departs[item['DepartmentName']];
+          }
+        });
+        print(_departs.toString());
+        requestData = _departs.keys.map((key) => RequestData(key.toString(), _departs[key])).toList();
       }
       setState(() {
         requestData = requestData;
@@ -331,12 +378,14 @@ class _DashboardState extends State<Dashboard> {
 
   void getCount({int equipmentId}) async {
     equipmentId = equipmentId??widget.equipmentId;
+    Map _params = {
+      'id': equipmentId,
+      'Date': '$currentYear-08-12'
+    };
     Map resp = await HttpRequest.request(
       '/Equipment/GetRequestCountByID',
       method: HttpRequest.GET,
-      params: {
-        'id': equipmentId
-      }
+      params: _params
     );
     if (resp['ResultCode'] == '00') {
       setState(() {
@@ -347,20 +396,25 @@ class _DashboardState extends State<Dashboard> {
 
   void getIncome({int equipmentId}) async {
     equipmentId = equipmentId??widget.equipmentId;
+    Map _params = {
+      'id': equipmentId,
+      'type': timeType=='月'?2:1,
+    };
+    if (timeType == '月') {
+      _params['year'] = currentYear;
+    }
     Map resp = await HttpRequest.request(
       '/Equipment/IncomeExpenseByID',
       method: HttpRequest.GET,
-      params: {
-        'id': equipmentId
-      }
+      params: _params
     );
     if (resp['ResultCode'] == '00') {
+      equipmentIncome = resp['Data'];
       incomeAll['income'] = resp['Data']['overall'][0]['Item2'];
       incomeAll['income_rate'] = resp['Data']['overall'][2]['Item2'];
       incomeAll['expense'] = resp['Data']['overall'][0]['Item3'];
       incomeAll['expense_rate'] = resp['Data']['overall'][2]['Item3'];
       setState(() {
-        equipmentIncome = resp['Data'];
         incomeAll = incomeAll;
         incomeData = resp['Data']['detail'].asMap().keys.map<IncomeData>((index) {
           double _income = resp['Data']['detail'][index]['Item2'];
@@ -369,9 +423,10 @@ class _DashboardState extends State<Dashboard> {
           if (_income == 0.0) {
             _net = 0.0;
           }
-          return new IncomeData(index/1.0, _income, _net==0.0?(0.0-_expense):(0.0-_income), _net);
+          return new IncomeData(index/1.0, _income, _net==0.0?(0.0-_expense):(0.0-_income), _net, '${resp['Data']['detail'][index]['Item1']}$timeType');
         }).toList();
       });
+      sortIncome(sortBy);
     }
   }
 
@@ -384,15 +439,18 @@ class _DashboardState extends State<Dashboard> {
   void initState() {
     super.initState();
     if (widget.equipmentId != null) {
+      sortName = '收支';
+      years = ReportDimensions.YEARS;
+      currentYear = years[0];
       getEquipmentInfo();
     } else {
-      getUserName();
       getOverview();
       getDepartmentIncome();
       getRequestToday();
       getKeyEvents();
       getKpi();
     }
+    getUserName();
   }
 
   void showBottomSheet() {
@@ -416,7 +474,7 @@ class _DashboardState extends State<Dashboard> {
                           onTap: () {
                             setState(() {
                               sortBy = 0;
-                              sortName = '科室';
+                              sortName = widget.equipmentId==null?'科室':'收支';
                             });
                           },
                           child: Container(
@@ -433,7 +491,7 @@ class _DashboardState extends State<Dashboard> {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: <Widget>[
                                 Text(
-                                  '科室',
+                                  widget.equipmentId!=null?'收支':'科室',
                                   style: TextStyle(
                                       fontSize: 17.0,
                                       color: Colors.black
@@ -525,7 +583,135 @@ class _DashboardState extends State<Dashboard> {
                   ),
                   GestureDetector(
                     onTap: () {
-                      sortIncome(sortBy);
+                      widget.equipmentId!=null?setIncome(sortBy):sortIncome(sortBy);
+                      Navigator.of(context).pop();
+                    },
+                    child: Container(
+                      height: 50.0,
+                      child: Container(
+                        width: 322.0,
+                        height: 40.0,
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.all(Radius.circular(4.0)),
+                            color: Color(0xff39649C)
+                        ),
+                        child: Center(
+                          child: Text(
+                            '确定',
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 16.0
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(
+                    height: 24,
+                  )
+                ],
+              )
+          ),
+        );
+      });
+    });
+  }
+
+  void showTimeType() {
+    showModalBottomSheet(context: context, builder: (context) {
+      return StatefulBuilder(builder: (context, setState) {
+        return Container(
+          height: 400,
+          decoration: BoxDecoration(
+              borderRadius: BorderRadius.all(Radius.circular(12.0)),
+              color: Colors.white
+          ),
+          child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 22.0),
+              child: Column(
+                children: <Widget>[
+                  Container(
+                    height: 300,
+                    child: ListView(
+                      children: <Widget>[
+                        GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              timeType = '月';
+                            });
+                          },
+                          child: Container(
+                            height: 64.0,
+                            decoration: BoxDecoration(
+                                border: Border(
+                                    bottom: BorderSide(
+                                        color: Color.fromRGBO(0, 0, 0, 0.1),
+                                        width: 1.0
+                                    )
+                                )
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: <Widget>[
+                                Text(
+                                  '月',
+                                  style: TextStyle(
+                                      fontSize: 17.0,
+                                      color: Colors.black
+                                  ),
+                                ),
+                                timeType=='月'?Icon(
+                                  Icons.check,
+                                  color: Color(0xff39649C),
+                                  size: 18.0,
+                                ):Container()
+                              ],
+                            ),
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              timeType = '年';
+                            });
+                          },
+                          child: Container(
+                            height: 64.0,
+                            decoration: BoxDecoration(
+                                border: Border(
+                                    bottom: BorderSide(
+                                        color: Color.fromRGBO(0, 0, 0, 0.1),
+                                        width: 1.0
+                                    )
+                                )
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: <Widget>[
+                                Text(
+                                  '年',
+                                  style: TextStyle(
+                                      fontSize: 17.0,
+                                      color: Colors.black
+                                  ),
+                                ),
+                                timeType=='年'?Icon(
+                                  Icons.check,
+                                  color: Color(0xff39649C),
+                                  size: 18.0,
+                                ):Container()
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: () {
+                      getIncome();
                       Navigator.of(context).pop();
                     },
                     child: Container(
@@ -945,7 +1131,7 @@ class _DashboardState extends State<Dashboard> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: <Widget>[
                             Text(
-                              '当年服务人次(万人)',
+                              '当年服务人次(人)',
                               style: TextStyle(
                                   color: Color(0xff666666),
                                   fontSize: 11.0
@@ -955,7 +1141,7 @@ class _DashboardState extends State<Dashboard> {
                               height: 8.0,
                             ),
                             Text(
-                              overview!=null?'${overview['ServiceCount']/10000}':'',
+                              overview!=null?'${overview['ServiceCount']}':'',
                               style: TextStyle(
                                   color: Color(0xff385A95),
                                   fontSize: 24.0,
@@ -1205,7 +1391,7 @@ class _DashboardState extends State<Dashboard> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
                           Text(
-                            '${incomeAll['income_rate']>=0?'+':''} ${(incomeAll['income_rate']).toStringAsFixed(2)}%',
+                            '${incomeAll['income_rate']>=0?'+':''} ${(incomeAll['income_rate']).toStringAsFixed(1)}%',
                             style: TextStyle(
                                 color: incomeAll['income_rate']>=0?Color(0xffD64040):Color(0xff33B850),
                                 fontSize: 15.0,
@@ -1261,7 +1447,7 @@ class _DashboardState extends State<Dashboard> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
                           Text(
-                            '${incomeAll['expense_rate']>=0?'+':''} ${(incomeAll['expense_rate']).toStringAsFixed(2)}%',
+                            '${incomeAll['expense_rate']>=0?'+':''} ${(incomeAll['expense_rate']).toStringAsFixed(1)}%',
                             style: TextStyle(
                                 color: incomeAll['expense_rate']>=0?Color(0xffD64040):Color(0xff33B850),
                                 fontSize: 15.0,
@@ -1294,7 +1480,7 @@ class _DashboardState extends State<Dashboard> {
                 scrollDirection: Axis.horizontal,
                 controller: new ScrollController(),
                 children: <Widget>[
-                  buildIncomeChart()
+                  incomeData.length>0?buildIncomeChart():Container()
                 ],
               ),
             )
@@ -1312,8 +1498,8 @@ class _DashboardState extends State<Dashboard> {
           borderWidth: 0,
           plotAreaBorderWidth: 0.0,
           borderColor: Colors.white,
-          primaryXAxis: NumericAxis(
-            isVisible: false,
+          primaryXAxis: CategoryAxis(
+            isVisible: widget.equipmentId!=null?true:false,
             majorGridLines: MajorGridLines(width: 0.0),
             majorTickLines: MajorTickLines(width: 0.0),
           ),
@@ -1375,7 +1561,7 @@ class _DashboardState extends State<Dashboard> {
                               Expanded(
                                 flex: 4,
                                 child: Text(
-                                  '月份：${equipmentIncome['detail'][pointIndex]['Item1']}月',
+                                  '$timeType份：${equipmentIncome['detail'][pointIndex]['Item1']} $timeType',
                                   style: TextStyle(
                                       color: Colors.white,
                                       fontSize: 11.0
@@ -1402,7 +1588,7 @@ class _DashboardState extends State<Dashboard> {
                               Expanded(
                                 flex: 4,
                                 child: Text(
-                                  '收入：${CommonUtil.CurrencyForm(equipmentIncome['detail'][pointIndex]['Item2'])}万元',
+                                  '收入：${CommonUtil.CurrencyForm(equipmentIncome['detail'][pointIndex]['Item2'], times: 1)}元',
                                   style: TextStyle(
                                       color: Colors.white,
                                       fontSize: 11.0
@@ -1412,7 +1598,7 @@ class _DashboardState extends State<Dashboard> {
                               Expanded(
                                 flex: 6,
                                 child: Text(
-                                  '支出：${CommonUtil.CurrencyForm(equipmentIncome['detail'][pointIndex]['Item3'])}万元',
+                                  '支出：${CommonUtil.CurrencyForm(equipmentIncome['detail'][pointIndex]['Item3'], times: 1)}元',
                                   style: TextStyle(
                                       color: Colors.white,
                                       fontSize: 11.0
@@ -1437,7 +1623,7 @@ class _DashboardState extends State<Dashboard> {
                               Expanded(
                                 flex: 4,
                                 child: Text(
-                                  isDetailPage?'设备价值：${CommonUtil.CurrencyForm(equipmentData[pointIndex]['PurchaseAmount'])}':'设备数量：${departmentData[pointIndex]['EquipmentCount']}台',
+                                  isDetailPage?'设备价值：${CommonUtil.CurrencyForm(equipmentData[pointIndex]['PurchaseAmount'], times: 1)}':'设备数量：${departmentData[pointIndex]['EquipmentCount']}台',
                                   style: TextStyle(
                                       color: Colors.white,
                                       fontSize: 11.0
@@ -1464,7 +1650,7 @@ class _DashboardState extends State<Dashboard> {
                               Expanded(
                                 flex: 10,
                                 child: Text(
-                                  isDetailPage?'型号：${equipmentData[pointIndex]['EquipmentCode']}':'设备价值：${CommonUtil.CurrencyForm(departmentData[pointIndex]['EquipmentAmount'])}万元',
+                                  isDetailPage?'型号：${equipmentData[pointIndex]['EquipmentCode']}':'设备价值：${CommonUtil.CurrencyForm(departmentData[pointIndex]['EquipmentAmount'], times: 1)}元',
                                   style: TextStyle(
                                       color: Colors.white,
                                       fontSize: 11.0
@@ -1518,7 +1704,7 @@ class _DashboardState extends State<Dashboard> {
                               Expanded(
                                 flex: 10,
                                 child: Text(
-                                  '收入：${CommonUtil.CurrencyForm(isDetailPage?equipmentData[pointIndex]['Incomes']:departmentData[pointIndex]['Incomes'])}万元',
+                                  '收入：${CommonUtil.CurrencyForm(isDetailPage?equipmentData[pointIndex]['Incomes']:departmentData[pointIndex]['Incomes'], times: 1)}元',
                                   style: TextStyle(
                                       color: Colors.white,
                                       fontSize: 11.0
@@ -1545,7 +1731,7 @@ class _DashboardState extends State<Dashboard> {
                               Expanded(
                                 flex: 10,
                                 child: Text(
-                                  '支出：${CommonUtil.CurrencyForm(isDetailPage?equipmentData[pointIndex]['Expenses']:departmentData[pointIndex]['Expenses'])}万元',
+                                  '支出：${CommonUtil.CurrencyForm(isDetailPage?equipmentData[pointIndex]['Expenses']:departmentData[pointIndex]['Expenses'], times: 1)}元',
                                   style: TextStyle(
                                       color: Colors.white,
                                       fontSize: 11.0
@@ -1574,29 +1760,29 @@ class _DashboardState extends State<Dashboard> {
                 );
               }
           ),
-          series: <ChartSeries<IncomeData, double>>[
-            StackedColumnSeries<IncomeData, double>(
+          series: <ChartSeries>[
+            StackedColumnSeries<IncomeData, String>(
                 selectionSettings: SelectionSettings(
                   enable: true
                 ),
                 dataSource: incomeData,
-                xValueMapper: (IncomeData sales, _) => sales.x,
+                xValueMapper: (IncomeData sales, _) => sales.label,
                 yValueMapper: (IncomeData sales, _) => sales.income
             ),
-            StackedColumnSeries<IncomeData, double>(
+            StackedColumnSeries<IncomeData, String>(
                 selectionSettings: SelectionSettings(
                     enable: true
                 ),
                 dataSource: incomeData,
-                xValueMapper: (IncomeData sales, _) => sales.x,
+                xValueMapper: (IncomeData sales, _) => sales.label,
                 yValueMapper: (IncomeData sales, _) => sales.expense
             ),
-            StackedColumnSeries<IncomeData, double>(
+            StackedColumnSeries<IncomeData, String>(
                 selectionSettings: SelectionSettings(
                     enable: true
                 ),
                 dataSource: incomeData,
-                xValueMapper: (IncomeData sales, _) => sales.x,
+                xValueMapper: (IncomeData sales, _) => sales.label,
                 yValueMapper: (IncomeData sales, _) => sales.net
             ),
           ]
@@ -1608,6 +1794,10 @@ class _DashboardState extends State<Dashboard> {
   Container buildRequestChart() {
     return Container(
       child: SfCircularChart(
+          tooltipBehavior: TooltipBehavior(
+            enable: true,
+            format: 'point.x\n参报数量: point.y件'
+          ),
           annotations: <CircularChartAnnotation>[
             CircularChartAnnotation(
               widget: Container(
@@ -1622,7 +1812,7 @@ class _DashboardState extends State<Dashboard> {
                       Row(
                         children: <Widget>[
                           SizedBox(
-                            width: 20.0,
+                            width: 30.0,
                           ),
                           Text(
                             totalRequest.toString(),
@@ -1916,22 +2106,27 @@ class _DashboardState extends State<Dashboard> {
   Padding buildEventList() {
     List _data;
     IconData _icon;
+    String _type;
     switch (currentEvent) {
       case 0:
         _data = List.from(repairEvents);
         _icon = Icons.build;
+        _type = '维修';
         break;
       case 1:
         _data = List.from(recallEvents);
         _icon = Icons.local_car_wash;
+        _type = '召回';
         break;
       case 2:
         _data = List.from(mandatoryEvents);
         _icon = Icons.speaker_phone;
+        _type = '强检';
         break;
       case 3:
         _data = List.from(overdueEvents);
         _icon = Icons.calendar_today;
+        _type = '超期';
         break;
     }
     return Padding(
@@ -1940,7 +2135,7 @@ class _DashboardState extends State<Dashboard> {
         height: 400.0,
         child: ListView(
           children: _data.map<Widget>((item) {
-            return buildEventListItem(_icon, '${item['DepartmentName']}: ${item['EquipmentName']} [${item['EquipmentOID']}] 正在等待${item['RequestType']['Name']}，请优先处理', CommonUtil.TimeForm(item['RequestDate'], 'yyyy'));
+            return buildEventListItem(_icon, '${item['DepartmentName']}: ${item['EquipmentName']} [${item['EquipmentOID']}] 正在等待${_type}，请优先处理', CommonUtil.TimeForm(item['RequestDate'], 'yyyy'));
           }).toList(),
         ),
       ),
@@ -1995,12 +2190,6 @@ class _DashboardState extends State<Dashboard> {
                       Container(
                         width: (1-finished/_plan)*220,
                         decoration: BoxDecoration(
-                            border: Border(
-                                right: BorderSide(
-                                  width: 1.0,
-                                  color: Color(0xffCD6750),
-                                )
-                            )
                         ),
                       )
                     ],
@@ -2044,7 +2233,7 @@ class _DashboardState extends State<Dashboard> {
                   ),
                 ),
                 Text(
-                  finished.toStringAsFixed(0),
+                  finished.toStringAsFixed(1),
                   style: TextStyle(
                       color: Color(0xff1e1e1e),
                       fontSize: 16
@@ -2068,7 +2257,7 @@ class _DashboardState extends State<Dashboard> {
                   ),
                 ),
                 Text(
-                  planned.toStringAsFixed(0),
+                  planned.toStringAsFixed(1),
                   style: TextStyle(
                       color: Color(0xff1e1e1e),
                       fontSize: 16
@@ -2145,7 +2334,7 @@ class _DashboardState extends State<Dashboard> {
                         Row(
                           children: <Widget>[
                             Text(
-                              kpi==null?'':(kpi['BootRate']['Present']*100).toStringAsFixed(0),
+                              kpi==null?'':(kpi['BootRate']['Present']*100).toStringAsFixed(1),
                               style: TextStyle(
                                   color: Color(0xffD64040),
                                   fontSize: 30,
@@ -2193,6 +2382,15 @@ class _DashboardState extends State<Dashboard> {
       isDetailPage = false;
     });
   }
+
+  void setYear(selected) {
+    print(selected);
+    setState(() {
+      currentYear = selected;
+    });
+    getIncome();
+    getCount();
+  }
   
   // department detail
   GestureDetector buildDetail() {
@@ -2204,22 +2402,27 @@ class _DashboardState extends State<Dashboard> {
           children: <Widget>[
             GestureDetector(
               onTap: () {
-                if (widget.equipmentId == null) {
-                  getDepartmentIncome();
-                  setState(() {
-                    isDetailPage = false;
-                  });
-                } else {
-                  Navigator.of(context).pop();
-                }
               },
               child: Container(
                 child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
                   children: <Widget>[
-                    Icon(
-                      Icons.arrow_back_ios,
-                      size: 13,
-                      color: Colors.grey,
+                    GestureDetector(
+                      onTap: () {
+                        if (widget.equipmentId == null) {
+                          getDepartmentIncome();
+                          setState(() {
+                            isDetailPage = false;
+                          });
+                        } else {
+                          Navigator.of(context).pop();
+                        }
+                      },
+                      child: Icon(
+                        Icons.arrow_back_ios,
+                        size: 13,
+                        color: Colors.grey,
+                      ),
                     ),
                     Text(
                       '设备收支概览',
@@ -2229,10 +2432,184 @@ class _DashboardState extends State<Dashboard> {
                           fontWeight: FontWeight.w600
                       ),
                     ),
+                    SizedBox(
+                      width: 20.0,
+                    ),
+                    widget.equipmentId!=null?IconButton(
+                      icon: Icon(
+                          Icons.refresh,
+                        size: 13.0,
+                        color: Colors.grey,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          sortBy = 0;
+                          sortName = '收支';
+                          timeType = '月';
+                          currentYear = years[0];
+                        });
+                        getIncome();
+                      },
+                    ):Container(),
                   ],
                 )
               ),
             ),
+            SizedBox(
+              height: 9.0,
+            ),
+            widget.equipmentId!=null?Container(
+              child: Row(
+                children: <Widget>[
+                  Expanded(
+                    flex: 4,
+                    child: Row(
+                      children: <Widget>[
+                        Text(
+                          '收支类型：',
+                          style: TextStyle(
+                              color: Color(0xff666666),
+                              fontSize: 11.0
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: () {
+                            showBottomSheet();
+                          },
+                          child: Container(
+                              height: 24.0,
+                              width: 50.0,
+                              decoration: BoxDecoration(
+                                  border: Border.all(
+                                      color: Color(0xff7597D3)
+                                  ),
+                                  borderRadius: BorderRadius.all(Radius.circular(2.0))
+                              ),
+                              child: Padding(
+                                padding: EdgeInsets.fromLTRB(8.0, 0, 8.0, 0),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: <Widget>[
+                                    Text(
+                                      sortName,
+                                      style: TextStyle(
+                                          color: Color(0xff666666),
+                                          fontSize: 11.0
+                                      ),
+                                    ),
+                                    Icon(
+                                      Icons.keyboard_arrow_down,
+                                      color: Color(0xff666666),
+                                      size: 14.0,
+                                    )
+                                  ],
+                                ),
+                              )
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+                  Expanded(
+                    flex: 4,
+                    child: Row(
+                      children: <Widget>[
+                        Text(
+                          '时间类型：',
+                          style: TextStyle(
+                              color: Color(0xff666666),
+                              fontSize: 11.0
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: () {
+                            showTimeType();
+                          },
+                          child: Container(
+                              height: 24.0,
+                              width: 50.0,
+                              decoration: BoxDecoration(
+                                  border: Border.all(
+                                      color: Color(0xff7597D3)
+                                  ),
+                                  borderRadius: BorderRadius.all(Radius.circular(2.0))
+                              ),
+                              child: Padding(
+                                padding: EdgeInsets.fromLTRB(8.0, 0, 8.0, 0),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: <Widget>[
+                                    Text(
+                                      timeType,
+                                      style: TextStyle(
+                                          color: Color(0xff666666),
+                                          fontSize: 11.0
+                                      ),
+                                    ),
+                                    Icon(
+                                      Icons.keyboard_arrow_down,
+                                      color: Color(0xff666666),
+                                      size: 14.0,
+                                    )
+                                  ],
+                                ),
+                              )
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+                  Expanded(
+                    flex: 3,
+                    child: timeType=='月'?Row(
+                      children: <Widget>[
+                        Text(
+                          '年份：',
+                          style: TextStyle(
+                              color: Color(0xff666666),
+                              fontSize: 11.0
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: () {
+                          },
+                          child: Container(
+                              height: 24.0,
+                              width: 50.0,
+                              decoration: BoxDecoration(
+                                  border: Border.all(
+                                      color: Color(0xff7597D3)
+                                  ),
+                                  borderRadius: BorderRadius.all(Radius.circular(2.0))
+                              ),
+                              child: Padding(
+                                padding: EdgeInsets.fromLTRB(8.0, 0, 8.0, 0),
+                                child: DropdownButton(
+                                  value: currentYear,
+                                  underline: Container(),
+                                  items: years.map<DropdownMenuItem>((item) {
+                                    return new DropdownMenuItem(
+                                      value: item,
+                                      child: Text(
+                                        item.toString(),
+                                        style: TextStyle(
+                                          fontSize: 11.0,
+                                          color: Color(0xff666666),
+                                        ),
+                                      ),
+                                    );
+                                  }).toList(),
+                                  onChanged: setYear,
+                                )
+                              )
+                          ),
+                        )
+                      ],
+                    ):SizedBox(width: 1,),
+                  ),
+                ],
+              ),
+            ):Container(),
             SizedBox(
               height: 9.0,
             ),
@@ -2306,7 +2683,7 @@ class _DashboardState extends State<Dashboard> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
                           Text(
-                            CommonUtil.CurrencyForm(incomeAll['income']),
+                            CommonUtil.CurrencyForm(incomeAll['income'], times: 1),
                             style: TextStyle(
                                 color: Color(0xff1e1e1e),
                                 fontSize: 15.0,
@@ -2317,7 +2694,7 @@ class _DashboardState extends State<Dashboard> {
                             height: 4.0,
                           ),
                           Text(
-                            '总收入(万元)',
+                            '总收入(元)',
                             style: TextStyle(
                                 color: Color(0xff666666),
                                 fontSize: 10.0
@@ -2334,7 +2711,7 @@ class _DashboardState extends State<Dashboard> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
                           Text(
-                            '${incomeAll['income_rate']>=0?'+':''} ${incomeAll['income_rate'].toStringAsFixed(2)}%',
+                            '${incomeAll['income_rate']>=0?'+':''} ${incomeAll['income_rate'].toStringAsFixed(1)}%',
                             style: TextStyle(
                                 color: incomeAll['income_rate']>=0?Color(0xffD64040):Color(0xff33B850),
                                 fontSize: 15.0,
@@ -2362,7 +2739,7 @@ class _DashboardState extends State<Dashboard> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
                           Text(
-                            CommonUtil.CurrencyForm(incomeAll['expense']),
+                            CommonUtil.CurrencyForm(incomeAll['expense'], times: 1),
                             style: TextStyle(
                                 color: Color(0xff1e1e1e),
                                 fontSize: 15.0,
@@ -2373,7 +2750,7 @@ class _DashboardState extends State<Dashboard> {
                             height: 4.0,
                           ),
                           Text(
-                            '总支出(万元)',
+                            '总支出(元)',
                             style: TextStyle(
                                 color: Color(0xff666666),
                                 fontSize: 10.0
@@ -2390,7 +2767,7 @@ class _DashboardState extends State<Dashboard> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
                           Text(
-                            '${incomeAll['expense_rate']>=0?'+':''} ${incomeAll['expense_rate'].toStringAsFixed(2)}%',
+                            '${incomeAll['expense_rate']>=0?'+':''} ${incomeAll['expense_rate'].toStringAsFixed(1)}%',
                             style: TextStyle(
                                 color: incomeAll['expense_rate']>=0?Color(0xffD64040):Color(0xff33B850),
                                 fontSize: 15.0,
@@ -2441,23 +2818,29 @@ class _DashboardState extends State<Dashboard> {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              Container(
-                height: 18,
-                width: 30,
-                color: Color(0xff33B850),
-                child: Center(
-                  child: Text(
-                    equipmentStatus??'正常',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.white,
-                    ),
-                  ),
-                )
+              Padding(
+                padding: EdgeInsets.fromLTRB(0, 25, 0, 0),
+                child: Container(
+                    height: 18,
+                    width: 45,
+                    color: Color(0xff33B850),
+                    child: Center(
+                      child: Text(
+                        equipmentStatus??'正常',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.white,
+                        ),
+                      ),
+                    )
+                ),
+              ),
+              SizedBox(
+                width: 5.0,
               ),
               Container(
                 height: 80,
-                width: 280,
+                width: 260,
                 child: Text(
                   equipmentName??'',
                   softWrap: true,
@@ -2481,35 +2864,40 @@ class _DashboardState extends State<Dashboard> {
                 style: TextStyle(
                   color: Colors.black,
                   fontWeight: FontWeight.w600,
-                  fontSize: 17
+                  fontSize: 13
                 ),
               ),
               Text(
                 '安装日期: $installDate',
                 style: TextStyle(
+                  fontWeight: FontWeight.w600,
                   fontSize: 13,
-                  color: Color(0xff666666)
+                  color: Colors.black,
                 ),
               ),
             ],
           ),
           Row(
-            mainAxisAlignment: MainAxisAlignment.end,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[
               Text(
                 '维保状态：$warrantyStatus',
                 style: TextStyle(
+                    fontWeight: FontWeight.w600,
                     fontSize: 13,
-                    color: Color(0xff666666)
+                    color: Colors.black,
                 ),
               ),
+              IconButton(
+                icon: Icon(Icons.photo_library, color: Color.fromRGBO(1, 1, 1, 0.2),),
+                onPressed: () {
+                  Navigator.of(context).push(new MaterialPageRoute(builder: (_) => EquipmentCarousel(equipmentFile: equipmentFiles,)));
+                },
+              )
             ],
           ),
-          SizedBox(
-            height: 50,
-          ),
           Container(
-            height: 200,
+            height: 250,
             child: buildSpiderChart(),
           ),
           Container(
@@ -2517,12 +2905,6 @@ class _DashboardState extends State<Dashboard> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: <Widget>[
-                IconButton(
-                  icon: Icon(Icons.photo_library, color: Color.fromRGBO(1, 1, 1, 0.2),),
-                  onPressed: () {
-                    Navigator.of(context).push(new MaterialPageRoute(builder: (_) => EquipmentCarousel(equipmentFile: equipmentFiles,)));
-                  },
-                )
               ],
             ),
           ),
@@ -2538,26 +2920,29 @@ class _DashboardState extends State<Dashboard> {
     });
     return Stack(
       children: <Widget>[
-        Container(
-          child: SpiderChart(
-            data: _data.isNotEmpty?_data:[
-              1,2,3,4,5
-            ],
-            labels: [
-              '维修','保养','强检','巡检','校准'
-            ],
-            maxValue: _data.isEmpty||_data.every((elem) => elem == 0)?10:_data.reduce((prev,next) => prev>=next?prev:next),
-            colors: <Color>[
-              Colors.red,
-              Colors.green,
-              Colors.blue,
-              Colors.yellow,
-              Colors.indigo,
-            ],
+        Padding(
+          padding: EdgeInsets.fromLTRB(0, 50, 0, 0),
+          child: Container(
+            child: SpiderChart(
+              data: _data.isNotEmpty?_data:[
+                1,2,3,4,5
+              ],
+              labels: [
+                '维修','保养','强检','巡检','校准'
+              ],
+              maxValue: _data.isEmpty||_data.every((elem) => elem == 0)?10:_data.reduce((prev,next) => prev>=next?prev:next),
+              colors: <Color>[
+                Colors.red,
+                Colors.green,
+                Colors.blue,
+                Colors.yellow,
+                Colors.indigo,
+              ],
+            ),
           ),
         ),
         Padding(
-          padding: EdgeInsets.fromLTRB(140, 0, 0, 0),
+          padding: EdgeInsets.fromLTRB(130, 0, 0, 0),
           child: GestureDetector(
             onTap: () {
               print('1 tab');
@@ -2571,7 +2956,7 @@ class _DashboardState extends State<Dashboard> {
           ),
         ),
         Padding(
-          padding: EdgeInsets.fromLTRB(50, 60, 0, 0),
+          padding: EdgeInsets.fromLTRB(30, 70, 0, 0),
           child: GestureDetector(
             onTap: () {
               print('1 tab');
@@ -2585,7 +2970,7 @@ class _DashboardState extends State<Dashboard> {
           ),
         ),
         Padding(
-          padding: EdgeInsets.fromLTRB(230, 60, 0, 0),
+          padding: EdgeInsets.fromLTRB(230, 70, 0, 0),
           child: GestureDetector(
             onTap: () {
               print('1 tab');
@@ -2599,7 +2984,7 @@ class _DashboardState extends State<Dashboard> {
           ),
         ),
         Padding(
-          padding: EdgeInsets.fromLTRB(80, 160, 0, 0),
+          padding: EdgeInsets.fromLTRB(80, 180, 0, 0),
           child: GestureDetector(
             onTap: () {
               print('1 tab');
@@ -2613,7 +2998,7 @@ class _DashboardState extends State<Dashboard> {
           ),
         ),
         Padding(
-          padding: EdgeInsets.fromLTRB(190, 160, 0, 0),
+          padding: EdgeInsets.fromLTRB(190, 180, 0, 0),
           child: GestureDetector(
             onTap: () {
               print('1 tab');
@@ -2831,7 +3216,7 @@ class _DashboardState extends State<Dashboard> {
             ),
           ),
           Container(
-            height: 559.0,
+            height: MediaQuery.of(context).size.height-100,
             color: Color(0xffd8e0ee),
             child: Stack(
               children: <Widget>[
@@ -2842,10 +3227,11 @@ class _DashboardState extends State<Dashboard> {
                   ),
                 ),
                 ListView(
+                    controller: new ScrollController(),
                     children: listBuilder()
                 ),
               ],
-            ),
+            )
           ),
         ],
       )
@@ -2889,8 +3275,9 @@ class IncomeData {
   final double income;
   final double expense;
   final double net;
+  final String label;
 
-  IncomeData(this.x, this.income, this.expense, this.net);
+  IncomeData(this.x, this.income, this.expense, this.net, [this.label]);
 }
 
 class RequestData {

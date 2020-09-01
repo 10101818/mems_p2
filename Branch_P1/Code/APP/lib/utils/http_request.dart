@@ -74,9 +74,8 @@ class HttpRequest {
     print('请求params：'+_params.toString());
     print('服务器地址：'+serverUrl);
 
-    serverUrl = isBoard?serverUrl:(serverUrl+'/APP');
+    serverUrl = serverUrl+'/APP';
     Dio dio = createInstance(serverUrl);
-    print(dio.toString());
     var result;
 
     try {

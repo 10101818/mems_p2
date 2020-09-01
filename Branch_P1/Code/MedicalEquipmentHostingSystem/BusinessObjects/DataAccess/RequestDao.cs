@@ -93,7 +93,7 @@ namespace BusinessObjects.DataAccess
         /// 获取请求列表信息
         /// </summary>
         /// <param name="statusList">请求状态</param>
-        /// <param name="requestType">请求类型</param>
+        /// <param name="requestTypeList">请求类型</param>
         /// <param name="isRecall">是否召回</param>
         /// <param name="department">科室编号</param>
         /// <param name="urgency">请求紧急程度</param>
@@ -109,7 +109,7 @@ namespace BusinessObjects.DataAccess
         /// <param name="pageSize">每页展示数据条数</param>
         /// <param name="requestUserID">请求用户ID</param>
         /// <returns>请求列表信息</returns>
-        public List<RequestInfo> QueryRequestsList(List<int> statusList, int requestType, bool isRecall, int department, int urgency, bool overDue, int source, string filterField, string filterText, string sortField, bool sortDirection, string startDate, string endDate, int curRowNum = 0, int pageSize = 0, int requestUserID = 0)
+        public List<RequestInfo> QueryRequestsList(List<int> statusList, List<int> requestTypeList, bool isRecall, int department, int urgency, bool overDue, int source, string filterField, string filterText, string sortField, bool sortDirection, string startDate, string endDate, int curRowNum = 0, int pageSize = 0, int requestUserID = 0)
         {
             List<RequestInfo> infos = new List<RequestInfo>();
             sqlStr = " SELECT DISTINCT r.*,CONVERT(VARCHAR(10),r.RequestDate,112), " + RequestInfo.Statuses.GetCurOverDueField() + 
@@ -137,8 +137,9 @@ namespace BusinessObjects.DataAccess
                 sqlStr += " AND r.RequestDate >= @StartDate ";
             if (!string.IsNullOrEmpty(endDate))
                 sqlStr += " AND r.RequestDate < @EndDate ";
-            if (requestType > 0)
-                sqlStr += " AND r.RequestType = " + requestType;
+            if (requestTypeList != null && requestTypeList.Count > 1) sqlStr += " AND r.RequestType IN (" + SQLUtil.ConvertToInStr(requestTypeList) + ")";
+            else if (requestTypeList != null && requestTypeList.Count == 1 && requestTypeList[0] != 0)
+                sqlStr += " AND r.RequestType = " + requestTypeList[0];
             if (isRecall)
                 sqlStr += " AND r.IsRecall = 1 ";
             if (requestUserID != 0)

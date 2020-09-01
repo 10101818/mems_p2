@@ -145,17 +145,17 @@
                     processResponseError(response.ResultCode, response.ResultMessage);
                 } else {
                     ServiceRatioVue.ServiceRatioList = response.Data;
-                    barChart();
+                    barChart(0);
                 }
             })
     }
 </script>
 
 <script>
-    function barChart() {
+    function barChart(typeID) {
         var chart = CreateChart();
 
-        var barView = BoundSlide2Chart(chart, 1000, ServiceRatioVue.ServiceRatioList, '@ViewBag.YName');
+        var barView = BoundSlide2Chart(chart, 1000, ServiceRatioVue.ServiceRatioList, '@ViewBag.YName', typeID);
 
         SetChartStyle(barView, '@ViewBag.YName');
 

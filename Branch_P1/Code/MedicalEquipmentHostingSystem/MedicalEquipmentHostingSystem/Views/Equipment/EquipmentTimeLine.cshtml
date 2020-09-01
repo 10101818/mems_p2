@@ -82,8 +82,8 @@
                         <div class="legend-right flex justify-content-flex-end ">
                             <div class="count-list flex align-content-base">
                                 <div class="total">
-                                    <div class=" center-center value">{{numberComma(Math.floor(overView.incomeSum/10000))}}</div>
-                                    <div class=" center-center text">总收入（万元）</div>
+                                    <div class=" center-center value">{{numberComma(Math.floor(overView.incomeSum))}}</div>
+                                    <div class=" center-center text">总收入（元）</div>
                                 </div>
                                 <div v-bind:class="overView.incomeRate>0?'status up green':'status down red'">
                                     <div class=" center-center value flex align-content-base">
@@ -97,8 +97,8 @@
                             </div>
                             <div class="count-list flex align-content-base">
                                 <div class="total">
-                                    <div class=" center-center value">{{numberComma(Math.floor(overView.expenseSum/10000))}}</div>
-                                    <div class=" center-center text">总支出（万元）</div>
+                                    <div class=" center-center value">{{numberComma(Math.floor(overView.expenseSum))}}</div>
+                                    <div class=" center-center text">总支出（元）</div>
                                 </div>
                                 <div v-bind:class="overView.expenseRate>0?'status up green':'status down red'">
                                     <div class=" center-center value  flex align-content-base ">
@@ -130,7 +130,7 @@
                                 <div class="form-row ">
                                     <label>时间类型 </label>
                                     <div style="padding:0 10px;">
-                                        <select id="type" @@change="getEquipmentOverView().then(function () { renderOverView()})" v-model="dateType" style="width:40px;padding:0;">
+                                        <select id="type" @@change="getIncomeExpense();getEquipmentOverView().then(function () { renderOverView()});getEquipmentRadar().then(function () {renderRadar()}) " v-model="dateType" style="width:40px;padding:0;">
                                             <option value="@BusinessObjects.Domain.ReportDimension.AcceptanceYear">年</option>
                                             <option value="@BusinessObjects.Domain.ReportDimension.AcceptanceMonth">月</option>
                                         </select>
@@ -138,11 +138,16 @@
                                     <div v-show="dateType == @BusinessObjects.Domain.ReportDimension.AcceptanceMonth" id="year" class="form-row justify-content-start" style="display:none;">
                                         <label>年 </label>
                                         <div style="padding:0 10px;">
-                                            <select id="myYear" @@change="getEquipmentOverView().then(function () { renderOverView()})" v-model="year" style="width:60px;padding:0;"></select>
+                                            <select id="myYear" @@change="getIncomeExpense();getEquipmentOverView().then(function () { renderOverView()});getEquipmentRadar().then(function () {renderRadar()}) " v-model="year" style="width:60px;padding:0;"></select>
                                         </div>
                                     </div>
                                 </div>
                             </div>
+                            <div v-show="true" class="chart-dimension ">
+                                <div class="form-row ">
+                                    <span title="重置" style="cursor: pointer;" @@click="valueType=0;dateType=2;year= (new Date()).getFullYear();getIncomeExpense();getEquipmentOverView().then(function () { renderOverView()});getEquipmentRadar().then(function () {renderRadar()})" class="iconfont icon-reset"></span>
+                                </div>
+                            </div> 
                         </div>
                     </div>
                     <div id="chartDiv"></div>
@@ -251,7 +256,7 @@
             },
             //收入支出信息
             getEquipmentOverView: function () {
-                let _this = this 
+                let _this = this
                 // 获取设备信息中的所有收入支出
                 return $.get('@Url.Action("SingleEquipmentAuditing", "Report")',
                 {
@@ -279,26 +284,27 @@
                         ]
                         //response.Data = test
                         response.Data.sort(function (a, b) { return a.Item1 - b.Item1 })
-                        _this.overView.current = response.Data.map(function (item) { 
-                        return {
-                            key: item.Item1,
-                            '收入': Number(item.Item2.toFixed(1)),
-                            '支出': Number(item.Item3.toFixed(1)),
-                        }
-                    })
-                }
+                        _this.overView.current = response.Data.map(function (item) {
+                            return {
+                                key: item.Item1,
+                                '收入': Number(item.Item2.toFixed(1)),
+                                '支出': Number(item.Item3.toFixed(1)),
+                            }
+                        })
+                    }
                 })
 
             },
             //收入支出信息
             getEquipmentCurrentOverView: function () {
-                let _this = this 
+                let _this = this
+                let year = _this.dateType == '@BusinessObjects.Domain.ReportDimension.AcceptanceMonth' ? _this.year : (new Date()).getFullYear()
                 // 获取设备信息中的所有收入支出
                 return $.get('@Url.Action("SingleEquipmentAuditing", "Report")',
                 {
                     id: _this.id,
                     type: '@BusinessObjects.Domain.ReportDimension.AcceptanceMonth',
-                    year: (new Date()).getFullYear(),
+                    year: year,
                 },
                 function (response) {
                     if (response.ResultCode != "00") {
@@ -322,42 +328,43 @@
                         ]
                         //response.Data = test
                         response.Data.forEach(function (item) {
-                            _this.overView.incomeSum += Number(item.Item2) || 0 
-                            _this.overView.expenseSum += Number(item.Item3) || 0 
+                            _this.overView.incomeSum += Number(item.Item2) || 0
+                            _this.overView.expenseSum += Number(item.Item3) || 0
                         })
                     }
                 })
             },
             getEquipmentPreviousOverView: function () {
-                let _this = this 
+                let _this = this
+                let year = _this.dateType == '@BusinessObjects.Domain.ReportDimension.AcceptanceMonth' ? _this.year - 1 : (new Date()).getFullYear() - 1
                 // 获取设备信息中的所有收入支出
                 return $.get('@Url.Action("SingleEquipmentAuditing", "Report")',
               {
-                  id:_this.id,
+                  id: _this.id,
                   type: '@BusinessObjects.Domain.ReportDimension.AcceptanceMonth',
-                  year: (new Date()).getFullYear()-1,
+                  year: year,
               },
               function (response) {
                   if (response.ResultCode != "00") {
                       processResponseError(response.ResultCode, response.ResultMessage);
                   } else {
-                      _this.overView.preIncomeSum  = 0
+                      _this.overView.preIncomeSum = 0
                       _this.overView.preExpenseSum = 0
-                      let test  =[{Item1:"1",Item2:100050,Item3:900150},
-                                    {Item1:"2",Item2:20005,Item3:138750},
-                                    {Item1:"3",Item2:20755,Item3:902650},
-                                    {Item1:"4",Item2:12005,Item3:538150},
-                                    {Item1:"5",Item2:200050,Item3:1853588},
-                                    {Item1:"6",Item2:153118,Item3:56015},
-                                    {Item1:"7",Item2:201115,Item3:110105},
-                                    {Item1:"8",Item2:153110,Item3:183870},
-                                    {Item1:"9",Item2:200010,Item3:48311530},
-                                    {Item1:"10",Item2:150050,Item3:483840},
-                                    {Item1:"11",Item2:20050,Item3:483280},
-                                    {Item1:"12",Item2:200050,Item3:163884},]
+                      let test = [{ Item1: "1", Item2: 100050, Item3: 900150 },
+                                    { Item1: "2", Item2: 20005, Item3: 138750 },
+                                    { Item1: "3", Item2: 20755, Item3: 902650 },
+                                    { Item1: "4", Item2: 12005, Item3: 538150 },
+                                    { Item1: "5", Item2: 200050, Item3: 1853588 },
+                                    { Item1: "6", Item2: 153118, Item3: 56015 },
+                                    { Item1: "7", Item2: 201115, Item3: 110105 },
+                                    { Item1: "8", Item2: 153110, Item3: 183870 },
+                                    { Item1: "9", Item2: 200010, Item3: 48311530 },
+                                    { Item1: "10", Item2: 150050, Item3: 483840 },
+                                    { Item1: "11", Item2: 20050, Item3: 483280 },
+                                    { Item1: "12", Item2: 200050, Item3: 163884 }, ]
                       //response.Data = test
                       _this.overView.previous = response.Data
-                      _this.overView.previous.forEach(function(item) {
+                      _this.overView.previous.forEach(function (item) {
                           _this.overView.preIncomeSum += Number(item.Item2) || 0
                           _this.overView.preExpenseSum += Number(item.Item3) || 0
                       })
@@ -365,9 +372,10 @@
               })
             },
             //雷达数据
-            getEquipmentRadar:function() {
+            getEquipmentRadar: function () {
                 let _this = this
-                return $.get("@Url.Action("GetRequestCountByID", "Equipment")", { id: this.id, date: new Date().format("yyyy-MM-dd") }
+                let date = _this.dateType == '@BusinessObjects.Domain.ReportDimension.AcceptanceMonth' ? new Date(_this.year.toString()).format("yyyy-MM-dd") : ''
+                return $.get("@Url.Action("GetRequestCountByID", "Equipment")", { id: this.id, date: date }
                     , function (res) {
                         let radar_data = [{
                             item: "维修",
@@ -567,8 +575,8 @@
                         // 辅助框
                         chart.guide().regionFilter({
                             top: true, // 指定 giude 是否绘制在 canvas 最上层，默认为 false, 即绘制在最下层
-                            start: [dataIndex - .25, -data['收入']], // 辅助框起始位置，值为原始数据值，支持 callback
-                            end: [dataIndex + .25, -data['支出']],// 辅助框结束位置，值为原始数据值，支持 callback
+                            start: [dataIndex - .5, -data['收入']], // 辅助框起始位置，值为原始数据值，支持 callback
+                            end: [dataIndex + .5, -data['支出']],// 辅助框结束位置，值为原始数据值，支持 callback
                             color: '#E2340D',
                         });
                     }
@@ -597,8 +605,8 @@
                         return '<div class="g2-tooltip">' +
                                 '<div class="g2-tooltip-title">' + title + (_this.dateType == "@BusinessObjects.Domain.ReportDimension.AcceptanceMonth" ? "月" : "年") + '</div>' +
                                 '<ul class="g2-tooltip-list">' +
-                                  '<li class="g2-tooltip-li">收入：' + _this.numberComma(Math.floor(Number(data.收入))) + '</li>' +
-                                  '<li class="g2-tooltip-li">支出：' + _this.numberComma(Math.floor(Number(data.支出))) + '</li>' +
+                                  '<li class="g2-tooltip-li">收入：' + _this.numberComma(Math.floor(Number(data.收入))) + ' 元</li>' +
+                                  '<li class="g2-tooltip-li">支出：' + _this.numberComma(Math.floor(Number(data.支出))) + ' 元</li>' +
                                 '</ul>' +
                               '</div>'
                     }
@@ -698,19 +706,24 @@
                 let _this = this;
 
                 _this.getEquipmentDetail()
-                _this.getEquipmentCurrentOverView().then(function () { 
-                    _this.getEquipmentPreviousOverView().then(function () {
-                        _this.overView.preExpenseSum && (_this.overView.expenseRate = (_this.overView.expenseSum - _this.overView.preExpenseSum) / _this.overView.preExpenseSum)
-                        _this.overView.preIncomeSum && (_this.overView.incomeRate = (_this.overView.incomeSum - _this.overView.preIncomeSum) / _this.overView.preIncomeSum)
-                    })
-                })
+                _this.getIncomeExpense()
                 _this.getEquipmentOverView().then(function () {
                     _this.renderOverView()
-                    _this.getEquipmentRadar().then(function () {
-                        _this.renderRadar()
+                })
+                _this.getEquipmentRadar().then(function () {
+                    _this.renderRadar()
+                })
+            },
+            getIncomeExpense: function () {
+                let _this = this;
+                _this.getEquipmentCurrentOverView().then(function () {
+                    _this.getEquipmentPreviousOverView().then(function () {
+                        _this.overView.preExpenseSum && (_this.overView.expenseRate = (_this.overView.expenseSum - _this.overView.preExpenseSum) / _this.overView.preExpenseSum)
+                        !_this.overView.preExpenseSum && (_this.overView.expenseRate = 0.00)
+                        _this.overView.preIncomeSum && (_this.overView.incomeRate = (_this.overView.incomeSum - _this.overView.preIncomeSum) / _this.overView.preIncomeSum)
+                        !_this.overView.preIncomeSum && (_this.overView.incomeRate = 0.00)
                     })
                 })
-
             },
             showFilter: function () {
                 SelectYears();

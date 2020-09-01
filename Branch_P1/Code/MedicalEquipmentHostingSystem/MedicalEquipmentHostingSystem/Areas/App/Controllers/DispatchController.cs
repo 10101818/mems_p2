@@ -28,7 +28,7 @@ namespace MedicalEquipmentHostingSystem.Areas.App.Controllers
         /// <param name="userID">用户编号</param>
         /// <param name="statusIDs">派工单状态</param>
         /// <param name="urgency">派工单紧急程度</param>
-        /// <param name="type">派工类型</param>
+        /// <param name="typeIDs">派工类型</param>
         /// <param name="filterField">搜索字段</param>
         /// <param name="filterText">搜索内容</param>、
         /// <param name="curRowNum">当前页数第一个数据的位置</param>
@@ -36,7 +36,7 @@ namespace MedicalEquipmentHostingSystem.Areas.App.Controllers
         /// <param name="userID">用户ID</param>
         /// <param name="sessionID">当前请求所在设备储存的SessionID</param>
         /// <returns>派工单信息</returns>
-        public JsonResult GetDispatchs(int userID, string sessionID, List<int> statusIDs, int urgency = 0, int type = 0, string filterField = "", string filterText = "", int curRowNum = 0, int pageSize = 0)
+        public JsonResult GetDispatchs(int userID, string sessionID, List<int> statusIDs, List<int> typeIDs, int urgency = 0, string filterField = "", string filterText = "", int curRowNum = 0, int pageSize = 0)
         {
             ServiceResultModel<List<DispatchInfo>> result = new ServiceResultModel<List<DispatchInfo>>();
             try
@@ -46,7 +46,7 @@ namespace MedicalEquipmentHostingSystem.Areas.App.Controllers
                 UserInfo user = null;
                 if (CheckUser(userID, result, out user) == false) return MyJson(result, JsonRequestBehavior.AllowGet);
 
-                else result.Data = this.dispatchManager.QueryDispatches(user.ID, user.Role.ID, statusIDs, urgency, type, filterField, filterText, "init", false, curRowNum, pageSize);
+                else result.Data = this.dispatchManager.QueryDispatches(user.ID, user.Role.ID, statusIDs, urgency, typeIDs, filterField, filterText, "init", false, curRowNum, pageSize);
             }
             catch (Exception ex)
             {

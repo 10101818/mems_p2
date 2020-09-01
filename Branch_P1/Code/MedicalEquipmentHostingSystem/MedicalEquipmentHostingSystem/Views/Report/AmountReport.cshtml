@@ -156,23 +156,24 @@
                     processResponseError(response.ResultCode, response.ResultMessage);
                 } else {
                     EquipmentAmountReportVue.EquipmentCount = [];
+                    console.log(response.Data)
                     for (var item in response.Data) {
                         let ele = {
                             "key": response.Data[item].Item1,
-                            "value": Number(response.Data[item].Item2.toFixed(2)),
+                            "value": Number(response.Data[item].Item2.toFixed(1)),
                         };
                         EquipmentAmountReportVue.EquipmentCount.push(ele);
                     }
-                    barChart();
+                    barChart(EquipmentAmountReportVue.searchType.ID);
                 }
             })
     }
 </script>
 <script>
-    function barChart() {
+    function barChart(typeID) {
         var chart = CreateChart();
 
-        var barView = BoundSlide2Chart(chart, 1000, EquipmentAmountReportVue.EquipmentCount, '@ViewBag.YName');
+        var barView = BoundSlide2Chart(chart, 1000, EquipmentAmountReportVue.EquipmentCount, '@ViewBag.YName', typeID);
 
         SetChartStyle(barView, '@ViewBag.YName');
 

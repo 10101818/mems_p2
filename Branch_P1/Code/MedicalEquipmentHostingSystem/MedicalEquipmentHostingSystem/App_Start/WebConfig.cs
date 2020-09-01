@@ -77,5 +77,7 @@ namespace MedicalEquipmentHostingSystem.App_Start
 
         public static readonly bool AutoAssetCode = Convert.ToBoolean(ConfigurationManager.AppSettings["AutoAssetCode"]);
 
+        public static readonly bool LIMIT_ENGINEER = Convert.ToBoolean(ConfigurationManager.AppSettings["LimitEngineer"]);
+
     }
 }
